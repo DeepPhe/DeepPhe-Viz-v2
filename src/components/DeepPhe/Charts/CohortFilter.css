@@ -1,0 +1,238 @@
+
+#NewControl {
+    padding-top: 25px
+}
+
+svg[id$="-hs"] {
+    flex: 3 0 30%;
+
+}
+
+.no_padding_grid {
+    padding: 0px !important;
+}
+
+.switch_list {
+    display: inline-grid;
+    justify-content: right;
+}
+
+.cohort-size-label-container {
+
+    padding: 0px 3px 0px 0px !important;
+    display: table !important;
+
+}
+
+.cohort-size-label {
+    font-size: 14px;
+    font-weight: 400;
+    color: #000000;
+    text-align: right;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#cohort-size-bar {
+    height: inherit;
+}
+
+.cohort-size-bar-container {
+    height: 45px;
+    padding-bottom: 55px !important;
+
+}
+
+.cohort-size-bar-container .MuiGrid-item {
+    height: inherit;
+}
+
+.filter-center-rows {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center;
+}
+
+.filter-inner-container {
+    margin-right: 5px !important;
+    margin-left: 5px !important;
+    border: 2px solid #e5e5e5;
+    border-radius: 4px;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+
+.switch-disabled {
+    height: 35px !important;
+    transform: scale(0.75);
+}
+
+#boolean-list-row .switch_label, #boolean-list-row .switch-toggle, #numeric-range-selector-row .switch_label, #numeric-range-selector-row .switch-toggle, #categorical-range-selector-row .switch_label, #categorical-range-selector-row .switch-toggle {
+    margin: 0px 3px 0px 0px !important;
+    margin-right: 2px;
+}
+
+.switch-box {
+    flex: 2 2 150px;
+    font-size: 12px;
+}
+
+#boolean-list-row .switch {
+    margin-right: 5px;
+    align-items: center;
+    display: inline-flex;
+}
+
+#numeric-range-selector-row .switch, #categorical-range-selector-row .switch {
+
+    align-items: center;
+    display: inline-flex;
+}
+
+.slider-container {
+    width: 80% !important;
+    height: 100% !important;
+    margin-top: 3px !important;
+    display: flex;
+    flex: 3 2 auto;
+}
+
+.rc-slider {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0px !important;
+}
+
+.rc-slider-track {
+    z-index: 100;
+    background-color: #1cff002b !important;
+}
+
+.rc-slider-step {
+    visibility: hidden;
+}
+
+.rc-slider-rail, .rc-slider-track {
+    height: 30px !important;
+    border-radius: 0px !important;
+    margin-top: 5px;
+}
+
+.rc-slider-mark {
+    top: 8px !important;
+    z-index: 99 !important;
+}
+
+#numeric-range-selector-row .rc-slider-mark-text {
+    padding-left: 0px !important;
+}
+
+.rc-slider-mark-text {
+    /*padding-left: calc(5%) !important;*/
+    font-size: 12px !important;
+    margin-top: 5px !important;
+    text-wrap: nowrap;
+    z-index: 99;
+    /*transform: translateX(+0%) !important;*/
+
+}
+
+.rc-slider-dot {
+    bottom: -8px;
+}
+
+.rc-slider-handle {
+    width: 10px !important;
+    height: 40px !important;
+    border: none !important;
+    border-radius: 0px !important;
+    background-color: #fbdfab !important;
+    margin-top: 0px !important;
+    z-index: 100 !important;
+}
+
+.rc-slider-handle-1 {
+    transform: translate(-100%) !important;
+}
+
+.rc-slider-handle-2 {
+    transform: translate(0%) !important;
+}
+
+.cohort-size-label {
+    padding: 0px 5px 0px 0px !important;
+}
+
+.cohort-size-label-container {
+    padding: 0px 0px 0px 0px !important;
+    display: flex;
+    align-content: center;
+}
+
+.no-gutter {
+    --bs-gutter-x: 0px !important;
+    --bs-gutter-y: 0px !important;
+}
+
+.box-for-word-filter {
+    --bs-gutter-x: 0px;
+    --bs-gutter-y: 0px;
+    width: auto !important;
+    margin-left: 10px !important;
+    line-height: 1em !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    height: 27px !important;
+    display: grid !important;
+    align-items: center !important;
+    align-content: center !important;
+    margin-top: 10px !important;
+}
+
+.blue-border-for-word-filter {
+    border: 1px solid blue;
+}
+
+.red-border-for-word-filter {
+    border: 1px solid red;
+}
+
+.gray-border-for-word-filter {
+    border: 1px solid gray;
+}
+
+#diagnosis-row, #agents-row {
+    height: 47px !important;
+}
+
+.blue-plus {
+    color: blue;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.red-plus {
+    color: red;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.gray-plus {
+    color: gray;
+    font-size: 1.5em;
+    cursor: pointer;
+
+}
+
+.overlay-row {
+    height: 35px !important;
+    transform: scale(0.75);
+    backgrounda: gray;
+    margin-left: 5px;
+    margin-right: 5px;
+    opacitya: 0.4;
+    pointera-events: none;
+}
