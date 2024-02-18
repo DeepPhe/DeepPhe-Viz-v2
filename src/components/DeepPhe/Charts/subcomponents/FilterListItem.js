@@ -5,11 +5,11 @@ import BooleanList from "./BooleanList";
 import { Draggable } from "react-beautiful-dnd";
 import ListItem from "@mui/material/ListItem";
 
-function FilterListItem({ key, index, filterDefinition, data, filterChangedState }) {
+function FilterListItem({ key, index, filterDefinition, filterChangedState }) {
   const getFilter = () => {
     switch (filterDefinition.class) {
       case "discreteList":
-        return <DiscreteList key={index} definition={filterDefinition} data={data} />;
+        return <DiscreteList key={index} definition={filterDefinition} />;
 
       case "categoricalRangeSelector":
         return (
@@ -17,7 +17,6 @@ function FilterListItem({ key, index, filterDefinition, data, filterChangedState
             key={index}
             definition={filterDefinition}
             broadcastUpdate={filterChangedState}
-            data={data}
           />
         );
 
@@ -27,7 +26,6 @@ function FilterListItem({ key, index, filterDefinition, data, filterChangedState
             key={index}
             definition={filterDefinition}
             broadcastUpdate={filterChangedState}
-            data={data}
           />
         );
 
@@ -37,7 +35,6 @@ function FilterListItem({ key, index, filterDefinition, data, filterChangedState
             key={index}
             definition={filterDefinition}
             broadcastUpdate={filterChangedState}
-            data={data}
           />
         );
       default:

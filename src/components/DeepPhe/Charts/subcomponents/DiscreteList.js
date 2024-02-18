@@ -25,7 +25,7 @@ class DiscreteList extends FilterComponent {
               id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-hs"}
               showTextIn
               height={47.3}
-              data={this.props.data}
+              data={definition.filterData}
             />
           </div>
         </div>

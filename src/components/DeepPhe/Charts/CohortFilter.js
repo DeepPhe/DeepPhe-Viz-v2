@@ -15,8 +15,7 @@ export default class CohortFilter extends React.Component {
     filterDefinitionLoading: true,
     patientArraysLoading: true,
     biomarkerData: null,
-
-    filterData: null,
+    handlingDragEnd: false,
     cohortSize: null,
     isLoading: true,
     selectedStages: null,
@@ -38,7 +37,8 @@ export default class CohortFilter extends React.Component {
   constructor(props) {
     super(props);
     this.filterChangedState.bind(this);
-    this.moveListItem = this.moveListItem.bind(this);
+    // this.moveListItem = this.moveListItem.bind(this);
+    // this.handleDragEnd = this.handleDragEnd.bind(this);
   }
 
   reset = () => {
@@ -84,11 +84,6 @@ export default class CohortFilter extends React.Component {
     const fetchFilterDefinitionPromise = new Promise((resolve, reject) => {
       fetchFilterDefinition().then(function (response) {
         response.json().then(function (json) {
-          let fieldNames = [];
-          json.searchFilterDefinition.map((definition) => {
-            fieldNames.push(definition.fieldName);
-            return true;
-          });
           let cohortSize = [
             {
               value: 5,
@@ -105,7 +100,6 @@ export default class CohortFilter extends React.Component {
           that.setState(
             {
               filterDefinitions: json,
-              fieldNames: fieldNames,
               cohortSize: cohortSize,
               isLoading: false,
             },
@@ -126,12 +120,8 @@ export default class CohortFilter extends React.Component {
 
   updateFilterData = () => {
     const that = this;
-    let filterDatas = new Array(that.state.fieldNames.length);
-    that.state.fieldNames.forEach((fieldName, i) => {
-      const fieldIdx = that.state.filterDefinitions.searchFilterDefinition.findIndex(
-        (x) => x.fieldName === fieldName
-      );
-      const definition = that.state.filterDefinitions.searchFilterDefinition[fieldIdx];
+    const filterDefinitions = [...this.state.filterDefinitions.searchFilterDefinition];
+    filterDefinitions.forEach((definition, i) => {
       const numberOfPossiblePatientsForThisFilter =
         definition.numberOfPossiblePatientsForThisFilter;
       let patientsMeetingEntireSetOfFilters = that.state.patientsMeetingAllFilters.length;
@@ -147,7 +137,7 @@ export default class CohortFilter extends React.Component {
       const patientsMeetingThisFilterOnly = definition.patientsMeetingThisFilterOnly;
       //console.log(that.state.patientsMeetingAllFilters)
       //console.log(fieldName + ": \n\t" + "patientsMeetingEntireSetOfFilters: " + patientsMeetingEntireSetOfFilters + " \n\tpatientsMeetingThisFilterOnly: " + patientsMeetingThisFilterOnly + " \n\tnumberOfPossiblePatientsForThisFilter: " + numberOfPossiblePatientsForThisFilter);
-      filterDatas[i] = [
+      definition.filterData = [
         {
           value: that.state.patientsMeetingAllFilters.length,
           description: that.state.patientsMeetingAllFilters.length,
@@ -184,8 +174,8 @@ export default class CohortFilter extends React.Component {
       },
     ];
     that.setState({
+      filterDefinitions: { searchFilterDefinition: filterDefinitions },
       filterDefinitionLoading: false,
-      filterData: filterDatas,
       cohortSize: cohortSize,
     });
   };
@@ -347,10 +337,9 @@ export default class CohortFilter extends React.Component {
       }
     };
 
-  filterAndFilterBar = ({ filterDefinition, data, index }) => {
+  filterAndFilterBar = ({ filterDefinition, index }) => {
     return new FilterListItem({
       filterDefinition: filterDefinition,
-      data: data,
       index: index,
       moveListItem: this.moveListItem,
       filterChangedState: this.filterChangedState,
@@ -376,8 +365,35 @@ export default class CohortFilter extends React.Component {
     console.log(this.state.items);
   }
 
-  handleDragEnd = (result) => {
-    console.log(result);
+  handleDragEnd = (result, that) => {
+    that.setState({ handlingDragEnd: true }, () => {
+      const swapElements = (array, index1, index2) => {
+        array[index1] = array.splice(index2, 1, array[index1])[0];
+      };
+      console.log(
+        "handleDragEnd - moving " +
+          result.draggableId +
+          " from " +
+          result.source.index +
+          " to " +
+          result.destination.index
+      );
+      const filterDefinitions = [...that.state.filterDefinitions.searchFilterDefinition];
+      filterDefinitions.forEach((filterDefinition, index) => {
+        if (filterDefinition.fieldName === result.draggableId) {
+          swapElements(filterDefinitions, result.source.index, result.destination.index);
+        }
+      });
+      that.setState(
+        {
+          filterDefinitions: { searchFilterDefinition: filterDefinitions },
+        },
+        () => {
+          that.setState({ handlingDragEnd: false });
+        }
+      );
+    });
+
     // TODO: Update the state based on the result
   };
 
@@ -385,7 +401,8 @@ export default class CohortFilter extends React.Component {
     if (
       this.state.isLoading ||
       this.state.filterDefinitionLoading ||
-      this.state.patientArraysLoading
+      this.state.patientArraysLoading ||
+      this.state.handlingDragEnd
     )
       return <div>Data is coming soon...</div>;
     else
@@ -408,7 +425,7 @@ export default class CohortFilter extends React.Component {
               <Grid className={"cohort-size-label-container"} item md={1} />
             </Grid>
             <Grid container direction="row" display={"block"}>
-              <DragDropContext onDragEnd={this.handleDragEnd}>
+              <DragDropContext onDragEnd={(result) => this.handleDragEnd(result, this)}>
                 <Droppable droppableId="droppable">
                   {(provided) => (
                     <List ref={provided.innerRef} {...provided.droppableProps}>
@@ -420,11 +437,6 @@ export default class CohortFilter extends React.Component {
                             index={index}
                             moveListItem={this.moveListItem}
                             filterChangedState={this.filterChangedState}
-                            data={
-                              this.state.filterData[
-                                this.state.fieldNames.indexOf(filterDefinition.fieldName)
-                              ]
-                            }
                           />
                         )
                       )}
