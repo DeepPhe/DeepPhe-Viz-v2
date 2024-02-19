@@ -38,7 +38,10 @@ class BooleanList extends FilterComponent {
     const { definition } = this.props;
     return (
       <React.Fragment>
-        <div id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}>
+        <div
+          className={"overlay-row-container"}
+          id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}
+        >
           <div id={"boolean-list-row"} className={"row filter_center_rows"}>
             <div className={"slider-container"}>
               <SwitchControl broadcastUpdate={this.handleSwitchUpdate} definition={definition} />{" "}

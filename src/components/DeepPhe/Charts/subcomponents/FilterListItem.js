@@ -50,7 +50,6 @@ function FilterListItem({ key, index, filterDefinition, filterChangedState }) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
-          {filterDefinition.fieldName}
           {getFilter()}
         </ListItem>
       )}

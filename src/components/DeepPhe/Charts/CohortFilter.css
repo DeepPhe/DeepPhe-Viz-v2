@@ -235,4 +235,9 @@ svg[id$="-hs"] {
     margin-right: 5px;
     opacitya: 0.4;
     pointera-events: none;
+
+}
+
+.overlay-row-container {
+    width:100%;
 }

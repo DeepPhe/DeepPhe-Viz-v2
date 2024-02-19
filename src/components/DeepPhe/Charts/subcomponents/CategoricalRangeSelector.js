@@ -101,7 +101,10 @@ class CategoricalRangeSelector extends RangeSelector {
 
     return (
       <React.Fragment>
-        <div id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}>
+        <div
+          className={"overlay-row-container"}
+          id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}
+        >
           <div id={"categorical-range-selector-row"} className={"filter-center-rows row"}>
             <Grid item md={2} className="filter-inner-container no_padding_grid">
               {this.getToggleSwitch(definition, this.state.index)}

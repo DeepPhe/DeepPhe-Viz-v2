@@ -424,11 +424,24 @@ export default class CohortFilter extends React.Component {
               </Grid>
               <Grid className={"cohort-size-label-container"} item md={1} />
             </Grid>
-            <Grid container direction="row" display={"block"}>
+            <Grid
+              container
+              direction="row"
+              display={"block"}
+              item
+              md={10}
+              spacing={0}
+              width={"100%"}
+              justifyContent={"center"}
+            >
               <DragDropContext onDragEnd={(result) => this.handleDragEnd(result, this)}>
                 <Droppable droppableId="droppable">
                   {(provided) => (
-                    <List ref={provided.innerRef} {...provided.droppableProps}>
+                    <List
+                      justifyContent={"center"}
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                    >
                       {this.state.filterDefinitions.searchFilterDefinition.map(
                         (filterDefinition, index) => (
                           <this.filterAndFilterBar
