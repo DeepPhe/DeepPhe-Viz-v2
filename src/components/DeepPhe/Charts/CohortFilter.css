@@ -60,6 +60,8 @@ svg[id$="-hs"] {
     border-radius: 4px;
     padding-top: 5px !important;
     padding-bottom: 5px !important;
+    display: flex;
+    flex-wrap: nowrap;
 }
 
 .switch-disabled {
@@ -237,7 +239,16 @@ svg[id$="-hs"] {
     pointera-events: none;
 
 }
+.filter-container {
+    display: flex;
+    flex-wrap: nowrap;
+}
 
-.overlay-row-container {
-    width:100%;
+
+.discrete-list-container {
+  flex: 2 0 66%
+}
+
+[id$="-hs-bar"] {
+  flex: 1 0 33%
 }

@@ -9,7 +9,7 @@ function FilterListItem({ key, index, filterDefinition, filterChangedState }) {
   const getFilter = () => {
     switch (filterDefinition.class) {
       case "discreteList":
-        return <DiscreteList key={index} definition={filterDefinition} />;
+        return <DiscreteList index={index} key={index} definition={filterDefinition} />;
 
       case "categoricalRangeSelector":
         return (

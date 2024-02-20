@@ -27,7 +27,10 @@ class NumericRangeSelector extends RangeSelector {
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.state.updated === false) {
+    if (
+      !(JSON.stringify(prevState) === JSON.stringify(this.state)) &&
+      this.state.updated === false
+    ) {
       this.props.definition = this.state.definition;
       this.setState({ updated: true });
       this.broadcastUpdate(this.state.definition);
