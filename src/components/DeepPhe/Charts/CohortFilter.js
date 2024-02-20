@@ -370,8 +370,9 @@ export default class CohortFilter extends React.Component {
       return;
     }
     that.setState({ handlingDragEnd: true }, () => {
-      const swapElements = (array, index1, index2) => {
-        array[index1] = array.splice(index2, 1, array[index1])[0];
+      const removeAndInsert = (array, removeFrom, insertAt) => {
+        const item = array.splice(removeFrom, 1);
+        return [...array.slice(0, insertAt), item[0], ...array.slice(insertAt)];
       };
       console.log(
         "handleDragEnd - moving " +
@@ -381,12 +382,17 @@ export default class CohortFilter extends React.Component {
           " to " +
           result.destination.index
       );
-      const filterDefinitions = [...that.state.filterDefinitions.searchFilterDefinition];
-      filterDefinitions.forEach((filterDefinition, index) => {
-        if (filterDefinition.fieldName === result.draggableId) {
-          swapElements(filterDefinitions, result.source.index, result.destination.index);
-        }
-      });
+
+      //filterDefinitions.findIndex((def, idx) => {if (def.fieldName == result.draggableId) return index})
+      //  if (filterDefinition.fieldName === result.draggableId) {
+      const filterDefinitions = removeAndInsert(
+        [...that.state.filterDefinitions.searchFilterDefinition],
+        result.source.index,
+        result.destination.index
+      );
+
+      //}
+      //});
       that.setState(
         {
           filterDefinitions: { searchFilterDefinition: filterDefinitions },

@@ -3,8 +3,6 @@ import Slider from "rc-slider";
 import { ChangeResult } from "multi-range-slider-react";
 import SwitchControl from "./controls/SwitchControl";
 import RangeSelector from "./RangeSelector";
-import HSBar from "react-horizontal-stacked-bar-chart";
-import Grid from "@mui/material/Grid";
 import { withDrag, withDrop } from "./withDragAndDropHook";
 
 class CategoricalRangeSelector extends RangeSelector {
@@ -83,7 +81,7 @@ class CategoricalRangeSelector extends RangeSelector {
     //     })
   }
 
-  render() {
+  getControl = () => {
     const { definition } = this.props;
     const globalPatientCountsForCategories = definition.globalPatientCountsForCategories;
     const selectedCategoricalRange = definition.selectedCategoricalRange;
@@ -101,43 +99,51 @@ class CategoricalRangeSelector extends RangeSelector {
 
     return (
       <React.Fragment>
-        <div
-          className={"overlay-row-container"}
-          id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}
-        >
-          <div id={"categorical-range-selector-row"} className={"filter-center-rows row"}>
-            <Grid item md={2} className="filter-inner-container no_padding_grid">
-              {this.getToggleSwitch(definition, this.state.index)}
-            </Grid>
-            <Grid item md={7} className="filter-inner-container no_padding_grid">
-              <div className={"slider-container"}>
-                <Slider
-                  range
-                  min={0}
-                  max={globalPatientCountsForCategories.length - 1}
-                  defaultValue={[minSelectedInRange, maxSelectedInRange]}
-                  onChange={(e) => this.handleRangeChange(e)}
-                  draggableTrack={true}
-                  pushable={true}
-                  marks={marks}
-                  dots={false}
-                  step={1}
-                />
-              </div>
-              <SwitchControl broadcastUpdate={this.handleSwitchUpdate} definition={definition} />
-            </Grid>
-            <Grid item md={3} className="filter-inner-container no_padding_grid">
-              <HSBar
-                id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-hs"}
-                showTextIn
-                height={47.3}
-                data={definition.filterData}
-              />
-            </Grid>
-          </div>
+        <div className={"slider-container"}>
+          <Slider
+            range
+            min={0}
+            max={globalPatientCountsForCategories.length - 1}
+            defaultValue={[minSelectedInRange, maxSelectedInRange]}
+            onChange={(e) => this.handleRangeChange(e)}
+            draggableTrack={true}
+            pushable={true}
+            marks={marks}
+            dots={false}
+            step={1}
+          />
         </div>
+        <SwitchControl broadcastUpdate={this.handleSwitchUpdate} definition={definition} />
       </React.Fragment>
     );
+  };
+
+  // render() {
+  //
+  //
+  //   return (
+  //     <React.Fragment>
+  //       <div
+  //         className={"overlay-row-container"}
+  //         id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}
+  //       >
+  //         <div id={"categorical-range-selector-row"} className={"filter-center-rows row"}>
+  //           <Grid item md={2} className="filter-inner-container no_padding_grid">
+  //             {this.getToggleSwitch(definition, this.state.index)}
+  //           </Grid>
+  //           <Grid item md={7} className="filter-inner-container no_padding_grid">
+  //
+  //           </Grid>
+  //           <Grid item md={3} className="filter-inner-container no_padding_grid">
+  //
+  //           </Grid>
+  //         </div>
+  //       </div>
+  //     </React.Fragment>
+  //   );
+  // }
+  render() {
+    return <React.Fragment />;
   }
 }
 

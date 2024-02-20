@@ -3,7 +3,6 @@ import Slider from "rc-slider";
 import { ChangeResult } from "multi-range-slider-react";
 import SwitchControl from "./controls/SwitchControl";
 import RangeSelector from "./RangeSelector";
-import HSBar from "react-horizontal-stacked-bar-chart";
 import { withDrag, withDrop } from "./withDragAndDropHook";
 
 class NumericRangeSelector extends RangeSelector {
@@ -49,7 +48,7 @@ class NumericRangeSelector extends RangeSelector {
     this.addCountsToCategory();
   }
 
-  render() {
+  getControl = () => {
     const { definition } = this.props;
     //const globalPatientCountsForCategories = definition.globalPatientCountsForCategories
     const selectedNumericRange = definition.selectedNumericRange;
@@ -67,35 +66,44 @@ class NumericRangeSelector extends RangeSelector {
 
     return (
       <React.Fragment>
-        <div id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}>
-          <div id={"numeric-range-selector-row"} className={"row filter_center_rows"}>
-            <div className={"slider-container"}>
-              <Slider
-                range
-                min={numericRangeSelectorDefinition.min}
-                max={numericRangeSelectorDefinition.max + 1}
-                defaultValue={[minSelectedInRange, maxSelectedInRange]}
-                onChange={(e) => this.handleRangeChange(e)}
-                draggableTrack={true}
-                pushable={true}
-                dots={false}
-                included={true}
-                marks={marks}
-                step={numericRangeSelectorDefinition.step}
-              />
-            </div>
-            <SwitchControl broadcastUpdate={this.handleSwitchUpdate} definition={definition} />{" "}
-            <HSBar
-              id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-hs"}
-              showTextIn
-              height={47.3}
-              data={definition.filterData}
-            />
-          </div>
+        <div className={"slider-container"}>
+          <Slider
+            range
+            min={numericRangeSelectorDefinition.min}
+            max={numericRangeSelectorDefinition.max + 1}
+            defaultValue={[minSelectedInRange, maxSelectedInRange]}
+            onChange={(e) => this.handleRangeChange(e)}
+            draggableTrack={true}
+            pushable={true}
+            dots={false}
+            included={true}
+            marks={marks}
+            step={numericRangeSelectorDefinition.step}
+          />
+
+          <SwitchControl broadcastUpdate={this.handleSwitchUpdate} definition={definition} />
         </div>
       </React.Fragment>
     );
+  };
+
+  render() {
+    return <React.Fragment />;
   }
 }
+
+// render() {
+//
+//
+//   return (
+//     <React.Fragment>
+//       <div id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}>
+//         <div id={"numeric-range-selector-row"} className={"row filter_center_rows"}>
+//
+//         </div>
+//     </React.Fragment>
+// );
+// }
+// }
 
 export default NumericRangeSelector;
