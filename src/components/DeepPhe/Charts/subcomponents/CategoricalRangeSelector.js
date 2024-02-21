@@ -1,14 +1,67 @@
 import React from "react";
-import Slider from "rc-slider";
 import { ChangeResult } from "multi-range-slider-react";
+import Slider from "rc-slider";
 import SwitchControl from "./controls/SwitchControl";
-import RangeSelector from "./RangeSelector";
-import { withDrag, withDrop } from "./withDragAndDropHook";
+import $ from "jquery";
+import * as d3 from "d3v4";
 
-class CategoricalRangeSelector extends RangeSelector {
+class CategoricalRangeSelector extends React.Component {
+  state = {
+    definition: this.props.definition,
+    updated: true,
+  };
+
   constructor(props) {
     super(props);
   }
+
+  addCountsToCategory = () => {
+    let total = 0;
+    let fieldName = this.state.definition.fieldName;
+    this.state.definition.globalPatientCountsForCategories.forEach((item) => {
+      total += item.count;
+    });
+    this.state.definition.globalPatientCountsForCategories.forEach((item) => {
+      this.addCountToCategory(fieldName, item.category, item.count, total);
+    });
+  };
+  addCountToCategory = (fieldName, category, catCount, totalCount) => {
+    let search = $("#" + fieldName + "-overlay-row span")
+      .filter(function () {
+        const that = $(this);
+
+        return (
+          $(this).text().toLowerCase().indexOf(category.toLowerCase()) >= 0 &&
+          that.text().length === category.length
+        );
+      })
+      .first();
+
+    const cssId =
+      fieldName.replaceAll(" ", "-").toLowerCase() + category.replaceAll(" ", "-").toLowerCase();
+    const cssIdWithHash = "#" + cssId;
+
+    $(cssIdWithHash).remove();
+    search.append("<svg id='" + cssId + "' height=29 width=20 />");
+    let svg = d3.select(cssIdWithHash);
+    svg
+      .style("position", "absolute")
+      .style("top", "-8px")
+      .style("left", "0px")
+      .style("fill-opacity", "0.5");
+    let catPercent = catCount / totalCount;
+
+    let y = 29 - 29 * catPercent;
+
+    svg
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", y)
+      .attr("width", search.width())
+      .attr("height", catPercent * 29)
+      //.attr('stroke', 'black')
+      .attr("fill", "blue");
+  };
 
   broadcastUpdate = (definition) => {
     this.props.broadcastUpdate(definition);
@@ -81,7 +134,7 @@ class CategoricalRangeSelector extends RangeSelector {
     //     })
   }
 
-  getControl = () => {
+  render() {
     const { definition } = this.props;
     const globalPatientCountsForCategories = definition.globalPatientCountsForCategories;
     const selectedCategoricalRange = definition.selectedCategoricalRange;
@@ -116,7 +169,7 @@ class CategoricalRangeSelector extends RangeSelector {
         <SwitchControl broadcastUpdate={this.handleSwitchUpdate} definition={definition} />
       </React.Fragment>
     );
-  };
+  }
 
   // render() {
   //
@@ -142,9 +195,6 @@ class CategoricalRangeSelector extends RangeSelector {
   //     </React.Fragment>
   //   );
   // }
-  render() {
-    return <React.Fragment />;
-  }
 }
 
 export default CategoricalRangeSelector;

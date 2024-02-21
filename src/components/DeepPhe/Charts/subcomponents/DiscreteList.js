@@ -1,5 +1,4 @@
 import React from "react";
-import HSBar from "react-horizontal-stacked-bar-chart";
 import { withDrag, withDrop } from "./withDragAndDropHook.js";
 import ListItemText from "@mui/material/ListItemText";
 import ListItem from "@mui/material/ListItem";
@@ -12,16 +11,44 @@ function DiscreteList(props) {
   return (
     <div className={"filter-inner-container"}>
       <List
+        spacing={2}
+        direction="row"
         className={"discrete-list-container"}
         sx={{
+          display: "flex",
+          flexWrap: "nowrap",
+          justifyContent: "space-around",
+          flexDirection: "row",
           width: "100%",
-          bgcolor: "background.paper",
+          bgcolor: "white",
+          fontSize: "8px !important",
         }}
       >
         {props.definition.globalPatientCountsForCategories.map((item, index) => {
           return (
-            <ListItem key={index}>
-              <ListItemText primary={item.category} />
+            <ListItem
+              sx={{
+                border: "1px solid #e0e0e0",
+                borderRadius: "5px",
+                marginRight: "10px",
+                marginLeft: "10px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                paddingRight: "10px",
+                paddingLeft: "10px",
+                backgroundColor: "blue",
+              }}
+              key={index}
+            >
+              <ListItemText
+                sx={{
+                  fontSize: "12px !important",
+                  color: "white !important",
+                }}
+                disableTypography={true}
+                primary={item.category}
+              />
             </ListItem>
           );
         })}

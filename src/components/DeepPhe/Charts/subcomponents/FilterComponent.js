@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import ToggleSwitch from "../../Buttons/ToggleSwitch";
 import $ from "jquery";
 import Grid from "@mui/material/Grid";
 import HSBar from "react-horizontal-stacked-bar-chart";
+import IconButton from "@mui/material/IconButton";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
 function FilterComponent(props) {
+  const [open, setOpen] = useState(true);
   const toggleFilterEnabled =
     (filterDefinition) =>
     ({ enabled }) => {
@@ -67,6 +71,9 @@ function FilterComponent(props) {
           </Grid>
           <Grid item md={3} className="filter-inner-container no_padding_grid">
             {getBar()}
+            <IconButton onClick={() => setOpen(!open)} aria-label="expand" size="small">
+              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>
           </Grid>
         </div>
       </div>

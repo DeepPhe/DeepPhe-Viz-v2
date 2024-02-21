@@ -72,7 +72,10 @@ export default class CohortFilter extends React.Component {
       fetchPatientArrays().then(function (response) {
         response.json().then(function (json) {
           that.setState(
-            { patientArrays: flattenObject(json, ""), patientArraysLoading: false },
+            {
+              patientArrays: flattenObject(json, ""),
+              patientArraysLoading: false,
+            },
             () => {
               resolve(json);
             }
@@ -122,6 +125,7 @@ export default class CohortFilter extends React.Component {
     const that = this;
     const filterDefinitions = [...this.state.filterDefinitions.searchFilterDefinition];
     filterDefinitions.forEach((definition, i) => {
+      //use the patientArrays to get the number of patients that meet the filter
       const numberOfPossiblePatientsForThisFilter =
         definition.numberOfPossiblePatientsForThisFilter;
       let patientsMeetingEntireSetOfFilters = that.state.patientsMeetingAllFilters.length;
@@ -134,9 +138,20 @@ export default class CohortFilter extends React.Component {
         });
       }
       definition.patientsMeetingThisFilterOnly = matchingPatients.length;
+
       const patientsMeetingThisFilterOnly = definition.patientsMeetingThisFilterOnly;
       //console.log(that.state.patientsMeetingAllFilters)
       //console.log(fieldName + ": \n\t" + "patientsMeetingEntireSetOfFilters: " + patientsMeetingEntireSetOfFilters + " \n\tpatientsMeetingThisFilterOnly: " + patientsMeetingThisFilterOnly + " \n\tnumberOfPossiblePatientsForThisFilter: " + numberOfPossiblePatientsForThisFilter);
+      console.log(
+        definition.fieldName +
+          ": \n\t" +
+          "patientsMeetingEntireSetOfFilters: " +
+          patientsMeetingEntireSetOfFilters +
+          " \n\tpatientsMeetingThisFilterOnly: " +
+          patientsMeetingThisFilterOnly +
+          " \n\tnumberOfPossiblePatientsForThisFilter: " +
+          numberOfPossiblePatientsForThisFilter
+      );
       definition.filterData = [
         {
           value: that.state.patientsMeetingAllFilters.length,
@@ -207,7 +222,10 @@ export default class CohortFilter extends React.Component {
               console.log("numericRangeSelector");
               break;
             case "booleanList":
-              matches = { ...matches, ...that.getBooleanListValues(filterDefinition) };
+              matches = {
+                ...matches,
+                ...that.getBooleanListValues(filterDefinition),
+              };
 
               break;
             default:
