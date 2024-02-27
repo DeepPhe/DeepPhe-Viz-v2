@@ -50,19 +50,9 @@ function FilterComponent(props) {
         height={47.3}
         data={[
           {
-            name: "Bar",
-            value: 100,
+            name: "",
+            value: props.filter.props.patientsMatchingThisFilter,
             color: "green",
-          },
-          {
-            name: "Bar",
-            value: 100,
-            color: "red",
-          },
-          {
-            name: "Bar",
-            value: 100,
-            color: "blue",
           },
         ]}
       />

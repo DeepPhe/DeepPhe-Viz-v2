@@ -16,8 +16,10 @@ class SwitchControl extends Component {
   handleToggleSwitch =
     (switchId, switchIndex) =>
     ({ enabled }) => {
+      const { definition } = this.state;
+      definition.switches[switchIndex].value = enabled;
       this.setState({
-        ...(definition.switches[switchIndex].value = enabled),
+        definition: definition,
         updated: false,
       });
     };
@@ -39,7 +41,7 @@ class SwitchControl extends Component {
     return (
       <React.Fragment>
         {this.state.definition.switches.map((item, index) => {
-          const fieldName = this.props.definition.fieldName;
+          const fieldName = this.state.definition.fieldName;
           const switchName = item.name;
           const name = fieldName + "_" + switchName;
           const enabled = item.value; //true/false
