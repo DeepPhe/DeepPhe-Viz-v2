@@ -8,18 +8,18 @@ import CategoricalRangeSelector from "./CategoricalRangeSelector";
 import React from "react";
 import NumericRangeSelector from "./NumericRangeSelector";
 
-function FilterListItem({ key, index, filterDefinition, filterChangedState }) {
+function FilterListItem({ key, index, filter, filterChangedState }) {
   const getFilter = () => {
-    switch (filterDefinition.class) {
+    switch (filter.props.definition.class) {
       case "discreteList":
-        return <DiscreteList index={index} key={index} definition={filterDefinition} />;
+        return <DiscreteList index={index} key={index} filter={filter} />;
 
       case "categoricalRangeSelector":
         return (
           <React.Fragment key={index}>
             <CategoricalRangeSelector
               key={index}
-              definition={filterDefinition}
+              filter={filter}
               broadcastUpdate={filterChangedState}
             />
           </React.Fragment>
@@ -30,7 +30,7 @@ function FilterListItem({ key, index, filterDefinition, filterChangedState }) {
           <React.Fragment key={index}>
             <NumericRangeSelector
               key={index}
-              definition={filterDefinition}
+              filter={filter}
               broadcastUpdate={filterChangedState}
             />
           </React.Fragment>
@@ -40,7 +40,7 @@ function FilterListItem({ key, index, filterDefinition, filterChangedState }) {
         return (
           <BooleanList
             key={index}
-            filterDefinition={filterDefinition}
+            filter={filter}
             //broadcastUpdate={filterChangedState}
           />
         );
@@ -50,7 +50,7 @@ function FilterListItem({ key, index, filterDefinition, filterChangedState }) {
   };
 
   return (
-    <Draggable key={index} draggableId={filterDefinition.fieldName} index={index}>
+    <Draggable key={index} draggableId={filter.props.fieldName} index={index}>
       {(provided) => (
         <List>
           <ListItem
@@ -59,7 +59,7 @@ function FilterListItem({ key, index, filterDefinition, filterChangedState }) {
             {...provided.draggableProps}
             {...provided.dragHandleProps}
           >
-            <FilterComponent filterDefinition={filterDefinition} filter={getFilter()} />
+            <FilterComponent filter={filter} filterControl={getFilter()} />
           </ListItem>
         </List>
       )}

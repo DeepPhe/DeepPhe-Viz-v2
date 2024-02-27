@@ -24,7 +24,7 @@ function DiscreteList(props) {
           fontSize: "8px !important",
         }}
       >
-        {props.definition.globalPatientCountsForCategories.map((item, index) => {
+        {props.filter.props.definition.globalPatientCountsForCategories.map((item, index) => {
           return (
             <ListItem
               sx={{

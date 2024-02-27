@@ -10,7 +10,7 @@ class NumericRangeSelector extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      definition: this.props.definition,
+      definition: this.props.filter.definition,
       updated: true,
     };
   }
@@ -105,7 +105,7 @@ class NumericRangeSelector extends React.Component {
   };
 
   render() {
-    const { definition } = this.props;
+    const definition = this.props.filter.definition;
     //const globalPatientCountsForCategories = definition.globalPatientCountsForCategories
     const selectedNumericRange = definition.selectedNumericRange;
     const numericRangeSelectorDefinition = definition.numericRangeSelectorDefinition;

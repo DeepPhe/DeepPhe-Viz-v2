@@ -1,9 +1,11 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
-export default function Filter(definition, patArrays) {
+const Filter = (props) => {
   const [patientsMatchingThisFilter, setPatientsMatchingThisFilter] = React.useState(0);
-  const [filterDefinition, setFilterDefinition] = React.useState(definition);
-  const [patientArrays, setPatientArrays] = React.useState(patArrays);
+  const [definition, setDefinition] = React.useState(props.definition);
+  const [patientArrays, setPatientArrays] = React.useState(props.patArrays);
+  const [filterData, setFilterData] = React.useState([]);
+  const [fieldName, setFieldName] = React.useState(props.fieldName);
 
   useEffect(() => {}, []);
   const update = () => {
@@ -30,6 +32,7 @@ export default function Filter(definition, patArrays) {
         ...matches,
         ...func(filterDefinition),
       };
+
       setPatientsMatchingThisFilter(matches);
       console.log(matches);
     }
@@ -58,4 +61,5 @@ export default function Filter(definition, patArrays) {
     });
     return matches;
   };
-}
+};
+export default Filter;

@@ -27,7 +27,7 @@ function BooleanList(props) {
       <div className={"slider-container"}>
         <SwitchControl
           broadcastUpdate={props.broadcastUpdate}
-          definition={props.filterDefinition}
+          definition={props.filter.props.definition}
         />{" "}
       </div>
     </Grid>

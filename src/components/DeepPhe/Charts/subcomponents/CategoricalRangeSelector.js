@@ -7,7 +7,7 @@ import * as d3 from "d3v4";
 
 class CategoricalRangeSelector extends React.Component {
   state = {
-    definition: this.props.definition,
+    definition: this.props.filter.props.definition,
     updated: true,
   };
 
@@ -135,7 +135,7 @@ class CategoricalRangeSelector extends React.Component {
   }
 
   render() {
-    const { definition } = this.props;
+    const definition = this.props.filter.props.definition;
     const globalPatientCountsForCategories = definition.globalPatientCountsForCategories;
     const selectedCategoricalRange = definition.selectedCategoricalRange;
     const marks = {};

@@ -10,10 +10,10 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 function FilterComponent(props) {
   const [open, setOpen] = useState(true);
   const toggleFilterEnabled =
-    (filterDefinition) =>
+    (filter) =>
     ({ enabled }) => {
       const selector =
-        "#" + filterDefinition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row";
+        "#" + filter.props.definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row";
       if (enabled) {
         $(selector).removeClass("overlay-row");
       } else {
@@ -21,16 +21,16 @@ function FilterComponent(props) {
       }
     };
 
-  const getToggleSwitch = (filterDefinition) => {
+  const getToggleSwitch = (filter) => {
     return (
       <React.Fragment>
         <ToggleSwitch
           wantsdivs={1}
-          key={filterDefinition.fieldName}
-          label={filterDefinition.fieldName}
+          key={filter.props.definition.fieldName}
+          label={filter.props.definition.fieldName}
           theme="graphite-small"
           enabled={true}
-          onStateChanged={toggleFilterEnabled(filterDefinition)}
+          onStateChanged={toggleFilterEnabled(filter)}
         />
       </React.Fragment>
     );
@@ -38,17 +38,33 @@ function FilterComponent(props) {
 
   const getSwitch = () => {
     {
-      return getToggleSwitch(props.filterDefinition);
+      return getToggleSwitch(props.filter);
     }
   };
 
   const getBar = () => {
     return (
       <HSBar
-        id={props.filterDefinition.fieldName.replaceAll(" ", "-").toLowerCase() + "-hs"}
+        id={props.filter.props.definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-hs"}
         showTextIn
         height={47.3}
-        data={props.filterDefinition.filterData}
+        data={[
+          {
+            name: "Bar",
+            value: 100,
+            color: "green",
+          },
+          {
+            name: "Bar",
+            value: 100,
+            color: "red",
+          },
+          {
+            name: "Bar",
+            value: 100,
+            color: "blue",
+          },
+        ]}
       />
     );
   };
@@ -60,14 +76,17 @@ function FilterComponent(props) {
     <React.Fragment>
       <div
         className={"overlay-row-container"}
-        id={props.filterDefinition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}
+        id={
+          props.filter.props.definition.fieldName.replaceAll(" ", "-").toLowerCase() +
+          "-overlay-row"
+        }
       >
         <div id={"boolean-list-row"} className={"row filter-center-rows"}>
           <Grid item md={2} className="filter-inner-container no_padding_grid">
             {getSwitch()}
           </Grid>
           <Grid item md={7} className="filter-inner-container no_padding_grid">
-            {props.filter}
+            {props.filterControl}
           </Grid>
           <Grid item md={3} className="filter-inner-container no_padding_grid">
             {getBar()}
