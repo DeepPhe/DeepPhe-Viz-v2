@@ -10,7 +10,7 @@ class NumericRangeSelector extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      definition: this.props.filter.definition,
+      definition: this.props.filter.props.definition,
       updated: true,
     };
   }
@@ -20,7 +20,7 @@ class NumericRangeSelector extends React.Component {
   };
 
   handleRangeChange = (range: ChangeResult) => {
-    const { definition } = this.props;
+    const { definition } = this.state;
     //debugger;
     this.setState({
       ...(definition.patientsMeetingThisFilterOnly = range[1]),
@@ -105,7 +105,7 @@ class NumericRangeSelector extends React.Component {
   };
 
   render() {
-    const definition = this.props.filter.definition;
+    const definition = this.state.definition;
     //const globalPatientCountsForCategories = definition.globalPatientCountsForCategories
     const selectedNumericRange = definition.selectedNumericRange;
     const numericRangeSelectorDefinition = definition.numericRangeSelectorDefinition;
@@ -122,7 +122,13 @@ class NumericRangeSelector extends React.Component {
 
     return (
       <React.Fragment>
-        <div className={"slider-container"}>
+        <div
+          onDragStart={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          className={"slider-container"}
+        >
           <Slider
             range
             min={numericRangeSelectorDefinition.min}

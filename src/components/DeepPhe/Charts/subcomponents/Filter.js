@@ -7,7 +7,9 @@ const Filter = (props) => {
   const [filterData, setFilterData] = React.useState([]);
   const [fieldName, setFieldName] = React.useState(props.fieldName);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    console.log(definition);
+  }, [definition]);
   const update = () => {
     let matches = {};
     let func = null;

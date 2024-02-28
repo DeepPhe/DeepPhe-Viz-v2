@@ -54,14 +54,15 @@ svg[id$="-hs"] {
 }
 
 .filter-inner-container {
-    margin-right: 5px !important;
-    margin-left: 5px !important;
     border: 2px solid #e5e5e5;
     border-radius: 4px;
-    padding-top: 5px !important;
-    padding-bottom: 5px !important;
+    padding: 5px 5px !important;
     display: flex;
     flex-wrap: nowrap;
+}
+
+.filter-control {
+    padding: 1px 30px !important;
 }
 
 .switch-disabled {
@@ -82,13 +83,13 @@ svg[id$="-hs"] {
 #boolean-list-row .switch {
     margin-right: 5px;
     align-items: center;
-    display: inline-flex;
+
 }
 
 #numeric-range-selector-row .switch, #categorical-range-selector-row .switch {
 
     align-items: center;
-    display: inline-flex;
+
 }
 
 .slider-container {
@@ -230,9 +231,8 @@ svg[id$="-hs"] {
 }
 
 .overlay-row {
-    height: 35px !important;
     transform: scale(0.75);
-    backgrounda: gray;
+    background: gray;
     margin-left: 5px;
     margin-right: 5px;
     opacitya: 0.4;
@@ -241,8 +241,9 @@ svg[id$="-hs"] {
 }
 
 .overlay-row-container {
-   width: 100%;
+    width: 100%;
 }
+
 .filter-container {
     display: flex;
     flex-wrap: nowrap;
@@ -250,9 +251,9 @@ svg[id$="-hs"] {
 
 
 .discrete-list-container {
-  flex: 2 0 66%
+    flex: 2 0 66%
 }
 
 [id$="-hs-bar"] {
-  flex: 1 0 33%
+    flex: 1 0 33%
 }

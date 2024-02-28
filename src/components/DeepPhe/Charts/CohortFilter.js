@@ -242,7 +242,7 @@ export default class CohortFilter extends React.Component {
   };
 
   filterChangedState = (definition) => {
-    this.state.filters[definition.fieldName].setFilterDefinition(definition);
+    // this.state.filters[definition.fieldName].updateDefinition(definition);
     this.setState(
       {
         patientsMeetingAllFiltersUpToDate: false,

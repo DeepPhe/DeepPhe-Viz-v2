@@ -62,9 +62,19 @@ function FilterComponent(props) {
   if (!props) {
     return null;
   }
+
+  $(document).ready(function () {
+    $(".overlay-row-container").on("mousedown", function (e) {
+      e.stopPropagation();
+    });
+  });
+
   return (
     <React.Fragment>
       <div
+        onMouseDown={(e) => {
+          console.log(e);
+        }}
         className={"overlay-row-container"}
         id={
           props.filter.props.definition.fieldName.replaceAll(" ", "-").toLowerCase() +
@@ -75,7 +85,7 @@ function FilterComponent(props) {
           <Grid item md={2} className="filter-inner-container no_padding_grid">
             {getSwitch()}
           </Grid>
-          <Grid item md={7} className="filter-inner-container no_padding_grid">
+          <Grid item md={7} className="filter-inner-container no_padding_grid filter-control">
             {props.filterControl}
           </Grid>
           <Grid item md={3} className="filter-inner-container no_padding_grid">
