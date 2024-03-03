@@ -7,7 +7,11 @@ import isFunction from "lodash/isFunction";
 import "./ToggleSwitch.css";
 
 class ToggleSwitch extends Component {
-  state = { enabled: this.enabledFromProps(), wantsdivs: this.props.wantsdivs };
+  state = {
+    enabled: this.enabledFromProps(),
+    wantsdivs: this.props.wantsdivs,
+    fieldName: this.props.fieldName,
+  };
 
   isEnabled = () => this.state.enabled;
 
@@ -32,7 +36,6 @@ class ToggleSwitch extends Component {
 
       // Augument the event object with SWITCH_STATE
       const switchEvent = Object.assign(evt, { SWITCH_STATE: state });
-
       // Execute the callback functions
       isFunction(onClick) && onClick(switchEvent);
       isFunction(onStateChanged) && onStateChanged(state);

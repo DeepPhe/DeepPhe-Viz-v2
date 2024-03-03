@@ -10,7 +10,7 @@ class NumericRangeSelector extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      definition: this.props.filter.props.definition,
+      definition: this.props.definition,
       updated: true,
     };
   }
@@ -23,7 +23,7 @@ class NumericRangeSelector extends React.Component {
     const { definition } = this.state;
     //debugger;
     this.setState({
-      ...(definition.patientsMeetingThisFilterOnly = range[1]),
+      //...(definition.patientsMeetingThisFilterOnly = range[1]),
       ...(definition.selectedNumericRange.min = range[0]),
       ...(definition.selectedNumericRange.max = range[1]),
     });
@@ -53,7 +53,7 @@ class NumericRangeSelector extends React.Component {
   }
 
   componentDidMount() {
-    this.addCountsToCategory();
+    //this.addCountsToCategory();
   }
 
   addCountsToCategory = () => {
@@ -114,11 +114,15 @@ class NumericRangeSelector extends React.Component {
     const maxSelectedInRange = selectedNumericRange.max;
     const markStep = (numericRangeSelectorDefinition.max - numericRangeSelectorDefinition.min) / 10;
 
-    let markIndex = 0;
-    while (markIndex < 11) {
-      marks[markIndex * markStep] = "" + markIndex * markStep;
-      markIndex++;
-    }
+    marks = {
+      40: "40",
+      45: "45",
+      50: "50",
+      55: "55",
+      60: "60",
+      65: "65",
+      70: "70",
+    };
 
     return (
       <React.Fragment>

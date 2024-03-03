@@ -2,13 +2,10 @@ import React, { useEffect } from "react";
 
 const Filter = (props) => {
   const [patientsMatchingThisFilter, setPatientsMatchingThisFilter] = React.useState(0);
-  const [definition, setDefinition] = React.useState(props.definition);
   const [patientArrays, setPatientArrays] = React.useState(props.patArrays);
-  const [filterData, setFilterData] = React.useState([]);
-  const [fieldName, setFieldName] = React.useState(props.fieldName);
 
   useEffect(() => {
-    console.log(definition);
+    console.log("Filter updated " + definition);
   }, [definition]);
   const update = () => {
     let matches = {};
@@ -63,5 +60,6 @@ const Filter = (props) => {
     });
     return matches;
   };
+  update();
 };
 export default Filter;

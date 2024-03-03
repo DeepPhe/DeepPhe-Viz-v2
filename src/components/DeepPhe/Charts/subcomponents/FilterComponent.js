@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ToggleSwitch from "../../Buttons/ToggleSwitch";
 import $ from "jquery";
 import Grid from "@mui/material/Grid";
@@ -8,50 +8,52 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
 function FilterComponent(props) {
-  const [open, setOpen] = useState(true);
-  const toggleFilterEnabled =
-    (filter) =>
-    ({ enabled }) => {
-      const selector =
-        "#" + filter.props.definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row";
-      if (enabled) {
-        $(selector).removeClass("overlay-row");
-      } else {
-        $(selector).addClass("overlay-row");
-      }
-    };
+  const [definition, setDefinition] = useState(props.definition);
+  const [filterControl, setFilterControl] = useState(props.filterControl);
+  const [toggleFilterEnabled, setToggleFilterEnabled] = useState(props.toggleFilterEnabled);
 
-  const getToggleSwitch = (filter) => {
+  useEffect(() => {
+    if (props) {
+      setDefinition(props.definition);
+    }
+  }, [props.definition]);
+
+  const getToggleSwitch = (definition) => {
     return (
       <React.Fragment>
         <ToggleSwitch
           wantsdivs={1}
-          key={filter.props.definition.fieldName}
-          label={filter.props.definition.fieldName}
+          key={definition.fieldName}
+          label={definition.fieldName}
+          fieldName={definition.fieldName}
           theme="graphite-small"
           enabled={true}
-          onStateChanged={toggleFilterEnabled(filter)}
+          onStateChanged={toggleFilterEnabled}
         />
       </React.Fragment>
     );
   };
 
-  const getSwitch = () => {
+  const getSwitch = (definition) => {
     {
-      return getToggleSwitch(props.filter);
+      return getToggleSwitch(definition);
     }
   };
 
-  const getBar = () => {
+  const getBar = (definition) => {
+    console.log(definition.fieldName, definition.patientsMeetingThisFilterOnly);
+    if (!definition.patientsMeetingThisFilterOnly) {
+      return null;
+    }
     return (
       <HSBar
-        id={props.filter.props.definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-hs"}
+        id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-hs"}
         showTextIn
         height={47.3}
         data={[
           {
             name: "",
-            value: props.filter.props.patientsMatchingThisFilter,
+            value: definition.patientsMeetingThisFilterOnly,
             color: "green",
           },
         ]}
@@ -63,36 +65,26 @@ function FilterComponent(props) {
     return null;
   }
 
-  $(document).ready(function () {
-    $(".overlay-row-container").on("mousedown", function (e) {
-      e.stopPropagation();
-    });
-  });
-
   return (
     <React.Fragment>
       <div
-        onMouseDown={(e) => {
-          console.log(e);
-        }}
         className={"overlay-row-container"}
-        id={
-          props.filter.props.definition.fieldName.replaceAll(" ", "-").toLowerCase() +
-          "-overlay-row"
-        }
+        id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}
       >
         <div id={"boolean-list-row"} className={"row filter-center-rows"}>
-          <Grid item md={2} className="filter-inner-container no_padding_grid">
-            {getSwitch()}
+          <Grid
+            item
+            md={1}
+            className="filter-inner-container no_padding_grid"
+            {...props.provided.dragHandleProps}
+          >
+            {getSwitch(definition)}
           </Grid>
-          <Grid item md={7} className="filter-inner-container no_padding_grid filter-control">
-            {props.filterControl}
+          <Grid item md={8} className="filter-inner-container no_padding_grid filter-control">
+            {filterControl}
           </Grid>
           <Grid item md={3} className="filter-inner-container no_padding_grid">
-            {getBar()}
-            <IconButton onClick={() => setOpen(!open)} aria-label="expand" size="small">
-              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>
+            {getBar(definition)}
           </Grid>
         </div>
       </div>

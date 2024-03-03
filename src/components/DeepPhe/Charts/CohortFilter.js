@@ -5,11 +5,13 @@ import "rc-slider/assets/index.css";
 import $ from "jquery";
 import { fastIntersection, flattenObject } from "../../../utils/arrayHelpers.js";
 import FilterListItem from "./subcomponents/FilterListItem";
-import Filter from "./subcomponents/Filter.js";
 import Grid from "@mui/material/Grid";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import List from "@mui/material/List";
 import * as d3 from "d3";
+import ToggleSwitch from "../Buttons/ToggleSwitch";
+import ListItem from "@mui/material/ListItem";
+import FilterList from "./subcomponents/FilterList";
 
 export default class CohortFilter extends React.Component {
   state = {
@@ -74,185 +76,324 @@ export default class CohortFilter extends React.Component {
     const fetchPatientArraysPromise = new Promise((resolve, reject) =>
       fetchPatientArrays().then(function (response) {
         response.json().then(function (json) {
+          let patientArr = flattenObject(json, "");
+          patientArr["gender.m"] = ["fake_patient1", "fake_patient2"];
+          patientArr["gender.f"] = [
+            "fake_patient3",
+            "fake_patient4",
+            "fake_patient5",
+            "fake_patient6",
+            "fake_patient7",
+          ];
+          patientArr["city.la"] = ["fake_patient1", "fake_patient2", "fake_patient3"];
+          patientArr["city.ny"] = [
+            "fake_patient4",
+            "fake_patient5",
+            "fake_patient6",
+            "fake_patient7",
+          ];
           that.setState(
             {
-              patientArrays: flattenObject(json, ""),
+              patientArrays: patientArr,
               patientArraysNotFlat: json,
               patientArraysLoading: false,
             },
             () => {
-              resolve(json);
+              resolve(flattenObject(json, ""));
             }
           );
         });
       })
     );
 
-    const fetchFilterDefinitionPromise = new Promise((resolve, reject) => {
-      fetchFilterDefinition().then(function (response) {
-        response.json().then(function (json) {
-          let cohortSize = [
-            {
-              value: 5,
-              description: "5",
-              color: "blue",
-            },
-            {
-              value: 95,
-              description: "",
-              color: "lightgray",
-            },
-          ];
-
-          that.setState(
-            {
-              filterDefinitions: json,
-              cohortSize: cohortSize,
-              isLoading: false,
-            },
-            () => {
-              resolve(json);
-            }
-          );
-        });
-      });
-    });
-
-    function initFilterData() {
+    const fetchFilterDefinitionPromise = (patientArrays) => {
       return new Promise((resolve, reject) => {
-        const filterDefinitions = that.state.filterDefinitions.searchFilterDefinition;
-        const patientArrays = that.state.patientArrays;
-        let filters = {};
-        filterDefinitions.forEach((definition, i) => {
-          filters[definition.fieldName] = (
-            <Filter
-              definition={definition}
-              patientArrays={patientArrays}
-              fieldName={definition.fieldName}
-            />
-          );
-        });
-        that.setState({ filters: filters }, () => {
-          resolve(true);
-        });
-      });
-    }
+        fetchFilterDefinition().then(function (response) {
+          response.json().then(function (json) {
+            let cohortSize = [
+              {
+                value: 5,
+                description: "5",
+                color: "blue",
+              },
+              {
+                value: 95,
+                description: "",
+                color: "lightgray",
+              },
+            ];
 
-    Promise.all([fetchPatientArraysPromise, fetchFilterDefinitionPromise]).then((promises) => {
-      initFilterData().then(() => {
-        that.updatePatientsMatchingAllFilters().then(() => {
-          that.updateFilterData();
+            const addGuiInfo = (obj, definition) => {
+              const group = definition.guiOptions.displayGroup;
+              const priority = definition.guiOptions.displayPriority;
+              const displayName = definition.guiOptions.displayName;
+              const name = definition.fieldName;
+              if (obj.hasOwnProperty(definition.guiOptions.displayGroup)) {
+                obj[group].push({
+                  displayName: displayName,
+                  group: group,
+                  priority: priority,
+                  definitionName: name,
+                });
+              } else {
+                obj[group] = [
+                  {
+                    displayName: displayName,
+                    group: group,
+                    priority: priority,
+                    definitionName: name,
+                  },
+                ];
+              }
+              return obj;
+            };
+
+            const sortGuiInfo = (guiInfo) => {
+              const sorted = {};
+              Object.keys(guiInfo).forEach((key) => {
+                //sort by priority and then displayName
+                sorted[key] = guiInfo[key].sort((a, b) => {
+                  if (a.priority < b.priority) return -1;
+                  if (a.priority > b.priority) return 1;
+                  if (a.displayName < b.displayName) return -1;
+                  if (a.displayName > b.displayName) return 1;
+                  return 0;
+                });
+              });
+              return sorted;
+            };
+            const definitions = json["searchFilterDefinition"];
+            let filterGuiInfo = {};
+            definitions.forEach((definition) => {
+              if (definition.class === "categoricalRangeSelector") {
+                definition.categoricalRange = [...definition.selectedCategoricalRange];
+              }
+              filterGuiInfo = addGuiInfo(filterGuiInfo, definition);
+              definition.numberOfPossiblePatientsForThisFilter = that.getPatientsInFilter(
+                definition,
+                that.state.patientArrays,
+                false
+              ).length;
+              definition.toggleFilterEnabled = that.toggleFilterEnabled;
+            });
+            const sortedGuiInfo = sortGuiInfo(filterGuiInfo);
+            that.setState(
+              {
+                filterGuiInfo: filterGuiInfo,
+                filterGuiInfoKeys: Object.keys(filterGuiInfo),
+                filterDefinitions: definitions,
+                cohortSize: cohortSize,
+                isLoading: false,
+                basicEnabled: false,
+              },
+              () => {
+                resolve(json);
+              }
+            );
+          });
         });
       });
-    });
+    };
+
+    fetchPatientArraysPromise.then((patientArrays) =>
+      fetchFilterDefinitionPromise(patientArrays).then(() => {
+        that.updatePatientsMatchingAllFilters();
+      })
+    );
   }; // end reset
 
-  updateFilterData = () => {
-    const that = this;
-    const filterDefinitions = [...this.state.filterDefinitions.searchFilterDefinition];
-    filterDefinitions.forEach((definition, i) => {
-      //use the patientArrays to get the number of patients that meet the filter
-      const numberOfPossiblePatientsForThisFilter =
-        definition.numberOfPossiblePatientsForThisFilter;
-      let patientsMeetingEntireSetOfFilters = that.state.patientsMeetingAllFilters.length;
-      let matchingPatients = [];
-      if (definition["selectedCategoricalRange"]) {
-        definition.selectedCategoricalRange.forEach((range) => {
-          const aryName = definition.fieldName.toLowerCase() + "." + range;
-          const ary = that.state.patientArrays[aryName];
-          matchingPatients = matchingPatients.concat(ary);
+  getPatientsInFilter = (definition, patientArrays, matchesOnly) => {
+    const getPatientsForArrayName = (name) => {
+      return patientArrays[definition.fieldName.toLowerCase() + "." + name.toLowerCase()];
+    };
+    let matchingPatients = [];
+    switch (definition.class) {
+      case "discreteList":
+        break;
+      case "checkboxList":
+        definition.checkboxes.forEach((switchDefinition) => {
+          if (switchDefinition.checked || !matchesOnly) {
+            matchingPatients = matchingPatients.concat(
+              getPatientsForArrayName(switchDefinition.name)
+            );
+          }
         });
-      }
-      definition.patientsMeetingThisFilterOnly = matchingPatients.length;
+        break;
+      case "categoricalRangeSelector":
+        let arr;
+        if (!matchesOnly) {
+          arr = definition.categoricalRange;
+        } else {
+          arr = definition.selectedCategoricalRange;
+        }
+        arr.forEach((range) => {
+          matchingPatients = matchingPatients.concat(getPatientsForArrayName(range));
+        });
+        break;
+      case "numericRangeSelector":
+        console.log("numericRangeSelector");
+        break;
+      case "booleanList":
+        definition.switches.forEach((switchDefinition) => {
+          if (switchDefinition.value || !matchesOnly) {
+            matchingPatients = matchingPatients.concat(
+              getPatientsForArrayName(switchDefinition.name)
+            );
+          }
+        });
+        break;
+      default:
+        console.log("Unknown filter type");
+    }
+    return matchingPatients;
+  };
+  updateFilterData = () => {};
 
-      const patientsMeetingThisFilterOnly = definition.patientsMeetingThisFilterOnly;
-      //console.log(that.state.patientsMeetingAllFilters)
-      //console.log(fieldName + ": \n\t" + "patientsMeetingEntireSetOfFilters: " + patientsMeetingEntireSetOfFilters + " \n\tpatientsMeetingThisFilterOnly: " + patientsMeetingThisFilterOnly + " \n\tnumberOfPossiblePatientsForThisFilter: " + numberOfPossiblePatientsForThisFilter);
-      console.log(
-        definition.fieldName +
-          ": \n\t" +
-          "patientsMeetingEntireSetOfFilters: " +
-          patientsMeetingEntireSetOfFilters +
-          " \n\tpatientsMeetingThisFilterOnly: " +
-          patientsMeetingThisFilterOnly +
-          " \n\tnumberOfPossiblePatientsForThisFilter: " +
-          numberOfPossiblePatientsForThisFilter
+  updateFilterCountsAndGetMatches = () => {
+    return new Promise((resolve, reject) => {
+      let matchesArray = [];
+
+      const filterDefinitions = this.state.filterDefinitions;
+      this.state.filterDefinitions.forEach((definition) => {
+        const fieldName = definition.fieldName;
+        const patientsInFilter = this.getPatientsInFilter(
+          definition,
+          this.state.patientArrays,
+          true
+        );
+        matchesArray.push(patientsInFilter);
+        definition.patientsMeetingThisFilterOnly = patientsInFilter.length;
+        console.log("Patients meeting " + fieldName + " only: " + patientsInFilter.length);
+        const idx = filterDefinitions.findIndex((a) => a.fieldName === fieldName);
+        this.setState({
+          filterDefinitions: {
+            ...filterDefinitions,
+            [idx]: {
+              ...filterDefinitions[idx],
+              patientsMeetingThisFilterOnly: patientsInFilter.length,
+            },
+          },
+        });
+      });
+      this.setState(
+        {
+          filterDefinitions: filterDefinitions,
+        },
+        () => {
+          resolve(matchesArray);
+        }
       );
     });
-    let cohortSize = [
-      {
-        value: this.state.patientsMeetingAllFilters.length,
-        description: "",
-        color: "blue",
-      },
-      {
-        value: 7,
-        description: "",
-        color: "lightgray",
-      },
-    ];
-    that.setState({
-      filterDefinitions: { searchFilterDefinition: filterDefinitions },
-      filterDefinitionLoading: false,
-      cohortSize: cohortSize,
+  };
+
+  getPatientsMeetingEntireSetOfFiltersForFilter(definition, patientsMeetingAllFilters) {
+    return new Promise((resolve, reject) => {
+      const patientsMatchingThisFilter = this.getPatientsInFilter(
+        definition,
+        this.state.patientArrays,
+        true
+      );
+      resolve(
+        (definition.patientsMeetingEntireSetOfFilters = patientsMeetingAllFilters.filter(
+          (patient) => patientsMatchingThisFilter.includes(patient)
+        ).length)
+      );
+    });
+  }
+
+  updatePatientsMeetingEntireSetOfFilters = (patientsMeetingAllFilters) => {
+    return new Promise((resolve, reject) => {
+      const filterDefinitions = this.state.filterDefinitions;
+      filterDefinitions.forEach((definition) => {
+        this.getPatientsMeetingEntireSetOfFiltersForFilter(
+          definition,
+          patientsMeetingAllFilters
+        ).then((patientsMeetingEntireSetOfFilters) => {
+          definition.patientsMeetingEntireSetOfFilters = patientsMeetingEntireSetOfFilters;
+        });
+      });
+      this.setState(
+        {
+          filterDefinitions: filterDefinitions,
+        },
+        () => {
+          resolve(true);
+        }
+      );
     });
   };
 
   updatePatientsMatchingAllFilters = () => {
     return new Promise((resolve, reject) => {
-      let matches = {};
-
-      for (const key in this.state.filters) {
-        const filter = this.state.filters[key];
-        if (filter.enabled) {
-          matches[filter.fieldName] = filter.patientsMatchingThisFilter;
-        } else {
-          matches[filter.fieldName] = [];
-        }
-      }
-      if (Object.keys(matches).length) {
-        let arrayOfArraysOfPatientsMatchingEachFilter = [];
-        for (const key in matches) {
-          if (matches.hasOwnProperty(key)) {
-            //console.log(`${key}: ${matches[key]}`);
-            arrayOfArraysOfPatientsMatchingEachFilter.push(matches[key]);
-          }
-        }
-        console.log(
-          "Matches across all filters: " +
-            fastIntersection(...arrayOfArraysOfPatientsMatchingEachFilter)
-        );
-        this.setState(
-          {
-            patientsMeetingAllFilters: fastIntersection(
-              ...arrayOfArraysOfPatientsMatchingEachFilter
-            ),
-            patientsMeetingAllFiltersUpToDate: true,
-          },
-          () => {
-            resolve(true);
-          }
-        );
-      }
+      this.updateFilterCountsAndGetMatches().then((matchesArray) => {
+        const patientsMeetingAllFilters = fastIntersection(...matchesArray);
+        this.updatePatientsMeetingEntireSetOfFilters(patientsMeetingAllFilters).then(() => {
+          console.log("Patients meeting all filters: " + patientsMeetingAllFilters.length);
+          const cohortSize = [
+            {
+              value: patientsMeetingAllFilters.length,
+              description: "",
+              color: "blue",
+            },
+            {
+              value: 7,
+              description: "",
+              color: "lightgray",
+            },
+          ];
+          this.setState(
+            {
+              patientsMeetingAllFilters: patientsMeetingAllFilters,
+              patientsMeetingAllFiltersUpToDate: true,
+              filterDefinitionLoading: false,
+              cohortSize: cohortSize,
+            },
+            () => {
+              resolve(true);
+            }
+          );
+        });
+      });
     });
   };
 
   CohortPercentHSBar = (props) => {
-    return <HSBar showTextIn max={100} height={47.3} data={this.state.cohortSize} />;
+    return (
+      <HSBar
+        showTextIn
+        max={100}
+        height={47.3}
+        color="blue"
+        data={[
+          {
+            name: "",
+            value: 7,
+            description: "",
+            color: "green",
+          },
+        ]}
+      />
+    );
   };
 
   filterChangedState = (definition) => {
-    // this.state.filters[definition.fieldName].updateDefinition(definition);
-    this.setState(
-      {
-        patientsMeetingAllFiltersUpToDate: false,
-      },
-      () => {
-        this.updatePatientsMatchingAllFilters().then(() => {
-          this.updateFilterData();
-        });
-      }
-    );
+    if (!this.state.isLoading) {
+      this.setState(
+        {
+          filterDefinitions: this.state.filterDefinitions.map((def) => {
+            if (def.fieldName === definition.fieldName) {
+              return definition;
+            } else {
+              return def;
+            }
+          }),
+          patientsMeetingAllFiltersUpToDate: false,
+        },
+        () => {
+          this.updatePatientsMatchingAllFilters().then(() => {});
+        }
+      );
+    }
   };
 
   componentDidMount() {
@@ -268,19 +409,35 @@ export default class CohortFilter extends React.Component {
   }
 
   shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean {
-    if (JSON.stringify(this.state.filters) !== JSON.stringify(nextState.filters)) {
-      // nextState.filters.forEach((filter) => {
-      //   if (filter.enabled) {
-      //     filter.update();
-      //   }
-      // });
-      // console.log("component should update!");
-      return true;
-    }
+    //if (JSON.stringify(this.state.filters) !== JSON.stringify(nextState.filters)) {
+    // nextState.filters.forEach((filter) => {
+    //   if (filter.enabled) {
+    //     filter.update();
+    //   }
+    // });
+    // console.log("component should update!");
+    //   return true;
+    //}
     return true;
   }
 
   componentDidUpdate = (prevProps, prevState, snapshot) => {
+    if (
+      this.state.isLoading ||
+      this.state.filterDefinitionLoading ||
+      this.state.patientArraysLoading ||
+      this.state.handlingDragEnd
+    ) {
+    } else {
+      if (this.state.basicEnabled) {
+        document.getElementById("NewControl").style.display = "none";
+        document.getElementById("NewBasicControl").style.display = "block";
+      } else {
+        document.getElementById("NewControl").style.display = "block";
+        document.getElementById("NewBasicControl").style.display = "none";
+      }
+    }
+
     console.log("component updated!");
 
     //need code to iterate of patientArrays, find the patientArrays that being with the fieldnames in the filterDefinitions,
@@ -298,31 +455,41 @@ export default class CohortFilter extends React.Component {
     // }
 
     // if (prevState.filterDefinitions !== this.state.filterDefinitions) {
-    //     this.state.filterDefinitions.searchFilterDefinition.forEach((e) => {
+    //     this.state.filterDefinitions.
+    //     lterDefinition.forEach((e) => {
     //         //console.log(e.fieldName)
     //     })
     //
     // }
   };
 
-  toggleFilterEnabled = (activity) => {
-    const selector =
-      "#" + activity.filterDefinition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row";
+  toggleFilterEnabled = (toggleInfo) => {
+    const fieldName = toggleInfo.fieldName;
+    const enabled = toggleInfo.enabled;
+    const filterDefinitions = this.state.filterDefinitions;
+    const selector = "#" + fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row";
     if (enabled) {
       $(selector).removeClass("overlay-row");
     } else {
       $(selector).addClass("overlay-row");
     }
-  };
-
-  filterAndFilterBar = ({ filter, index }) => {
-    return new FilterListItem({
-      filter: filter,
-      index: index,
-      moveListItem: this.moveListItem,
-      filterChangedState: this.filterChangedState,
-      toggleFilterEnabled: this.toggleFilterEnabled,
-    });
+    this.setState(
+      {
+        filterDefinitions: filterDefinitions.map((def) => {
+          if (def.fieldName === fieldName) {
+            return {
+              ...def,
+              enabled: toggleInfo.enabled,
+            };
+          } else {
+            return def;
+          }
+        }),
+      },
+      () => {
+        this.updatePatientsMatchingAllFilters().then(() => {});
+      }
+    );
   };
 
   moveListItem = (dragIndex, hoverIndex) => {
@@ -331,7 +498,7 @@ export default class CohortFilter extends React.Component {
 
     this.setState(
       update(this.state, {
-        items: {
+        filterDefinitions: {
           $splice: [
             [dragIndex, 1],
             [hoverIndex, 0, dragitem],
@@ -364,7 +531,7 @@ export default class CohortFilter extends React.Component {
       //filterDefinitions.findIndex((def, idx) => {if (def.fieldName == result.draggableId) return index})
       //  if (filterDefinition.fieldName === result.draggableId) {
       const filterDefinitions = removeAndInsert(
-        [...that.state.filterDefinitions.searchFilterDefinition],
+        [...that.state.filterDefinitions],
         result.source.index,
         result.destination.index
       );
@@ -373,7 +540,7 @@ export default class CohortFilter extends React.Component {
       //});
       that.setState(
         {
-          filterDefinitions: { searchFilterDefinition: filterDefinitions },
+          filterDefinitions: filterDefinitions,
         },
         () => {
           that.setState({ handlingDragEnd: false });
@@ -382,6 +549,9 @@ export default class CohortFilter extends React.Component {
     });
 
     // TODO: Update the state based on the result
+  };
+  handleToggleSwitch = (enabled) => {
+    this.setState({ basicEnabled: enabled.enabled });
   };
 
   render() {
@@ -393,13 +563,48 @@ export default class CohortFilter extends React.Component {
     )
       return <div>Data is coming soon...</div>;
     else {
-      let filtersArray = [];
-      Object.keys(this.state.filters).forEach((key) => {
-        filtersArray.push(this.state.filters[key]);
-      });
+      let simpleInterface = [];
+      // simpleInterface.push(this.state.filterDefinitions.findIndex((a) => a.fieldName === "gender"));
+      simpleInterface.push(this.state.filterDefinitions.findIndex((a) => a.fieldName === "age"));
+      simpleInterface.push(this.state.filterDefinitions.findIndex((a) => a.fieldName === "city"));
+      const that = this;
       return (
         <React.Fragment>
-          <div id="NewControl">
+          <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            align="center"
+            spacing={0}
+            width={"100%"}
+          >
+            <List>
+              {this.state.patientsMeetingAllFilters.map((patient) => (
+                <ListItem key={patient} primaryText={patient} />
+              ))}
+            </List>
+          </Grid>
+          <div id={"switcher"}>
+            <Grid
+              container
+              direction="row"
+              justifyContent="center"
+              align="center"
+              spacing={0}
+              width={"100%"}
+            >
+              <ToggleSwitch
+                key={134}
+                wantsdivs={0}
+                label={"Complete / Basic"}
+                theme="graphite-small"
+                enabled={this.state.basicEnabled}
+                onStateChanged={this.handleToggleSwitch}
+              />
+            </Grid>
+          </div>
+
+          <div id={"NewBasicControl"}>
             <Grid
               className={"cohort-size-bar-container"}
               container
@@ -420,7 +625,7 @@ export default class CohortFilter extends React.Component {
               direction="row"
               display={"block"}
               item
-              md={10}
+              md={8}
               spacing={0}
               width={"100%"}
               justifyContent={"center"}
@@ -433,13 +638,14 @@ export default class CohortFilter extends React.Component {
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                     >
-                      {filtersArray.map((filter, index) => (
-                        <this.filterAndFilterBar
-                          key={index}
-                          filter={filter}
+                      {simpleInterface.map((definition, index) => (
+                        <FilterListItem
+                          key={that.state.filterDefinitions[definition].fieldName}
+                          definition={that.state.filterDefinitions[definition]}
                           index={index}
-                          moveListItem={this.moveListItem}
-                          filterChangedState={this.filterChangedState}
+                          moveListItem={that.moveListItem}
+                          filterChangedState={that.filterChangedState}
+                          broadcastEnabledChange={that.toggleFilterEnabled}
                         />
                       ))}
                       {provided.placeholder}
@@ -447,6 +653,46 @@ export default class CohortFilter extends React.Component {
                   )}
                 </Droppable>
               </DragDropContext>
+            </Grid>
+          </div>
+
+          <div id="NewControl">
+            <Grid
+              className={"cohort-size-bar-container"}
+              container
+              direction="row"
+              justifyContent="center"
+              align="center"
+            >
+              <Grid className={"no_padding_grid cohort-size-label-container"} item md={1}>
+                <span className={"cohort-size-label"}>Cohort Size</span>
+              </Grid>
+              <Grid className={"cohort-size-label-container"} item md={6}>
+                <this.CohortPercentHSBar />
+              </Grid>
+              <Grid className={"cohort-size-label-container"} item md={1} />
+            </Grid>
+            <Grid
+              id={"filter-list-container"}
+              container
+              direction="row"
+              display={"block"}
+              item
+              md={10}
+              spacing={0}
+              width={"80%"}
+            >
+              {this.state.filterGuiInfoKeys.map((guiInfo, index) => (
+                <FilterList
+                  key={index}
+                  guiInfo={guiInfo}
+                  filterGuiInfo={this.state.filterGuiInfo}
+                  filterGuiInfoKeys={this.state.filterGuiInfoKeys}
+                  filterDefinitions={this.state.filterDefinitions}
+                  filterChangedState={this.filterChangedState}
+                  moveListItem={this.moveListItem}
+                />
+              ))}
             </Grid>
           </div>
         </React.Fragment>

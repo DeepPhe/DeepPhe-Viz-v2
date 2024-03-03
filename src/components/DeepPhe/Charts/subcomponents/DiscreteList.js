@@ -3,56 +3,55 @@ import { withDrag, withDrop } from "./withDragAndDropHook.js";
 import ListItemText from "@mui/material/ListItemText";
 import ListItem from "@mui/material/ListItem";
 import List from "@mui/material/List";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 function DiscreteList(props) {
   if (!props) {
     return null;
   }
+  const { definition } = props;
+  const items = definition.globalPatientCountsForCategories.map((item, index) => {
+    return { category: item.category, selected: false };
+  });
+  const [state, setState] = React.useState({
+    items,
+  });
+
+  function setSelected(idx, selected) {
+    setState({
+      ...items,
+      items: state.items.map((item, index) => {
+        if (index === parseInt(idx)) {
+          return { ...item, selected };
+        }
+        return item;
+      }),
+    });
+  }
+
+  const that = this;
   return (
     <div className={"filter-inner-container"}>
-      <List
-        spacing={2}
-        direction="row"
-        className={"discrete-list-container"}
-        sx={{
-          display: "flex",
-          flexWrap: "nowrap",
-          justifyContent: "space-around",
-          flexDirection: "row",
-          width: "100%",
-          bgcolor: "white",
-          fontSize: "8px !important",
-        }}
-      >
-        {props.filter.props.definition.globalPatientCountsForCategories.map((item, index) => {
-          return (
-            <ListItem
-              sx={{
-                border: "1px solid #e0e0e0",
-                borderRadius: "5px",
-                marginRight: "10px",
-                marginLeft: "10px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                paddingRight: "10px",
-                paddingLeft: "10px",
-                backgroundColor: "blue",
-              }}
-              key={index}
-            >
-              <ListItemText
-                sx={{
-                  fontSize: "12px !important",
-                  color: "white !important",
-                }}
-                disableTypography={true}
-                primary={item.category}
-              />
-            </ListItem>
-          );
-        })}
-      </List>
+      {props.definition.globalPatientCountsForCategories.map((item, index) => {
+        return (
+          <ToggleButton
+            sx={{ color: "blue", fontSize: "12px" }}
+            key={item.category}
+            value={index}
+            selected={
+              state.items[state.items.findIndex((i) => i.category === item.category)].selected
+            }
+            onChange={(e) => {
+              setSelected(
+                e.target.value,
+                !state.items[state.items.findIndex((i) => i.category === item.category)].selected
+              );
+            }}
+          >
+            {item.category}
+          </ToggleButton>
+        );
+      })}
     </div>
   );
 }

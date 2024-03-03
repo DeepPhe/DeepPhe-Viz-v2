@@ -7,19 +7,27 @@ import List from "@mui/material/List";
 import CategoricalRangeSelector from "./CategoricalRangeSelector";
 import React from "react";
 import NumericRangeSelector from "./NumericRangeSelector";
+import DpCheckboxList from "./DpCheckboxList";
 
-function FilterListItem({ key, index, filter, filterChangedState }) {
+function FilterListItem(props) {
+  const [definition, setDefinition] = React.useState(props.definition);
+
+  React.useEffect(() => {
+    setDefinition(props.definition);
+  }, [props.definition]);
+
   const getFilter = () => {
-    switch (filter.props.definition.class) {
+    const filterChangedState = props.filterChangedState;
+    switch (definition.class) {
       case "discreteList":
-        return <DiscreteList index={index} key={index} filter={filter} />;
+        return <DiscreteList index={props.index} key={props.index} definition={definition} />;
 
       case "categoricalRangeSelector":
         return (
-          <React.Fragment key={index}>
+          <React.Fragment key={props.index}>
             <CategoricalRangeSelector
-              key={index}
-              filter={filter}
+              key={props.index}
+              definition={definition}
               broadcastUpdate={filterChangedState}
             />
           </React.Fragment>
@@ -27,21 +35,31 @@ function FilterListItem({ key, index, filter, filterChangedState }) {
       //
       case "numericRangeSelector":
         return (
-          <React.Fragment key={index}>
+          <React.Fragment key={props.index}>
             <NumericRangeSelector
-              key={index}
-              filter={filter}
-              broadcastUpdate={filterChangedState}
+              key={props.index}
+              definition={definition}
+              broadcastUpdate={props.filterChangedState}
             />
           </React.Fragment>
         );
 
+      case "checkboxList":
+        return (
+          <React.Fragment key={props.index}>
+            <DpCheckboxList
+              key={props.index}
+              definition={definition}
+              broadcastUpdate={props.filterChangedState}
+            />
+          </React.Fragment>
+        );
       case "booleanList":
         return (
           <BooleanList
-            key={index}
-            filter={filter}
-            //broadcastUpdate={filterChangedState}
+            key={props.index}
+            definition={definition}
+            broadcastUpdate={props.filterChangedState}
           />
         );
       default:
@@ -50,16 +68,15 @@ function FilterListItem({ key, index, filter, filterChangedState }) {
   };
 
   return (
-    <Draggable key={index} draggableId={filter.props.fieldName} index={index}>
+    <Draggable key={props.key} draggableId={definition.fieldName} index={props.index}>
       {(provided) => (
         <List>
-          <ListItem
-            sx={{ width: "100%" }}
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            <FilterComponent filter={filter} filterControl={getFilter()} />
+          <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
+            <FilterComponent
+              provided={provided}
+              definition={definition}
+              filterControl={getFilter()}
+            />
           </ListItem>
         </List>
       )}

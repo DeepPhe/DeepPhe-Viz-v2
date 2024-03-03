@@ -11,7 +11,7 @@ class SwitchControl extends Component {
   }
 
   broadcastUpdate = (definition) => {
-    //this.props.broadcastUpdate(definition);
+    this.props.broadcastUpdate(definition);
   };
   handleToggleSwitch =
     (switchId, switchIndex) =>
@@ -27,7 +27,7 @@ class SwitchControl extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.updated === false) {
       this.setState({ updated: true });
-      //this.broadcastUpdate(this.state.definition);
+      this.broadcastUpdate(this.state.definition);
     }
 
     // const {definition} = this.props
