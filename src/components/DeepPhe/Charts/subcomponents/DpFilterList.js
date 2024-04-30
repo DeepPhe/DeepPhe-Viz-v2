@@ -1,9 +1,9 @@
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import List from "@mui/material/List";
 import React from "react";
-import FilterListItem from "./FilterListItem.js";
+import DpFilterListItem from "./DpFilterListItem.js";
 
-function FilterList(props) {
+function DpFilterList(props) {
   const [guiInfo, setGuiInfo] = React.useState(props.guiInfo);
   const [filterGuiInfo, setFilterGuiInfo] = React.useState(props.filterGuiInfo);
   const [filterGuiInfoKeys, setFilterGuiInfoKeys] = React.useState(props.filterGuiInfoKeys);
@@ -39,7 +39,7 @@ function FilterList(props) {
                   {...provided.droppableProps}
                 >
                   {getFilters().map((filter, index) => (
-                    <FilterListItem
+                    <DpFilterListItem
                       key={filterDefinitions[filter.definitionIdx].fieldName}
                       definition={filterDefinitions[filter.definitionIdx]}
                       index={index}
@@ -58,4 +58,4 @@ function FilterList(props) {
   );
 }
 
-export default FilterList;
+export default DpFilterList;

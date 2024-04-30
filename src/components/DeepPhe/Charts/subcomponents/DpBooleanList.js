@@ -2,7 +2,7 @@ import Grid from "@mui/material/Grid";
 import SwitchControl from "./controls/SwitchControl";
 import React from "react";
 
-class BooleanList extends React.Component {
+class DpBooleanList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -21,15 +21,7 @@ class BooleanList extends React.Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.updated === false) {
-      let countMeetingThisFilter = 0;
       const { definition } = this.state;
-      definition.globalPatientCountsForCategories.forEach((item, index) => {
-        let idx = definition.switches.findIndex((x) => x.name === item.category);
-        if (idx !== -1 && definition.switches[idx].value === true) {
-          countMeetingThisFilter += item.count;
-        }
-      });
-      //definition.patientsMeetingThisFilterOnly = countMeetingThisFilter;
       this.setState({ updated: true, definition: definition });
       this.broadcastUpdate(this.state.definition);
     }
@@ -49,4 +41,4 @@ class BooleanList extends React.Component {
   }
 }
 
-export default BooleanList;
+export default DpBooleanList;

@@ -1,15 +1,15 @@
-import DiscreteList from "./DiscreteList";
+import DpDiscreteList from "./DpDiscreteList";
 import { Draggable } from "react-beautiful-dnd";
 import ListItem from "@mui/material/ListItem";
-import FilterComponent from "./FilterComponent";
-import BooleanList from "./BooleanList";
+import DpFilterComponent from "./DpFilterComponent";
+import DpBooleanList from "./DpBooleanList";
 import List from "@mui/material/List";
-import CategoricalRangeSelector from "./CategoricalRangeSelector";
+import DpCategoricalRangeSelector from "./DpCategoricalRangeSelector";
 import React from "react";
-import NumericRangeSelector from "./NumericRangeSelector";
+import DpNumericRangeSelector from "./DpNumericRangeSelector";
 import DpCheckboxList from "./DpCheckboxList";
 
-function FilterListItem(props) {
+function DpFilterListItem(props) {
   const [definition, setDefinition] = React.useState(props.definition);
 
   React.useEffect(() => {
@@ -19,13 +19,13 @@ function FilterListItem(props) {
   const getFilter = () => {
     const filterChangedState = props.filterChangedState;
     switch (definition.class) {
-      case "discreteList":
-        return <DiscreteList index={props.index} key={props.index} definition={definition} />;
+      case "DpDiscreteList":
+        return <DpDiscreteList index={props.index} key={props.index} definition={definition} />;
 
       case "categoricalRangeSelector":
         return (
           <React.Fragment key={props.index}>
-            <CategoricalRangeSelector
+            <DpCategoricalRangeSelector
               key={props.index}
               definition={definition}
               broadcastUpdate={filterChangedState}
@@ -33,10 +33,10 @@ function FilterListItem(props) {
           </React.Fragment>
         );
       //
-      case "numericRangeSelector":
+      case "DpNumericRangeSelector":
         return (
           <React.Fragment key={props.index}>
-            <NumericRangeSelector
+            <DpNumericRangeSelector
               key={props.index}
               definition={definition}
               broadcastUpdate={props.filterChangedState}
@@ -56,7 +56,7 @@ function FilterListItem(props) {
         );
       case "booleanList":
         return (
-          <BooleanList
+          <DpBooleanList
             key={props.index}
             definition={definition}
             broadcastUpdate={props.filterChangedState}
@@ -72,7 +72,7 @@ function FilterListItem(props) {
       {(provided) => (
         <List>
           <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
-            <FilterComponent
+            <DpFilterComponent
               provided={provided}
               definition={definition}
               filterControl={getFilter()}
@@ -84,4 +84,4 @@ function FilterListItem(props) {
   );
 }
 
-export default FilterListItem;
+export default DpFilterListItem;

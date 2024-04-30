@@ -29,12 +29,6 @@ class SwitchControl extends Component {
       this.setState({ updated: true });
       this.broadcastUpdate(this.state.definition);
     }
-
-    // const {definition} = this.props
-    // console.log(definition.fieldName + ":")
-    // definition.switches.forEach(switchInfo => {
-    //     console.log("    Switch " + switchInfo.name + ": " + switchInfo.value)
-    // })
   }
 
   render() {

@@ -270,3 +270,9 @@ svg[id$="-hs"] {
     background-color: #1cff002b !important;
 }
 
+.filter-stack-bar {
+    font-size: 14px;
+    color: black !important;
+    fill: black !important;
+}
+

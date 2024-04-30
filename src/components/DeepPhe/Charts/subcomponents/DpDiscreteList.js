@@ -1,11 +1,7 @@
 import React from "react";
-import { withDrag, withDrop } from "./withDragAndDropHook.js";
-import ListItemText from "@mui/material/ListItemText";
-import ListItem from "@mui/material/ListItem";
-import List from "@mui/material/List";
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { ToggleButton } from "@mui/material";
 
-function DiscreteList(props) {
+function DpDiscreteList(props) {
   if (!props) {
     return null;
   }
@@ -56,25 +52,4 @@ function DiscreteList(props) {
   );
 }
 
-// render() {
-//   const {definition} = this.props;
-//   return (
-//     <React.Fragment>
-//       <div
-//         className={"overlay-row-container"}
-//         id={+"-overlay-row"}
-//       >
-//         <div id={"diagnosis-row"} className={"row no-gutter"}>
-//           <Grid item md={2} className="filter-inner-container no_padding_grid">
-//             {this.getToggleSwitch(definition, this.props.index)}
-//           </Grid>
-//           <Grid item md={7}>
-//
-//           </Grid>
-//         </div>
-//       </div>
-//     </React.Fragment>
-//   );
-// }
-
-export default DiscreteList;
+export default DpDiscreteList;

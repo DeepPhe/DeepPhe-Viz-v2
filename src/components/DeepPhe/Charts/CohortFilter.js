@@ -4,14 +4,14 @@ import HSBar from "react-horizontal-stacked-bar-chart";
 import "rc-slider/assets/index.css";
 import $ from "jquery";
 import { fastIntersection, flattenObject } from "../../../utils/arrayHelpers.js";
-import FilterListItem from "./subcomponents/FilterListItem";
+import DpFilterListItem from "./subcomponents/DpFilterListItem";
 import Grid from "@mui/material/Grid";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import List from "@mui/material/List";
 import * as d3 from "d3";
 import ToggleSwitch from "../Buttons/ToggleSwitch";
 import ListItem from "@mui/material/ListItem";
-import FilterList from "./subcomponents/FilterList";
+import DpFilterList from "./subcomponents/DpFilterList";
 
 export default class CohortFilter extends React.Component {
   state = {
@@ -92,6 +92,11 @@ export default class CohortFilter extends React.Component {
             "fake_patient6",
             "fake_patient7",
           ];
+          Object.keys(patientArr).forEach((key) => {
+            const arr = patientArr[key];
+            delete patientArr[key];
+            patientArr[key.toLowerCase()] = arr;
+          });
           that.setState(
             {
               patientArrays: patientArr,
@@ -160,6 +165,7 @@ export default class CohortFilter extends React.Component {
                   return 0;
                 });
               });
+              //apply rules
               return sorted;
             };
             const definitions = json["searchFilterDefinition"];
@@ -175,6 +181,7 @@ export default class CohortFilter extends React.Component {
                 false
               ).length;
               definition.toggleFilterEnabled = that.toggleFilterEnabled;
+              //set dilter def?
             });
             const sortedGuiInfo = sortGuiInfo(filterGuiInfo);
             that.setState(
@@ -584,77 +591,27 @@ export default class CohortFilter extends React.Component {
               ))}
             </List>
           </Grid>
-          <div id={"switcher"}>
-            <Grid
-              container
-              direction="row"
-              justifyContent="center"
-              align="center"
-              spacing={0}
-              width={"100%"}
-            >
-              <ToggleSwitch
-                key={134}
-                wantsdivs={0}
-                label={"Complete / Basic"}
-                theme="graphite-small"
-                enabled={this.state.basicEnabled}
-                onStateChanged={this.handleToggleSwitch}
-              />
-            </Grid>
-          </div>
+          {/*<div id={"switcher"}>*/}
+          {/*  <Grid*/}
+          {/*    container*/}
+          {/*    direction="row"*/}
+          {/*    justifyContent="center"*/}
+          {/*    align="center"*/}
+          {/*    spacing={0}*/}
+          {/*    width={"100%"}*/}
+          {/*  >*/}
+          {/*    <ToggleSwitch*/}
+          {/*      key={134}*/}
+          {/*      wantsdivs={0}*/}
+          {/*      label={"Complete / Basic"}*/}
+          {/*      theme="graphite-small"*/}
+          {/*      enabled={this.state.basicEnabled}*/}
+          {/*      onStateChanged={this.handleToggleSwitch}*/}
+          {/*    />*/}
+          {/*  </Grid>*/}
+          {/*</div>*/}
 
-          <div id={"NewBasicControl"}>
-            <Grid
-              className={"cohort-size-bar-container"}
-              container
-              direction="row"
-              justifyContent="center"
-              align="center"
-            >
-              <Grid className={"no_padding_grid cohort-size-label-container"} item md={1}>
-                <span className={"cohort-size-label"}>Cohort Size</span>
-              </Grid>
-              <Grid className={"cohort-size-label-container"} item md={6}>
-                <this.CohortPercentHSBar />
-              </Grid>
-              <Grid className={"cohort-size-label-container"} item md={1} />
-            </Grid>
-            <Grid
-              container
-              direction="row"
-              display={"block"}
-              item
-              md={8}
-              spacing={0}
-              width={"100%"}
-              justifyContent={"center"}
-            >
-              <DragDropContext onDragEnd={(result) => this.handleDragEnd(result, this)}>
-                <Droppable droppableId="droppable">
-                  {(provided) => (
-                    <List
-                      justifyContent={"center"}
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                    >
-                      {simpleInterface.map((definition, index) => (
-                        <FilterListItem
-                          key={that.state.filterDefinitions[definition].fieldName}
-                          definition={that.state.filterDefinitions[definition]}
-                          index={index}
-                          moveListItem={that.moveListItem}
-                          filterChangedState={that.filterChangedState}
-                          broadcastEnabledChange={that.toggleFilterEnabled}
-                        />
-                      ))}
-                      {provided.placeholder}
-                    </List>
-                  )}
-                </Droppable>
-              </DragDropContext>
-            </Grid>
-          </div>
+          <div id={"NewBasicControl"}></div>
 
           <div id="NewControl">
             <Grid
@@ -683,7 +640,7 @@ export default class CohortFilter extends React.Component {
               width={"80%"}
             >
               {this.state.filterGuiInfoKeys.map((guiInfo, index) => (
-                <FilterList
+                <DpFilterList
                   key={index}
                   guiInfo={guiInfo}
                   filterGuiInfo={this.state.filterGuiInfo}
