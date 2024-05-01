@@ -2,6 +2,7 @@ import React from "react";
 import { ChangeResult } from "multi-range-slider-react";
 import Slider from "rc-slider";
 import SwitchControl from "./controls/SwitchControl";
+import RangeSlider from "../../../RangeSlider/RangeSlider";
 
 class DpCategoricalRangeSelector extends React.Component {
   state = {
@@ -67,21 +68,25 @@ class DpCategoricalRangeSelector extends React.Component {
       return true;
     });
 
+    const prices = [1, 1, 3, 5, 6, 7];
+
     return (
       <React.Fragment>
         <div className={"slider-container"}>
-          <Slider
-            range
-            min={0}
-            max={globalPatientCountsForCategories.length - 1}
-            defaultValue={[minSelectedInRange, maxSelectedInRange]}
-            onChange={(e) => this.handleRangeChange(e)}
-            draggableTrack={true}
-            pushable={true}
-            marks={marks}
-            dots={false}
-            step={1}
-          />
+          <RangeSlider data={prices} />
+
+          {/*<Slider*/}
+          {/*  range*/}
+          {/*  min={0}*/}
+          {/*  max={globalPatientCountsForCategories.length - 1}*/}
+          {/*  defaultValue={[minSelectedInRange, maxSelectedInRange]}*/}
+          {/*  onChange={(e) => this.handleRangeChange(e)}*/}
+          {/*  draggableTrack={true}*/}
+          {/*  pushable={true}*/}
+          {/*  marks={marks}*/}
+          {/*  dots={true}*/}
+          {/*  step={1}*/}
+          {/*/>*/}
         </div>
         <SwitchControl broadcastUpdate={this.handleSwitchUpdate} definition={definition} />
       </React.Fragment>
