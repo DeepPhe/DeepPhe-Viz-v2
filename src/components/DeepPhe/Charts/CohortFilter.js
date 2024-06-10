@@ -12,6 +12,7 @@ import * as d3 from "d3";
 import ToggleSwitch from "../Buttons/ToggleSwitch";
 import ListItem from "@mui/material/ListItem";
 import DpFilterList from "./subcomponents/DpFilterList";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 export default class CohortFilter extends React.Component {
   state = {
@@ -36,17 +37,41 @@ export default class CohortFilter extends React.Component {
     patientArrays: null,
     patientArraysNotFlat: null,
     filters: {},
+    theme: null,
+    themeLoading: true,
   };
-  updateFilterDefinition;
 
   constructor(props) {
     super(props);
     this.filterChangedState.bind(this);
+
     // this.moveListItem = this.moveListItem.bind(this);
     // this.handleDragEnd = this.handleDragEnd.bind(this);
   }
 
   reset = () => {
+    const theme = createTheme({
+      palette: {
+        mode: "light",
+        primary: {
+          main: "#3f51b5",
+        },
+        secondary: {
+          main: "#5c283a",
+        },
+        background: {
+          default: "rgba(0,0,0)",
+          paper: "#56b0ff",
+        },
+        text: {
+          primary: "rgba(255,255,255,0.87)",
+        },
+      },
+    });
+    this.setState({ theme: theme }, () => {
+      this.setState({ themeLoading: false });
+    });
+
     const that = this;
     const fetchPatientArrays = async () => {
       return new Promise(function (resolve, reject) {
@@ -433,7 +458,8 @@ export default class CohortFilter extends React.Component {
       this.state.isLoading ||
       this.state.filterDefinitionLoading ||
       this.state.patientArraysLoading ||
-      this.state.handlingDragEnd
+      this.state.handlingDragEnd ||
+      this.state.themeLoading
     ) {
     } else {
       if (this.state.basicEnabled) {
@@ -566,7 +592,8 @@ export default class CohortFilter extends React.Component {
       this.state.isLoading ||
       this.state.filterDefinitionLoading ||
       this.state.patientArraysLoading ||
-      this.state.handlingDragEnd
+      this.state.handlingDragEnd ||
+      this.state.themeLoading
     )
       return <div>Data is coming soon...</div>;
     else {
@@ -577,81 +604,83 @@ export default class CohortFilter extends React.Component {
       const that = this;
       return (
         <React.Fragment>
-          <Grid
-            container
-            direction="row"
-            justifyContent="center"
-            align="center"
-            spacing={0}
-            width={"100%"}
-          >
-            <List>
-              {this.state.patientsMeetingAllFilters.map((patient) => (
-                <ListItem key={patient} primaryText={patient} />
-              ))}
-            </List>
-          </Grid>
-          {/*<div id={"switcher"}>*/}
-          {/*  <Grid*/}
-          {/*    container*/}
-          {/*    direction="row"*/}
-          {/*    justifyContent="center"*/}
-          {/*    align="center"*/}
-          {/*    spacing={0}*/}
-          {/*    width={"100%"}*/}
-          {/*  >*/}
-          {/*    <ToggleSwitch*/}
-          {/*      key={134}*/}
-          {/*      wantsdivs={0}*/}
-          {/*      label={"Complete / Basic"}*/}
-          {/*      theme="graphite-small"*/}
-          {/*      enabled={this.state.basicEnabled}*/}
-          {/*      onStateChanged={this.handleToggleSwitch}*/}
-          {/*    />*/}
-          {/*  </Grid>*/}
-          {/*</div>*/}
-
-          <div id={"NewBasicControl"}></div>
-
-          <div id="NewControl">
+          <ThemeProvider theme={this.state.theme}>
             <Grid
-              className={"cohort-size-bar-container"}
               container
               direction="row"
               justifyContent="center"
               align="center"
-            >
-              <Grid className={"no_padding_grid cohort-size-label-container"} item md={1}>
-                <span className={"cohort-size-label"}>Cohort Size</span>
-              </Grid>
-              <Grid className={"cohort-size-label-container"} item md={6}>
-                <this.CohortPercentHSBar />
-              </Grid>
-              <Grid className={"cohort-size-label-container"} item md={1} />
-            </Grid>
-            <Grid
-              id={"filter-list-container"}
-              container
-              direction="row"
-              display={"block"}
-              item
-              md={10}
               spacing={0}
-              width={"80%"}
+              width={"100%"}
             >
-              {this.state.filterGuiInfoKeys.map((guiInfo, index) => (
-                <DpFilterList
-                  key={index}
-                  guiInfo={guiInfo}
-                  filterGuiInfo={this.state.filterGuiInfo}
-                  filterGuiInfoKeys={this.state.filterGuiInfoKeys}
-                  filterDefinitions={this.state.filterDefinitions}
-                  filterChangedState={this.filterChangedState}
-                  moveListItem={this.moveListItem}
-                />
-              ))}
+              <List>
+                {this.state.patientsMeetingAllFilters.map((patient) => (
+                  <ListItem key={patient} primaryText={patient} />
+                ))}
+              </List>
             </Grid>
-          </div>
+            {/*<div id={"switcher"}>*/}
+            {/*  <Grid*/}
+            {/*    container*/}
+            {/*    direction="row"*/}
+            {/*    justifyContent="center"*/}
+            {/*    align="center"*/}
+            {/*    spacing={0}*/}
+            {/*    width={"100%"}*/}
+            {/*  >*/}
+            {/*    <ToggleSwitch*/}
+            {/*      key={134}*/}
+            {/*      wantsdivs={0}*/}
+            {/*      label={"Complete / Basic"}*/}
+            {/*      theme="graphite-small"*/}
+            {/*      enabled={this.state.basicEnabled}*/}
+            {/*      onStateChanged={this.handleToggleSwitch}*/}
+            {/*    />*/}
+            {/*  </Grid>*/}
+            {/*</div>*/}
+
+            <div id={"NewBasicControl"}></div>
+
+            <div id="NewControl">
+              <Grid
+                className={"cohort-size-bar-container"}
+                container
+                direction="row"
+                justifyContent="center"
+                align="center"
+              >
+                <Grid className={"no_padding_grid cohort-size-label-container"} item md={1}>
+                  <span className={"cohort-size-label"}>Cohort Size</span>
+                </Grid>
+                <Grid className={"cohort-size-label-container"} item md={6}>
+                  <this.CohortPercentHSBar />
+                </Grid>
+                <Grid className={"cohort-size-label-container"} item md={1} />
+              </Grid>
+              <Grid
+                id={"filter-list-container"}
+                container
+                direction="row"
+                display={"flex"}
+                item
+                md={12}
+                spacing={0}
+                width={"80%"}
+              >
+                {this.state.filterGuiInfoKeys.map((guiInfo, index) => (
+                  <DpFilterList
+                    key={index}
+                    guiInfo={guiInfo}
+                    filterGuiInfo={this.state.filterGuiInfo}
+                    filterGuiInfoKeys={this.state.filterGuiInfoKeys}
+                    filterDefinitions={this.state.filterDefinitions}
+                    filterChangedState={this.filterChangedState}
+                    moveListItem={this.moveListItem}
+                  />
+                ))}
+              </Grid>
+            </div>
+          </ThemeProvider>
         </React.Fragment>
       );
     }

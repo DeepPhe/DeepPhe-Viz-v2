@@ -12,6 +12,7 @@ class RangeSlider extends React.Component {
     const range = [sortedData[0], sortedData[sortedData.length - 1]];
 
     this.state = {
+      // domain: range,
       domain: range,
       update: range,
       values: range,

@@ -1,7 +1,6 @@
-import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import List from "@mui/material/List";
 import React from "react";
 import DpFilterListItem from "./DpFilterListItem.js";
+import Grid from "@mui/material/Grid";
 
 function DpFilterList(props) {
   const [guiInfo, setGuiInfo] = React.useState(props.guiInfo);
@@ -27,33 +26,32 @@ function DpFilterList(props) {
 
   return (
     <React.Fragment key={guiInfo}>
-      <div>
-        {guiInfo}
-        <>
-          <DragDropContext>
-            <Droppable droppableId="droppable">
-              {(provided) => (
-                <List
-                  justifyContent={"center"}
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  {getFilters().map((filter, index) => (
-                    <DpFilterListItem
-                      key={filterDefinitions[filter.definitionIdx].fieldName}
-                      definition={filterDefinitions[filter.definitionIdx]}
-                      index={index}
-                      moveListItem={props.moveListItem}
-                      filterChangedState={props.filterChangedState}
-                    />
-                  ))}
-                  {provided.placeholder}
-                </List>
-              )}
-            </Droppable>
-          </DragDropContext>
-        </>
-      </div>
+      <Grid item md={12} className={"filter-list-container"}>
+        {/*{guiInfo}*/}
+
+        {/*<DragDropContext>*/}
+        {/*  <Droppable droppableId="droppable">*/}
+        {/*    {(provided) => (*/}
+        {/*      <List*/}
+        {/*        justifyContent={"center"}*/}
+        {/*        ref={provided.innerRef}*/}
+        {/*        {...provided.droppableProps}*/}
+        {/*      >*/}
+        {getFilters().map((filter, index) => (
+          <DpFilterListItem
+            key={filterDefinitions[filter.definitionIdx].fieldName}
+            definition={filterDefinitions[filter.definitionIdx]}
+            index={index}
+            moveListItem={props.moveListItem}
+            filterChangedState={props.filterChangedState}
+          />
+        ))}
+        {/*        {provided.placeholder}*/}
+        {/*      </List>*/}
+        {/*    )}*/}
+        {/*  </Droppable>*/}
+        {/*</DragDropContext>*/}
+      </Grid>
     </React.Fragment>
   );
 }

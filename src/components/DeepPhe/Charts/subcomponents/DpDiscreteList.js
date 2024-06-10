@@ -1,5 +1,6 @@
 import React from "react";
 import { ToggleButton } from "@mui/material";
+import getChartTitle from "./FilterBuilder";
 
 function DpDiscreteList(props) {
   if (!props) {
@@ -27,28 +28,32 @@ function DpDiscreteList(props) {
 
   const that = this;
   return (
-    <div className={"filter-inner-container"}>
-      {props.definition.globalPatientCountsForCategories.map((item, index) => {
-        return (
-          <ToggleButton
-            sx={{ color: "blue", fontSize: "12px" }}
-            key={item.category}
-            value={index}
-            selected={
-              state.items[state.items.findIndex((i) => i.category === item.category)].selected
-            }
-            onChange={(e) => {
-              setSelected(
-                e.target.value,
-                !state.items[state.items.findIndex((i) => i.category === item.category)].selected
-              );
-            }}
-          >
-            {item.category}
-          </ToggleButton>
-        );
-      })}
-    </div>
+    <React.Fragment>
+      {getChartTitle(definition)}
+
+      <div className={"filter-inner-container"}>
+        {props.definition.globalPatientCountsForCategories.map((item, index) => {
+          return (
+            <ToggleButton
+              sx={{ color: "blue", fontSize: "12px" }}
+              key={item.category}
+              value={index}
+              selected={
+                state.items[state.items.findIndex((i) => i.category === item.category)].selected
+              }
+              onChange={(e) => {
+                setSelected(
+                  e.target.value,
+                  !state.items[state.items.findIndex((i) => i.category === item.category)].selected
+                );
+              }}
+            >
+              {item.category}
+            </ToggleButton>
+          );
+        })}
+      </div>
+    </React.Fragment>
   );
 }
 

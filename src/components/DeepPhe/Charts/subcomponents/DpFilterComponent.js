@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
-import ToggleSwitch from "../../Buttons/ToggleSwitch";
 import Grid from "@mui/material/Grid";
 import HSBar from "react-horizontal-stacked-bar-chart";
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import { Label } from "@mui/icons-material";
+import { ToggleButton } from "@mui/material";
 import Typography from "@mui/material/Typography";
 
 function DpFilterComponent(props) {
@@ -132,27 +129,27 @@ function DpFilterComponent(props) {
 
   return (
     <React.Fragment>
-      <div
-        className={"overlay-row-container"}
-        id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}
-      >
-        <div id={"boolean-list-row"} className={"row filter-center-rows"}>
-          <Grid
-            item
-            md={1}
-            className="filter-inner-container no_padding_grid"
-            {...props.provided.dragHandleProps}
-          >
-            {getSwitch(definition)}
-          </Grid>
-          <Grid item md={8} className="filter-inner-container no_padding_grid filter-control">
-            {filterControl}
-          </Grid>
-          <Grid item md={3} className="filter-inner-container no_padding_grid">
-            {getBar(definition)}
-          </Grid>
-        </div>
-      </div>
+      {/*<div*/}
+      {/*  className={"overlay-row-container"}*/}
+      {/*  id={definition.fieldName.replaceAll(" ", "-").toLowerCase() + "-overlay-row"}*/}
+      {/*>*/}
+      {/*<div id={"boolean-list-row"} className={"row filter-center-rows"}>*/}
+      {/*<Grid*/}
+      {/*  item*/}
+      {/*  md={1}*/}
+      {/*  className="filter-inner-container no_padding_grid"*/}
+      {/*  {...props.provided.dragHandleProps}*/}
+      {/*>*/}
+      {/*  {getSwitch(definition)}*/}
+      {/*</Grid>*/}
+      <Grid item md={6} className="filter-inner-container no_padding_grid filter-control">
+        {filterControl}
+      </Grid>
+      {/*<Grid item md={3} className="filter-inner-container no_padding_grid">*/}
+      {/*  {getBar(definition)}*/}
+      {/*</Grid>*/}
+      {/*</div>*/}
+      {/* </div>*/}
     </React.Fragment>
   );
 }

@@ -1,9 +1,6 @@
 import DpDiscreteList from "./DpDiscreteList";
-import { Draggable } from "react-beautiful-dnd";
-import ListItem from "@mui/material/ListItem";
 import DpFilterComponent from "./DpFilterComponent";
 import DpBooleanList from "./DpBooleanList";
-import List from "@mui/material/List";
 import DpCategoricalRangeSelector from "./DpCategoricalRangeSelector";
 import React from "react";
 import DpNumericRangeSelector from "./DpNumericRangeSelector";
@@ -19,7 +16,7 @@ function DpFilterListItem(props) {
   const getFilter = () => {
     const filterChangedState = props.filterChangedState;
     switch (definition.class) {
-      case "DpDiscreteList":
+      case "discreteList":
         return <DpDiscreteList index={props.index} key={props.index} definition={definition} />;
 
       case "categoricalRangeSelector":
@@ -33,7 +30,7 @@ function DpFilterListItem(props) {
           </React.Fragment>
         );
       //
-      case "DpNumericRangeSelector":
+      case "numericRangeSelector":
         return (
           <React.Fragment key={props.index}>
             <DpNumericRangeSelector
@@ -63,24 +60,21 @@ function DpFilterListItem(props) {
           />
         );
       default:
-        return <div>Unknown filter type</div>;
+        return <div>Unknown filter type {definition.class}</div>;
     }
   };
 
   return (
-    <Draggable key={props.key} draggableId={definition.fieldName} index={props.index}>
-      {(provided) => (
-        <List>
-          <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
-            <DpFilterComponent
-              provided={provided}
-              definition={definition}
-              filterControl={getFilter()}
-            />
-          </ListItem>
-        </List>
-      )}
-    </Draggable>
+    // <Draggable key={props.key} draggableId={definition.fieldName} index={props.index}>
+    //   {(provided) => (
+    //     <List>
+    //       <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
+    //<DpFilterComponent provided={provided} definition={definition} filterControl={getFilter()} />
+    <DpFilterComponent definition={definition} filterControl={getFilter()} />
+    //       </ListItem>
+    //     </List>
+    //   )}
+    // </Draggable>
   );
 }
 

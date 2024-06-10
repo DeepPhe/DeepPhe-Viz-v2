@@ -57,8 +57,8 @@ svg[id$="-hs"] {
     /*border: 2px solid #e5e5e5;*/
     border-radius: 4px;
     padding: 5px 5px !important;
-    display: flex;
-    flex-wrap: nowrap;
+    flex: 1 0 auto;
+    /*flex-wrap: nowrap;*/
 }
 
 .filter-control {
@@ -92,7 +92,7 @@ svg[id$="-hs"] {
 }
 
 .slider-container {
-    width: 80% !important;
+    /*width: 80% !important;*/
     height: 100% !important;
     margin-top: 3px !important;
     display: flex;
@@ -110,7 +110,13 @@ svg[id$="-hs"] {
 
 .rc-slider-track {
     z-index: 100;
-    background-color: #1cff002b !important;
+    background-color: rgba(0, 0, 0, 0.75) !important;
+}
+
+.rc-slider-track-draggable {
+    z-index: 100;
+    background-color: rgba(0, 45, 248) !important;
+
 }
 
 .rc-slider-step {
@@ -143,7 +149,7 @@ svg[id$="-hs"] {
 }
 
 .rc-slider-dot {
-    bottom: -8px;
+    bottom: 0px !important;
 }
 
 .rc-slider-handle {
@@ -156,12 +162,24 @@ svg[id$="-hs"] {
     z-index: 100 !important;
 }
 
+.rc-slider-dot {
+    border-color: white;
+}
+
 .rc-slider-handle {
     clip-path: polygon(25% 25%, 75% 25%, 75% 75%, 50% 100%, 25% 75%);
-    background-color: #666666 !important;
+    background-color: #0017ff !important;
     border: none !important;
-    width: 10px;
-    height: 15px;
+    width: 22px !important;
+    height: 20px !important;
+    margin-top: -10px !important;
+    opacity: 1.0 !important;
+}
+
+.rc-slider-dot-active {
+    border-color: white !important;
+    background-color: white !important;
+
 }
 
 
@@ -270,8 +288,9 @@ svg[id$="-hs"] {
 
 }
 
-#filter-list-container {
-
+.filter-list-container {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .Mui-selected {
@@ -284,3 +303,7 @@ svg[id$="-hs"] {
     fill: black !important;
 }
 
+.newslider {
+    margin-left: 50px;
+    margin-right: 50px;
+}

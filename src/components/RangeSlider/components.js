@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 import PropTypes from "prop-types";
-import { styled } from "@mui/system";
+
+import { withStyles } from "@mui/styles";
 import Typography from "@mui/material/Typography";
 
 // Based on Material Design spec:
@@ -15,7 +16,7 @@ const thumbHeight = 12;
 
 const muiRailStyle = (theme) => ({
   rail: {
-    backgroundColor: "black",
+    backgroundColor: theme.palette.grey[400],
     width: "100%",
     height: trackHeight,
     position: "absolute",
@@ -31,10 +32,10 @@ const muiRailStyle = (theme) => ({
   },
 });
 
-function MuiRailComponent({ classes, ...props }) {
+function MuiRailComponent({ classes, getRailProps }) {
   return (
     <Fragment>
-      <div className={classes.railHotspot} {...props} />
+      <div className={classes.railHotspot} {...getRailProps()} />
       <div className={classes.rail} />
     </Fragment>
   );
@@ -45,7 +46,7 @@ MuiRailComponent.propTypes = {
   getRailProps: PropTypes.func.isRequired,
 };
 
-export const MuiRail = styled(MuiRailComponent)(muiRailStyle());
+export const MuiRail = withStyles(muiRailStyle)(MuiRailComponent);
 
 // *******************************************************
 // HANDLE COMPONENT
@@ -98,7 +99,7 @@ MuiHandleComponent.propTypes = {
   getHandleProps: PropTypes.func.isRequired,
 };
 
-export const MuiHandle = styled(MuiHandleComponent)(muiHandleStyle);
+export const MuiHandle = withStyles(muiHandleStyle)(MuiHandleComponent);
 
 // *******************************************************
 // TRACK COMPONENT
@@ -128,7 +129,7 @@ function MuiTrackComponent({ classes, source, target, getTrackProps }) {
   return (
     <Fragment>
       <div className={classes.track} style={{ left, width }} />
-      <div className={classes.trackHotspot} style={{ left, width }} {...getTrackProps} />
+      <div className={classes.trackHotspot} style={{ left, width }} {...getTrackProps()} />
     </Fragment>
   );
 }
@@ -148,7 +149,7 @@ MuiTrackComponent.propTypes = {
   getTrackProps: PropTypes.func.isRequired,
 };
 
-export const MuiTrack = styled(MuiTrackComponent)(muiTrackStyle);
+export const MuiTrack = withStyles(muiTrackStyle)(MuiTrackComponent);
 
 // *******************************************************
 // TICK COMPONENT
@@ -160,7 +161,7 @@ const muiTickStyle = (theme) => ({
     marginTop: 14,
     width: 1,
     height: 5,
-    backgroundColor: theme.palette.main[400],
+    backgroundColor: theme.palette.grey[400],
   },
   label: {
     position: "absolute",
@@ -203,4 +204,4 @@ MuiTickComponent.defaultProps = {
   format: (d) => d,
 };
 
-export const MuiTick = styled(MuiTickComponent)(muiTickStyle);
+export const MuiTick = withStyles(muiTickStyle)(MuiTickComponent);
