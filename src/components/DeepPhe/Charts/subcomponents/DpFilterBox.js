@@ -12,6 +12,7 @@ function DpFilterBox(props) {
       <Grid item md={12}>
         <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 10 }}>
           {getChartTitle(definition)}
+          {props.list && props.list}
           {props.chart && props.chart}
           {props.slider && props.slider}
         </Box>

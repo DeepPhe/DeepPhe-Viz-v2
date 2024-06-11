@@ -1,6 +1,7 @@
 import React from "react";
 import { ToggleButton } from "@mui/material";
 import getChartTitle from "./FilterBuilder";
+import DpFilterBox from "./DpFilterBox";
 
 function DpDiscreteList(props) {
   if (!props) {
@@ -26,11 +27,8 @@ function DpDiscreteList(props) {
     });
   }
 
-  const that = this;
-  return (
-    <React.Fragment>
-      {getChartTitle(definition)}
-
+  const getList = () => {
+    return (
       <div className={"filter-inner-container"}>
         {props.definition.globalPatientCountsForCategories.map((item, index) => {
           return (
@@ -53,6 +51,13 @@ function DpDiscreteList(props) {
           );
         })}
       </div>
+    );
+  };
+
+  const that = this;
+  return (
+    <React.Fragment>
+      <DpFilterBox definition={definition} list={getList()} />
     </React.Fragment>
   );
 }

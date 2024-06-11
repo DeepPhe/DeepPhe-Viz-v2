@@ -65,6 +65,7 @@ export default class CohortFilter extends React.Component {
         },
         text: {
           primary: "rgba(255,255,255,0.87)",
+          secondary: "rgba(170,170,170,0.54)",
         },
       },
     });
@@ -244,11 +245,11 @@ export default class CohortFilter extends React.Component {
         break;
       case "checkboxList":
         definition.checkboxes.forEach((switchDefinition) => {
-          if (switchDefinition.checked || !matchesOnly) {
-            matchingPatients = matchingPatients.concat(
-              getPatientsForArrayName(switchDefinition.name)
-            );
-          }
+          // if (switchDefinition.checked || !matchesOnly) {
+          //   matchingPatients = matchingPatients.concat(
+          //     getPatientsForArrayName(switchDefinition.name)
+          //   );
+          // }
         });
         break;
       case "categoricalRangeSelector":

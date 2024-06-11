@@ -15,6 +15,7 @@ function DpFilterListItem(props) {
 
   const getFilter = () => {
     const filterChangedState = props.filterChangedState;
+    console.log(definition);
     switch (definition.class) {
       case "discreteList":
         return <DpDiscreteList index={props.index} key={props.index} definition={definition} />;
