@@ -142,7 +142,12 @@ function DpFilterComponent(props) {
       {/*>*/}
       {/*  {getSwitch(definition)}*/}
       {/*</Grid>*/}
-      <Grid item md={6} className="filter-inner-container no_padding_grid filter-control">
+      <Grid
+        item
+        md={3}
+        sx={{ alignContent: "space-around" }}
+        className="filter-inner-container no_padding_grid filter-control"
+      >
         {filterControl}
       </Grid>
       {/*<Grid item md={3} className="filter-inner-container no_padding_grid">*/}

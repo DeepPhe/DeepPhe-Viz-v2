@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Grid from "@mui/material/Grid";
 import CohortFilter from "./CohortFilter";
-import { styled } from "@mui/material/styles";
+import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import CssBaseline from "@mui/material/CssBaseline";
+import DataGridDemo from "./subcomponents/DemoDataGrid.js";
 
 const TopCharts = () => {
   const [patientsAndStagesInfo, setPatientsAndStagesInfo] = useState({});
@@ -59,15 +62,42 @@ const TopCharts = () => {
     reset();
   }
 
+  const theme = createTheme({
+    palette: {
+      mode: "dark",
+      primary: {
+        main: "#3f51b5",
+      },
+      secondary: {
+        main: "#5c283a",
+      },
+      background: {
+        default: "rgba(0,0,0)",
+        paper: "#56b0ff",
+      },
+      text: {
+        primary: "rgba(255,255,255,0.87)",
+        secondary: "rgba(170,170,170,0.54)",
+      },
+    },
+  });
+
   if (isLoading) {
     return <div>Data is coming soon...</div>;
   } else {
     return (
-      <Grid container direction="row" justifyContent="center" align="center" spacing={10}>
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <CohortFilter></CohortFilter>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Typography align={"center"} variant={"h3"}>
+          DeepPhe Cohort Filter
+        </Typography>
+        <Grid container direction="row" justifyContent="center" align="center" spacing={10}>
+          <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+            <CohortFilter></CohortFilter>
+            <DataGridDemo></DataGridDemo>
+          </Grid>
         </Grid>
-      </Grid>
+      </ThemeProvider>
     );
   }
 };

@@ -8,20 +8,19 @@ import { useTheme } from "@mui/styles";
 import DpFilterBox from "./DpFilterBox";
 
 function DpCheckboxList(props) {
-  const [definition, setDefinition] = React.useState(props.definition);
+  const definition = props.definition;
 
   const getInitialCheckboxes = (checkboxes) => {
     let initialCheckboxes = {};
     checkboxes.forEach((checkbox) => {
-      const name = [Object.keys(checkbox)[0]];
-      initialCheckboxes[name] = checkbox[name].checked;
+      const name = checkbox.name;
+      initialCheckboxes[name] = checkbox.checked;
     });
+    console.log(initialCheckboxes);
     return initialCheckboxes;
   };
 
-  const [checkedSeries, setCheckedSeries] = useState(
-    getInitialCheckboxes(props.definition.checkboxes)
-  );
+  const [checkedSeries, setCheckedSeries] = useState(getInitialCheckboxes(definition.checkboxes));
 
   const getCheckboxName = (checkbox) => {
     return definition.fieldName + "_" + checkbox.name + "_checkbox";
@@ -75,21 +74,30 @@ function DpCheckboxList(props) {
   };
 
   const sizingProps = { height: 200, width: 400 };
-  const categories = ["Male", "Female"];
+  const categories = props.definition.checkboxes.map((checkbox) => checkbox.name);
   const hue = checkedSeries["male"] ? "green" : "purple";
 
   const getList = () => {
     const theme = useTheme();
     return (
-      <FormGroup row>
+      <FormGroup row sx={{ fontSize: "12px" }}>
         {Object.keys(checkedSeries).map((key) => (
           <FormControlLabel
-            sx={{ color: theme.palette.text.primary }}
+            sx={{
+              "& .MuiFormControlLabel-label": { fontSize: "14px" },
+              color: theme.palette.text.primary,
+            }}
             key={key}
             control={
-              <Checkbox checked={checkedSeries[key]} onChange={handleCheckboxChange} name={key} />
+              <Checkbox
+                sx={{ "& .MuiSvgIcon-root": { fontSize: 14 } }}
+                size={"small"}
+                checked={checkedSeries[key]}
+                onChange={handleCheckboxChange}
+                name={key}
+              />
             }
-            label={key.toUpperCase()}
+            label={key}
           />
         ))}
       </FormGroup>

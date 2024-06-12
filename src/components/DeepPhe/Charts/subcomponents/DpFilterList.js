@@ -1,6 +1,8 @@
 import React from "react";
 import DpFilterListItem from "./DpFilterListItem.js";
 import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 function DpFilterList(props) {
   const [guiInfo, setGuiInfo] = React.useState(props.guiInfo);
@@ -26,32 +28,39 @@ function DpFilterList(props) {
 
   return (
     <React.Fragment key={guiInfo}>
-      <Grid item md={12} className={"filter-list-container"}>
-        {/*{guiInfo}*/}
-
-        {/*<DragDropContext>*/}
-        {/*  <Droppable droppableId="droppable">*/}
-        {/*    {(provided) => (*/}
-        {/*      <List*/}
-        {/*        justifyContent={"center"}*/}
-        {/*        ref={provided.innerRef}*/}
-        {/*        {...provided.droppableProps}*/}
-        {/*      >*/}
-        {getFilters().map((filter, index) => (
-          <DpFilterListItem
-            key={filterDefinitions[filter.definitionIdx].fieldName}
-            definition={filterDefinitions[filter.definitionIdx]}
-            index={index}
-            moveListItem={props.moveListItem}
-            filterChangedState={props.filterChangedState}
-          />
-        ))}
-        {/*        {provided.placeholder}*/}
-        {/*      </List>*/}
-        {/*    )}*/}
-        {/*  </Droppable>*/}
-        {/*</DragDropContext>*/}
-      </Grid>
+      <Box sx={{ width: "100%", p: 2, border: "1px dashed grey" }}>
+        <Typography align={"center"}>{guiInfo}</Typography>
+        <Grid
+          alignItems="center"
+          justifyContent="center"
+          container
+          md={12}
+          className={"filter-list-container"}
+        >
+          {/*<DragDropContext>*/}
+          {/*  <Droppable droppableId="droppable">*/}
+          {/*    {(provided) => (*/}
+          {/*      <List*/}
+          {/*        justifyContent={"center"}*/}
+          {/*        ref={provided.innerRef}*/}
+          {/*        {...provided.droppableProps}*/}
+          {/*      >*/}
+          {getFilters().map((filter, index) => (
+            <DpFilterListItem
+              key={filterDefinitions[filter.definitionIdx].fieldName}
+              definition={filterDefinitions[filter.definitionIdx]}
+              index={index}
+              moveListItem={props.moveListItem}
+              filterChangedState={props.filterChangedState}
+            />
+          ))}
+          {/*        {provided.placeholder}*/}
+          {/*      </List>*/}
+          {/*    )}*/}
+          {/*  </Droppable>*/}
+          {/*</DragDropContext>*/}
+        </Grid>
+      </Box>
     </React.Fragment>
   );
 }

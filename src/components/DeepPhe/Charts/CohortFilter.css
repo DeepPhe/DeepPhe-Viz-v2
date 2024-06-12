@@ -167,7 +167,7 @@ svg[id$="-hs"] {
 }
 
 .rc-slider-handle {
-    clip-path: polygon(25% 25%, 75% 25%, 75% 75%, 50% 100%, 25% 75%);
+    /*clip-path: polygon(25% 25%, 75% 25%, 75% 75%, 50% 100%, 25% 75%);*/
     background-color: #0017ff !important;
     border: none !important;
     width: 22px !important;
@@ -284,7 +284,7 @@ svg[id$="-hs"] {
 }
 
 #top-charts {
-    padding-top: 50px;
+
 
 }
 

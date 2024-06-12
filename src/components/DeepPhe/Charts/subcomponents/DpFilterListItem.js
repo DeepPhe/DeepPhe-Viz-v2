@@ -5,6 +5,7 @@ import DpCategoricalRangeSelector from "./DpCategoricalRangeSelector";
 import React from "react";
 import DpNumericRangeSelector from "./DpNumericRangeSelector";
 import DpCheckboxList from "./DpCheckboxList";
+import Grid from "@mui/material/Grid";
 
 function DpFilterListItem(props) {
   const [definition, setDefinition] = React.useState(props.definition);
@@ -15,7 +16,6 @@ function DpFilterListItem(props) {
 
   const getFilter = () => {
     const filterChangedState = props.filterChangedState;
-    console.log(definition);
     switch (definition.class) {
       case "discreteList":
         return <DpDiscreteList index={props.index} key={props.index} definition={definition} />;
@@ -71,7 +71,9 @@ function DpFilterListItem(props) {
     //     <List>
     //       <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
     //<DpFilterComponent provided={provided} definition={definition} filterControl={getFilter()} />
+
     <DpFilterComponent definition={definition} filterControl={getFilter()} />
+
     //       </ListItem>
     //     </List>
     //   )}

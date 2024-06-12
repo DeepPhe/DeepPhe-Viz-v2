@@ -4,17 +4,7 @@ import { useTheme } from "@mui/styles";
 
 const getChartTitle = (definition) => {
   const theme = useTheme();
-  return (
-    <Typography
-      sx={{
-        color: theme.palette.text.primary,
-      }}
-      variant="h4"
-      component="h4"
-    >
-      {definition.fieldName}
-    </Typography>
-  );
+  return <Typography>{definition.fieldName}</Typography>;
 };
 
 export default getChartTitle;
