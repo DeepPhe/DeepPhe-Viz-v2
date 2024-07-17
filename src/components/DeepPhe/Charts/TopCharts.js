@@ -73,11 +73,11 @@ const TopCharts = () => {
       },
       background: {
         default: "rgba(0,0,0)",
-        paper: "#56b0ff",
+        paper: "#000000",
       },
       text: {
         primary: "rgba(255,255,255,0.87)",
-        secondary: "rgba(170,170,170,0.54)",
+        secondary: "rgba(255,255,255,0.90)",
       },
     },
   });

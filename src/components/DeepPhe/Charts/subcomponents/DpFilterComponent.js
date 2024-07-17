@@ -144,7 +144,7 @@ function DpFilterComponent(props) {
       {/*</Grid>*/}
       <Grid
         item
-        md={3}
+        md={12}
         sx={{ alignContent: "space-around" }}
         className="filter-inner-container no_padding_grid filter-control"
       >

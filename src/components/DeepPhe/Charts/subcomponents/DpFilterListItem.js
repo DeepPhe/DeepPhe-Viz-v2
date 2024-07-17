@@ -65,6 +65,11 @@ function DpFilterListItem(props) {
     }
   };
 
+  let size = 3;
+  if (["t", "n", "m"].includes(definition.fieldName)) {
+    size = 4;
+  }
+
   return (
     // <Draggable key={props.key} draggableId={definition.fieldName} index={props.index}>
     //   {(provided) => (
@@ -72,7 +77,9 @@ function DpFilterListItem(props) {
     //       <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
     //<DpFilterComponent provided={provided} definition={definition} filterControl={getFilter()} />
 
-    <DpFilterComponent definition={definition} filterControl={getFilter()} />
+    <Grid item xs={size}>
+      <DpFilterComponent definition={definition} filterControl={getFilter()} />
+    </Grid>
 
     //       </ListItem>
     //     </List>

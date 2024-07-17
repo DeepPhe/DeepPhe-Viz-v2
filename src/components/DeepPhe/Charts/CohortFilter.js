@@ -15,6 +15,7 @@ import DpFilterList from "./subcomponents/DpFilterList";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/styles";
+import { BarChart } from "@mui/x-charts";
 
 export default class CohortFilter extends React.Component {
   state = {
@@ -563,6 +564,53 @@ export default class CohortFilter extends React.Component {
     this.setState({ basicEnabled: enabled.enabled });
   };
 
+  getAgeChart = () => {
+    const seriesA = {
+      data: [Math.floor(Math.random() * 75)],
+      label: "Patients Meeting All Filters",
+      color: "#187bcd",
+      id: "patients-meeting-all-filters",
+    };
+    const seriesC = {
+      data: [40 + Math.floor(Math.random() * 200)],
+      label: "Remaining Patients",
+      color: "#d0efff",
+      id: "remaining-patients",
+    };
+    const ageseriesArray = [
+      { ...seriesA, stack: "total" },
+      { ...seriesC, stack: "total" },
+    ];
+    const sizingProps = { height: 200 };
+    return (
+      <BarChart
+        label="Patients Meeting All Filters"
+        // colors={blueberryTwilightPalette}
+        slotProps={{ legend: { hidden: true } }}
+        series={ageseriesArray}
+        layout={"horizontal"}
+        sx={{ width: "80%" }}
+        id={"test-chart"}
+        margin={{ top: 10, right: 100, bottom: 50, left: 100 }}
+        yAxis={[
+          {
+            // id: "x-axis-id",
+            // label: this.state.definition.fieldName,
+            scaleType: "band",
+            data: ["patients"],
+          },
+        ]}
+        {...sizingProps}
+      >
+        {/*<ChartsXAxis*/}
+        {/*  label={this.state.definition.fieldName}*/}
+        {/*  position="bottom"*/}
+        {/*  axisId="x-axis-id"*/}
+        {/*/>*/}
+      </BarChart>
+    );
+  };
+
   render() {
     if (
       this.state.isLoading ||
@@ -579,20 +627,12 @@ export default class CohortFilter extends React.Component {
       const that = this;
       return (
         <React.Fragment>
-          <Grid
-            container
-            direction="row"
-            justifyContent="center"
-            align="center"
-            spacing={0}
-            width={"100%"}
-          >
-            <List>
-              {this.state.patientsMeetingAllFilters.map((patient) => (
-                <ListItem key={patient} primaryText={patient} />
-              ))}
-            </List>
-          </Grid>
+          <List>
+            {this.state.patientsMeetingAllFilters.map((patient) => (
+              <ListItem key={patient} primaryText={patient} />
+            ))}
+          </List>
+
           {/*<div id={"switcher"}>*/}
           {/*  <Grid*/}
           {/*    container*/}
@@ -616,21 +656,21 @@ export default class CohortFilter extends React.Component {
           <div id={"NewBasicControl"}></div>
 
           <div id="NewControl">
-            <Grid
-              className={"cohort-size-bar-container"}
-              container
-              direction="row"
-              justifyContent="center"
-              align="center"
-            >
-              <Grid className={"no_padding_grid cohort-size-label-container"} item md={1}>
-                <span className={"cohort-size-label"}>Cohort Size</span>
-              </Grid>
-              {/*<Grid className={"cohort-size-label-container"} item md={6}>*/}
-              {/*  <this.CohortPercentHSBar />*/}
-              {/*</Grid>*/}
-              <Grid className={"cohort-size-label-container"} item md={1} />
-            </Grid>
+            {/*<Grid*/}
+            {/*  className={"cohort-size-bar-container"}*/}
+            {/*  container*/}
+            {/*  direction="row"*/}
+            {/*  justifyContent="center"*/}
+            {/*  align="center"*/}
+            {/*>*/}
+            {/*  <Grid className={"no_padding_grid cohort-size-label-container"} item md={1}>*/}
+            {/*    <span className={"cohort-size-label"}>Cohort Size</span>*/}
+            {/*  </Grid>*/}
+            {/*  /!*<Grid className={"cohort-size-label-container"} item md={6}>*!/*/}
+            {/*  /!*  <this.CohortPercentHSBar />*!/*/}
+            {/*  /!*</Grid>*!/*/}
+            {/*  <Grid className={"cohort-size-label-container"} item md={1} />*/}
+            {/*</Grid>*/}
             {/*<Grid*/}
             {/*  id={"filter-list-container"}*/}
             {/*  container*/}
@@ -641,6 +681,7 @@ export default class CohortFilter extends React.Component {
             {/*  spacing={0}*/}
             {/*  width={"100%"}*/}
             {/*>*/}
+            {this.getAgeChart()}
             {this.state.filterGuiInfoKeys.map((guiInfo, index) => (
               <DpFilterList
                 key={index}

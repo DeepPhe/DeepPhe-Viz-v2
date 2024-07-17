@@ -76,11 +76,7 @@ function DpNumericRangeSelector(props) {
 
   return (
     <React.Fragment>
-      <DpFilterBox
-        definition={definition}
-        chart={getChart(definition)}
-        slider={getSlider(definition)}
-      />
+      <DpFilterBox definition={definition} />
 
       {/*<SwitchControl broadcastUpdate={handleSwitchUpdate} definition={definition} />*/}
     </React.Fragment>

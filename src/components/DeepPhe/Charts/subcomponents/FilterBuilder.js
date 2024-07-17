@@ -4,7 +4,7 @@ import { useTheme } from "@mui/styles";
 
 const getChartTitle = (definition) => {
   const theme = useTheme();
-  return <Typography>{definition.fieldName}</Typography>;
+  return <Typography align={"left"}>{definition.fieldName}</Typography>;
 };
 
 export default getChartTitle;

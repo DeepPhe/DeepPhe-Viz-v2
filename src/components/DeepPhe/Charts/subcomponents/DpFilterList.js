@@ -28,8 +28,8 @@ function DpFilterList(props) {
 
   return (
     <React.Fragment key={guiInfo}>
-      <Box sx={{ width: "100%", p: 2, border: "1px dashed grey" }}>
-        <Typography align={"center"}>{guiInfo}</Typography>
+      <Box className={guiInfo + "guiinfo"} sx={{ width: "100%", p: 2, border: "1px dashed grey" }}>
+        {/*<Typography align={"center"}>{guiInfo}</Typography>*/}
         <Grid
           alignItems="center"
           justifyContent="center"
