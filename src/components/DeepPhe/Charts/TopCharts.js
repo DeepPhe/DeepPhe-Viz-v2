@@ -51,7 +51,10 @@ const TopCharts = () => {
     };
     fetchData().then(function (response) {
       response.json().then(function (json) {
-        const newPatientsAndStagesInfo = { patients: json.patients, stagesInfo: json.stagesInfo };
+        const newPatientsAndStagesInfo = {
+          patients: json.patients,
+          stagesInfo: json.stagesInfo,
+        };
         setPatientsAndStagesInfo(newPatientsAndStagesInfo);
         setIsLoading(false);
       });

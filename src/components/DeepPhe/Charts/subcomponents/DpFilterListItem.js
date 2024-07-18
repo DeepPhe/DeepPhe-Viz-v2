@@ -65,7 +65,7 @@ function DpFilterListItem(props) {
     }
   };
 
-  let size = 3;
+  let size = 6;
   if (["t", "n", "m"].includes(definition.fieldName)) {
     size = 4;
   }

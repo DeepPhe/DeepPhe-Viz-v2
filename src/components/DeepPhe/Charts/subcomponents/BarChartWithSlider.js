@@ -11,7 +11,7 @@ function BarChartWithSlider(props) {
   const definition = props.definition;
   const globalPatientCountsForCategories = props.definition.globalPatientCountsForCategories;
   const theme = useTheme();
-
+  // debugger;
   useEffect(() => {
     let barColorsTmp = [];
     if (definition.class === "categoricalRangeSelector") {
@@ -45,7 +45,10 @@ function BarChartWithSlider(props) {
     let minSelectedInRange = 10000000000;
     let maxSelectedInRange = 0;
     globalPatientCountsForCategories.map((item, index) => {
-      marks2[index] = { label: item.category, style: { color: theme.palette.text.primary } };
+      marks2[index] = {
+        label: item.category,
+        style: { color: theme.palette.text.primary },
+      };
       if (selectedCategoricalRange.indexOf(item.category) !== -1) {
         minSelectedInRange = Math.min(minSelectedInRange, index);
         maxSelectedInRange = Math.max(maxSelectedInRange, index);
@@ -164,69 +167,70 @@ function BarChartWithSlider(props) {
   };
 
   const getHorizontalChart = () => {
-    const sizingProps = { height: 200 };
+    // const sizingProps = { height: 500 };
     const categories = props.definition.categoricalRange;
+    let adjustedSeriesArray = [...seriesArray];
+
+    for (let i = 0; i < seriesArray.length; i++) {
+      adjustedSeriesArray[i].data = seriesArray[i].data.slice(
+        seriesArray[i].data.length - categories.length * 3
+      );
+    }
+    debugger;
     return (
-      <BarChart
-        label="Patients Meeting All Filters"
-        // colors={blueberryTwilightPalette}
-        slotProps={{ legend: { hidden: true } }}
-        series={seriesArray}
-        xAxis={[
-          {
-            scaleType: "band",
-            data: categories,
-            colorMap: {
-              type: "ordinal",
-              colors: barColors,
+      <React.Fragment>
+        <BarChart
+          // label="Patients Meeting All Filters"
+          margin={{ top: 30, right: 10, bottom: 30, left: 30 }}
+          // colors={blueberryTwilightPalette}
+          // slotProps={{ legend: { direction: "row", hidden: false } }}
+          series={adjustedSeriesArray}
+          xAxis={[
+            {
+              scaleType: "band",
+              data: categories,
             },
-          },
-        ]}
-        {...sizingProps}
-      >
-        {/*<ChartsXAxis*/}
-        {/*  label={this.state.definition.fieldName}*/}
-        {/*  position="bottom"*/}
-        {/*  axisId="x-axis-id"*/}
-        {/*/>*/}
-      </BarChart>
+          ]}
+          height={500}
+        ></BarChart>
+      </React.Fragment>
     );
   };
 
-  const getVerticalChart = () => {
-    const sizingProps = { height: 200 };
-    const categories = props.definition.categoricalRange;
-    return (
-      <BarChart
-        label="Patients Meeting All Filters2"
-        layout={"horizontal"}
-        // colors={blueberryTwilightPalette}
-        slotProps={{ legend: { hidden: true } }}
-        series={seriesArray}
-        yAxis={[
-          {
-            scaleType: "band",
-            data: categories,
-            colorMap: {
-              type: "ordinal",
-              colors: barColors,
-            },
-          },
-        ]}
-        {...sizingProps}
-      >
-        {/*<ChartsXAxis*/}
-        {/*  label={this.state.definition.fieldName}*/}
-        {/*  position="bottom"*/}
-        {/*  axisId="x-axis-id"*/}
-        {/*/>*/}
-      </BarChart>
-    );
-  };
+  // const getVerticalChart = () => {
+  //   const sizingProps = { height: 200 };
+  //   const categories = props.definition.categoricalRange;
+  //   return (
+  //     <BarChart
+  //       label="Patients Meeting All Filters2"
+  //       layout={"horizontal"}
+  //       // colors={blueberryTwilightPalette}
+  //       slotProps={{ legend: { hidden: true } }}
+  //       series={seriesArray}
+  //       yAxis={[
+  //         {
+  //           scaleType: "band",
+  //           data: categories,
+  //           colorMap: {
+  //             type: "ordinal",
+  //             colors: barColors,
+  //           },
+  //         },
+  //       ]}
+  //       {...sizingProps}
+  //     >
+  //       {/*<ChartsXAxis*/}
+  //       {/*  label={this.state.definition.fieldName}*/}
+  //       {/*  position="bottom"*/}
+  //       {/*  axisId="x-axis-id"*/}
+  //       {/*/>*/}
+  //     </BarChart>
+  //   );
+  // };
 
   const getChart = () => {
     if (["t", "n", "m"].includes(definition.fieldName)) {
-      return getVerticalChart();
+      //return getVerticalChart();
     } else {
       return getHorizontalChart();
     }
@@ -235,7 +239,7 @@ function BarChartWithSlider(props) {
   return (
     <React.Fragment>
       {definition.class === "categoricalRangeSelector" ? getChart() : getAgeChart()}
-      {definition.class === "categoricalRangeSelector" ? getSlider() : getAgeSlider()}
+      {/*{definition.class === "categoricalRangeSelector" ? getSlider() : getAgeSlider()}*/}
     </React.Fragment>
   );
 }

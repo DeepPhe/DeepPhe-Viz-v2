@@ -4,17 +4,10 @@ import HSBar from "react-horizontal-stacked-bar-chart";
 import "rc-slider/assets/index.css";
 import $ from "jquery";
 import { fastIntersection, flattenObject } from "../../../utils/arrayHelpers.js";
-import DpFilterListItem from "./subcomponents/DpFilterListItem";
-import Grid from "@mui/material/Grid";
-import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import List from "@mui/material/List";
 import * as d3 from "d3";
-import ToggleSwitch from "../Buttons/ToggleSwitch";
 import ListItem from "@mui/material/ListItem";
 import DpFilterList from "./subcomponents/DpFilterList";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
-import { useTheme } from "@mui/styles";
 import { BarChart } from "@mui/x-charts";
 
 export default class CohortFilter extends React.Component {

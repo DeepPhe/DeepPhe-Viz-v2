@@ -22,7 +22,7 @@ function DpFilterBox(props) {
     );
   }
 
-  const getChart = () => {
+  const getChart = (title) => {
     const seriesA = {
       data: [Math.floor(Math.random() * 20)],
       label: "Patients Meeting All Filters",
@@ -46,12 +46,12 @@ function DpFilterBox(props) {
       { ...seriesB, stack: "total" },
       { ...seriesC, stack: "total" },
     ];
-    const categories = ["Patients"];
-    const sizingProps = { width: 200, height: 200 };
+    const categories = [title];
+    const sizingProps = { width: 50, height: 200 };
     return (
       <BarChart
-        label="Total"
-        margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
+        label={title}
+        margin={{ top: 50, right: 30, bottom: 30, left: 30 }}
         // colors={blueberryTwilightPalette}
         slotProps={{ legend: { hidden: true } }}
         series={seriesArray}
@@ -77,23 +77,28 @@ function DpFilterBox(props) {
   return (
     <React.Fragment>
       <Grid container>
-        <Grid item md={2} sx={{ alignContent: "center" }}>
-          {getChartTitle(definition)}
-        </Grid>
+        {/*<Grid item md={2} sx={{ alignContent: "center" }}>*/}
+        {/*  {getChartTitle(definition)}*/}
+        {/*</Grid>*/}
         <Grid item md={8}>
           <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-            {props.chart && props.chart}
-            {props.list && props.list}
+            {/*{props.chart && props.chart}*/}
+            {/*{props.list && props.list}*/}
 
             {props.slider && props.slider}
             {filterObject && filterObject}
           </Box>
         </Grid>
-        <Grid item md={1}>
-          <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-            {getChart()}
-          </Box>
-        </Grid>
+        {/*<Grid item md={2}>*/}
+        {/*  <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>*/}
+        {/*    {getChart("Unknown")}*/}
+        {/*  </Box>*/}
+        {/*</Grid>*/}
+        {/*<Grid item md={2}>*/}
+        {/*  <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>*/}
+        {/*    {getChart("Total")}*/}
+        {/*  </Box>*/}
+        {/*</Grid>*/}
       </Grid>
     </React.Fragment>
   );

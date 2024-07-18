@@ -1,7 +1,6 @@
 import React from "react";
 import DpFilterListItem from "./DpFilterListItem.js";
 import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
 function DpFilterList(props) {
@@ -31,6 +30,7 @@ function DpFilterList(props) {
       <Box className={guiInfo + "guiinfo"} sx={{ width: "100%", p: 2, border: "1px dashed grey" }}>
         {/*<Typography align={"center"}>{guiInfo}</Typography>*/}
         <Grid
+          item
           alignItems="center"
           justifyContent="center"
           container

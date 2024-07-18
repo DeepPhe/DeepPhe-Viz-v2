@@ -11,29 +11,25 @@ function DpCategoricalRangeSelector(props) {
   const seriesA = {
     //24 random numbers
     data: [2, 3, 1, 4, 5, 8, 3, 9, 3, 7, 9, 3, 2, 5, 8, 3, 9, 3, 7, 9, 3, 2, 5, 8],
-    label: "Patients Meeting All Filters",
-    color: "#187bcd",
-    id: "patients-meeting-all-filters",
+    label: "Patients Meeting All Filters", // color: "#187bcd",
+    // id: "patients-meeting-all-filters",
+    stack: "total",
+    stackOffset: "none",
   };
   const seriesB = {
     data: [3, 1, 4, 2, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5],
-    label: "Patients Meeting This Filter",
-    color: "#2a9df4",
-    id: "patients-meeting-this-filter",
+    label: "Patients Meeting This Filter", // color: "#2a9df4",
+    // id: "patients-meeting-this-filter",
+    stack: "total",
   };
   const seriesC = {
     data: [3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 5, 2, 4, 5, 5, 3, 2, 4, 5],
-    label: "Remaining Patients",
-    color: "#d0efff",
-    id: "remaining-patients",
+    label: "Remaining Patients", // color: "#d0efff",
+    // id: "remaining-patients",
+    stack: "total",
   };
 
-  const seriesArray = [
-    { ...seriesA, stack: "total" },
-    { ...seriesB, stack: "total" },
-    { ...seriesC, stack: "total" },
-    ,
-  ];
+  const seriesArray = [{ ...seriesA }, { ...seriesB }, { ...seriesC }];
 
   return (
     <React.Fragment>
