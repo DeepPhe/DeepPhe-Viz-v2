@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChangeResult } from "multi-range-slider-react";
 import Slider from "rc-slider";
-import { BarChart } from "@mui/x-charts";
+import { axisClasses, BarChart } from "@mui/x-charts";
 import { useTheme } from "@mui/styles";
 
 function BarChartWithSlider(props) {
@@ -173,25 +173,31 @@ function BarChartWithSlider(props) {
 
     for (let i = 0; i < seriesArray.length; i++) {
       adjustedSeriesArray[i].data = seriesArray[i].data.slice(
-        seriesArray[i].data.length - categories.length * 3
+        seriesArray[i].data.length - categories.length
       );
     }
-    debugger;
     return (
       <React.Fragment>
         <BarChart
+          sx={{
+            [`.${axisClasses.bottom} .${axisClasses.tickLabel}`]: {
+              fontSize: "9px !important",
+            },
+          }}
           // label="Patients Meeting All Filters"
           margin={{ top: 30, right: 10, bottom: 30, left: 30 }}
           // colors={blueberryTwilightPalette}
-          // slotProps={{ legend: { direction: "row", hidden: false } }}
+          slotProps={{ legend: { direction: "row", hidden: true } }}
           series={adjustedSeriesArray}
           xAxis={[
             {
+              tickLabelInterval: () => true,
               scaleType: "band",
               data: categories,
             },
           ]}
-          height={500}
+          height={200}
+          width={250}
         ></BarChart>
       </React.Fragment>
     );

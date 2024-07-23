@@ -1,4 +1,3 @@
-import getChartTitle from "./FilterBuilder";
 import Grid from "@mui/material/Grid";
 import React from "react";
 import Box from "@mui/material/Box";
@@ -47,30 +46,34 @@ function DpFilterBox(props) {
       { ...seriesC, stack: "total" },
     ];
     const categories = [title];
-    const sizingProps = { width: 50, height: 200 };
+    const sizingProps = { width: 75, height: 200 };
     return (
-      <BarChart
-        label={title}
-        margin={{ top: 50, right: 30, bottom: 30, left: 30 }}
-        // colors={blueberryTwilightPalette}
-        slotProps={{ legend: { hidden: true } }}
-        series={seriesArray}
-        xAxis={[
-          {
-            // id: "x-axis-id",
-            // label: this.state.definition.fieldName,
-            scaleType: "band",
-            data: categories,
-          },
-        ]}
-        {...sizingProps}
-      >
-        {/*<ChartsXAxis*/}
-        {/*  label={this.state.definition.fieldName}*/}
-        {/*  position="bottom"*/}
-        {/*  axisId="x-axis-id"*/}
-        {/*/>*/}
-      </BarChart>
+      <React.Fragment>
+        <BarChart
+          label={title}
+          rightAxis={{}}
+          leftAxis={null}
+          margin={{ top: 30, right: 30, bottom: 30, left: 10 }}
+          // colors={blueberryTwilightPalette}
+          slotProps={{ legend: { hidden: true } }}
+          series={seriesArray}
+          xAxis={[
+            {
+              // id: "x-axis-id",
+              // label: this.state.definition.fieldName,
+              scaleType: "band",
+              data: categories,
+            },
+          ]}
+          {...sizingProps}
+        >
+          {/*<ChartsXAxis*/}
+          {/*  label={this.state.definition.fieldName}*/}
+          {/*  position="bottom"*/}
+          {/*  axisId="x-axis-id"*/}
+          {/*/>*/}
+        </BarChart>
+      </React.Fragment>
     );
   };
 
@@ -84,21 +87,20 @@ function DpFilterBox(props) {
           <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {/*{props.chart && props.chart}*/}
             {/*{props.list && props.list}*/}
-
             {props.slider && props.slider}
             {filterObject && filterObject}
           </Box>
         </Grid>
-        {/*<Grid item md={2}>*/}
-        {/*  <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>*/}
-        {/*    {getChart("Unknown")}*/}
-        {/*  </Box>*/}
-        {/*</Grid>*/}
-        {/*<Grid item md={2}>*/}
-        {/*  <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>*/}
-        {/*    {getChart("Total")}*/}
-        {/*  </Box>*/}
-        {/*</Grid>*/}
+        <Grid item md={2}>
+          <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
+            {getChart("Unknown")}
+          </Box>
+        </Grid>
+        <Grid item md={2}>
+          <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
+            {getChart("Total")}
+          </Box>
+        </Grid>
       </Grid>
     </React.Fragment>
   );

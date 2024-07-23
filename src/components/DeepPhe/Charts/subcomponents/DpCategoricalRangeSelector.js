@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import DpFilterBox from "./DpFilterBox.js";
+import Typography from "@mui/material/Typography";
 
 function DpCategoricalRangeSelector(props) {
   const [definition, setDefinition] = useState(props.definition);
@@ -13,6 +14,7 @@ function DpCategoricalRangeSelector(props) {
     data: [2, 3, 1, 4, 5, 8, 3, 9, 3, 7, 9, 3, 2, 5, 8, 3, 9, 3, 7, 9, 3, 2, 5, 8],
     label: "Patients Meeting All Filters", // color: "#187bcd",
     // id: "patients-meeting-all-filters",
+    color: "#187bcd",
     stack: "total",
     stackOffset: "none",
   };
@@ -20,12 +22,14 @@ function DpCategoricalRangeSelector(props) {
     data: [3, 1, 4, 2, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5],
     label: "Patients Meeting This Filter", // color: "#2a9df4",
     // id: "patients-meeting-this-filter",
+    color: "#2a9df4",
     stack: "total",
   };
   const seriesC = {
     data: [3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 5, 2, 4, 5, 5, 3, 2, 4, 5],
     label: "Remaining Patients", // color: "#d0efff",
     // id: "remaining-patients",
+    color: "#d0efff",
     stack: "total",
   };
 
@@ -33,6 +37,7 @@ function DpCategoricalRangeSelector(props) {
 
   return (
     <React.Fragment>
+      <Typography>Title</Typography>
       <DpFilterBox
         seriesArray={seriesArray}
         definition={definition}
