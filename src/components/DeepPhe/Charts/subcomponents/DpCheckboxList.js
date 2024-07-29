@@ -60,19 +60,19 @@ function DpCheckboxList(props) {
   const hue = checkedSeries["male"] ? "green" : "purple";
 
   const seriesA = {
-    data: [2, 3, 1, 4],
+    data: [2, 3, 1],
     label: "Patients Meeting All Filters",
     color: "#187bcd",
     id: "patients-meeting-all-filters",
   };
   const seriesB = {
-    data: [3, 1, 4, 2],
+    data: [3, 1, 4],
     label: "Patients Meeting This Filter",
     color: "#2a9df4",
     id: "patients-meeting-this-filter",
   };
   const seriesC = {
-    data: [3, 2, 4, 5],
+    data: [3, 2, 4],
     label: "Remaining Patients",
     color: "#d0efff",
     id: "remaining-patients",
@@ -129,18 +129,17 @@ function DpCheckboxList(props) {
         <BarChart
           onAxisClick={(event, d) => setAxisData(d)}
           colors={blueberryTwilightPalette}
-          layout="vertical"
           slotProps={{ legend: { hidden: true } }}
           xAxis={[
             {
               scaleType: "band",
               valueFormatter: (value) => `${value}`,
               data: categories,
-              colorMap: {
-                type: "ordinal",
-                values: ["m", "f", "u"],
-                colors: ["blue", hue, "blue"],
-              },
+              // colorMap: {
+              //   type: "ordinal",
+              //   values: ["m", "f", "u"],
+              //   colors: ["blue", hue, "blue"],
+              // },
             },
           ]}
           series={[

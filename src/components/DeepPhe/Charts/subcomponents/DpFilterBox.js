@@ -45,6 +45,10 @@ function DpFilterBox(props) {
       { ...seriesB, stack: "total" },
       { ...seriesC, stack: "total" },
     ];
+    let marginLeft = 10;
+    // if (title === "Total") {
+    //   marginLeft = 0;
+    // }
     const categories = [title];
     const sizingProps = { width: 75, height: 200 };
     return (
@@ -53,7 +57,7 @@ function DpFilterBox(props) {
           label={title}
           rightAxis={{}}
           leftAxis={null}
-          margin={{ top: 30, right: 30, bottom: 30, left: 10 }}
+          margin={{ top: 30, right: 30, bottom: 30, left: marginLeft }}
           // colors={blueberryTwilightPalette}
           slotProps={{ legend: { hidden: true } }}
           series={seriesArray}
@@ -83,11 +87,11 @@ function DpFilterBox(props) {
         {/*<Grid item md={2} sx={{ alignContent: "center" }}>*/}
         {/*  {getChartTitle(definition)}*/}
         {/*</Grid>*/}
-        <Grid item md={8}>
+        <Grid item md={10} className={"filter-item"}>
           <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-            {/*{props.chart && props.chart}*/}
+            {props.chart && props.chart}
             {/*{props.list && props.list}*/}
-            {props.slider && props.slider}
+            {/*{props.slider && props.slider}*/}
             {filterObject && filterObject}
           </Box>
         </Grid>

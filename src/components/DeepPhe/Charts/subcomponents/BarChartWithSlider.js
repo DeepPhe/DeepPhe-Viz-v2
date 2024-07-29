@@ -176,6 +176,11 @@ function BarChartWithSlider(props) {
         seriesArray[i].data.length - categories.length
       );
     }
+
+    let width = 250;
+    if (definition.fieldName === "Clockface") {
+      width = 600;
+    }
     return (
       <React.Fragment>
         <BarChart
@@ -197,7 +202,7 @@ function BarChartWithSlider(props) {
             },
           ]}
           height={200}
-          width={250}
+          width={width}
         ></BarChart>
       </React.Fragment>
     );
@@ -235,11 +240,11 @@ function BarChartWithSlider(props) {
   // };
 
   const getChart = () => {
-    if (["t", "n", "m"].includes(definition.fieldName)) {
-      //return getVerticalChart();
-    } else {
-      return getHorizontalChart();
-    }
+    // if (["t", "n", "m"].includes(definition.fieldName)) {
+    //   //return getVerticalChart();
+    // } else {
+    return getHorizontalChart();
+    // }
   };
 
   return (

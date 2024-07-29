@@ -69,7 +69,11 @@ function DpFilterListItem(props) {
   // if (["t", "n", "m"].includes(definition.fieldName)) {
   //   size = 4;
   // }
-
+  let lg = 3;
+  debugger;
+  if (definition.fieldName === "Clockface") {
+    lg = 6;
+  }
   return (
     // <Draggable key={props.key} draggableId={definition.fieldName} index={props.index}>
     //   {(provided) => (
@@ -77,7 +81,7 @@ function DpFilterListItem(props) {
     //       <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
     //<DpFilterComponent provided={provided} definition={definition} filterControl={getFilter()} />
 
-    <Grid item md={6} lg={4}>
+    <Grid item md={6} lg={lg}>
       <DpFilterComponent definition={definition} filterControl={getFilter()} />
     </Grid>
 

@@ -48,7 +48,7 @@ const BarChartWithCheckboxes = () => {
         layout="horizontal"
         width={600}
         height={400}
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        margin={{ top: 5, right: 10, left: 20, bottom: 5 }}
         series={[
           { dataKey: "uv", fill: "#8884d8" },
           { dataKey: "pv", fill: "#82ca9d" },

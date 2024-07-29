@@ -37,12 +37,14 @@ function DpCategoricalRangeSelector(props) {
 
   return (
     <React.Fragment>
-      <Typography>Title</Typography>
-      <DpFilterBox
-        seriesArray={seriesArray}
-        definition={definition}
-        type={"BarChartWithSlider"}
-      ></DpFilterBox>
+      <Typography>{definition.fieldName}</Typography>
+      <span className={"dp-filter-box-" + definition.fieldName}>
+        <DpFilterBox
+          seriesArray={seriesArray}
+          definition={definition}
+          type={"BarChartWithSlider"}
+        ></DpFilterBox>
+      </span>
     </React.Fragment>
   );
 }
