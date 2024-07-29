@@ -1,6 +1,5 @@
 import React from "react";
 import { ToggleButton } from "@mui/material";
-import getChartTitle from "./FilterBuilder";
 import DpFilterBox from "./DpFilterBox";
 
 function DpDiscreteList(props) {
@@ -57,7 +56,7 @@ function DpDiscreteList(props) {
   const that = this;
   return (
     <React.Fragment>
-      <DpFilterBox definition={definition} list={getList()} />
+      <DpFilterBox definition={definition} fullWidth={props.fullWidth} list={getList()} />
     </React.Fragment>
   );
 }

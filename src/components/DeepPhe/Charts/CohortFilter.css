@@ -293,11 +293,15 @@ svg[id$="-hs"] {
 }
 
 .filter-item {
-    max-width: 300px !important;
+    /*max-width: 300px !important;*/
 }
 
-.dp-filter-box-Clockface > div > div {
-    max-width: 600px !important;
+.dp-filter-box-clockface > div > div:nth-child(1) {
+    max-width: 100% !important;
+}
+
+.MuiChartsAxis-directionX .MuiChartsAxis-tickLabel {
+    transform: translateX(40%) rotateZ(32deg)
 }
 
 .Mui-selected {

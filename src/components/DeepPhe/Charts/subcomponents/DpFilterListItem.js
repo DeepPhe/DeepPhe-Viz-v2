@@ -16,14 +16,23 @@ function DpFilterListItem(props) {
 
   const getFilter = () => {
     const filterChangedState = props.filterChangedState;
+    const fullWidth = definition.fieldName.toLowerCase() === "clockface";
     switch (definition.class) {
       case "discreteList":
-        return <DpDiscreteList index={props.index} key={props.index} definition={definition} />;
+        return (
+          <DpDiscreteList
+            fullWidth={fullWidth}
+            index={props.index}
+            key={props.index}
+            definition={definition}
+          />
+        );
 
       case "categoricalRangeSelector":
         return (
           <React.Fragment key={props.index}>
             <DpCategoricalRangeSelector
+              fullWidth={fullWidth}
               key={props.index}
               definition={definition}
               broadcastUpdate={filterChangedState}
@@ -35,6 +44,7 @@ function DpFilterListItem(props) {
         return (
           <React.Fragment key={props.index}>
             <DpNumericRangeSelector
+              fullWidth={fullWidth}
               key={props.index}
               definition={definition}
               broadcastUpdate={props.filterChangedState}
@@ -46,6 +56,7 @@ function DpFilterListItem(props) {
         return (
           <React.Fragment key={props.index}>
             <DpCheckboxList
+              fullWidth={fullWidth}
               key={props.index}
               definition={definition}
               broadcastUpdate={props.filterChangedState}
@@ -55,6 +66,7 @@ function DpFilterListItem(props) {
       case "booleanList":
         return (
           <DpBooleanList
+            fullWidth={fullWidth}
             key={props.index}
             definition={definition}
             broadcastUpdate={props.filterChangedState}
@@ -69,10 +81,9 @@ function DpFilterListItem(props) {
   // if (["t", "n", "m"].includes(definition.fieldName)) {
   //   size = 4;
   // }
-  let lg = 3;
-  debugger;
-  if (definition.fieldName === "Clockface") {
-    lg = 6;
+  let lg = 4;
+  if (definition.fieldName === "clockface") {
+    lg = 12;
   }
   return (
     // <Draggable key={props.key} draggableId={definition.fieldName} index={props.index}>
@@ -81,8 +92,12 @@ function DpFilterListItem(props) {
     //       <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
     //<DpFilterComponent provided={provided} definition={definition} filterControl={getFilter()} />
 
-    <Grid item md={6} lg={lg}>
-      <DpFilterComponent definition={definition} filterControl={getFilter()} />
+    <Grid item md={lg} lg={lg}>
+      <DpFilterComponent
+        fullWidth={definition.fieldName.toLowerCase() === "clockface"}
+        definition={definition}
+        filterControl={getFilter()}
+      />
     </Grid>
 
     //       </ListItem>

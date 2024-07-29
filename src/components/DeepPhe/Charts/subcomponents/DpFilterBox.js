@@ -4,10 +4,12 @@ import Box from "@mui/material/Box";
 import { useTheme } from "@mui/styles";
 import BarChartWithSlider from "./BarChartWithSlider";
 import { BarChart } from "@mui/x-charts";
+import Typography from "@mui/material/Typography";
 
 function DpFilterBox(props) {
   const theme = useTheme();
   const { definition } = props;
+  const fullWidth = props.fullWidth;
   let filterObject = undefined;
   if (
     definition.class === "categoricalRangeSelector" ||
@@ -45,12 +47,12 @@ function DpFilterBox(props) {
       { ...seriesB, stack: "total" },
       { ...seriesC, stack: "total" },
     ];
-    let marginLeft = 10;
-    // if (title === "Total") {
-    //   marginLeft = 0;
-    // }
+    let marginLeft = 0;
+    if (title === "Total") {
+      marginLeft = 10;
+    }
     const categories = [title];
-    const sizingProps = { width: 75, height: 200 };
+    const sizingProps = { width: 60, height: 200 };
     return (
       <React.Fragment>
         <BarChart
@@ -81,13 +83,17 @@ function DpFilterBox(props) {
     );
   };
 
+  const chartColWidth = fullWidth ? 10 : 8;
+  const totalUnknownColWidth = (12 - chartColWidth) / 2;
+
   return (
     <React.Fragment>
+      <Typography>{definition.fieldName}</Typography>
       <Grid container>
         {/*<Grid item md={2} sx={{ alignContent: "center" }}>*/}
         {/*  {getChartTitle(definition)}*/}
         {/*</Grid>*/}
-        <Grid item md={10} className={"filter-item"}>
+        <Grid item sm={chartColWidth} className={"filter-item"}>
           <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {props.chart && props.chart}
             {/*{props.list && props.list}*/}
@@ -95,12 +101,12 @@ function DpFilterBox(props) {
             {filterObject && filterObject}
           </Box>
         </Grid>
-        <Grid item md={2}>
+        <Grid item sm={totalUnknownColWidth}>
           <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {getChart("Unknown")}
           </Box>
         </Grid>
-        <Grid item md={2}>
+        <Grid item sm={totalUnknownColWidth}>
           <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {getChart("Total")}
           </Box>

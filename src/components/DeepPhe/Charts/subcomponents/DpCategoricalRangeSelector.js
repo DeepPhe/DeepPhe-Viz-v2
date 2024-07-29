@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import DpFilterBox from "./DpFilterBox.js";
-import Typography from "@mui/material/Typography";
 
 function DpCategoricalRangeSelector(props) {
   const [definition, setDefinition] = useState(props.definition);
@@ -37,12 +36,12 @@ function DpCategoricalRangeSelector(props) {
 
   return (
     <React.Fragment>
-      <Typography>{definition.fieldName}</Typography>
       <span className={"dp-filter-box-" + definition.fieldName}>
         <DpFilterBox
           seriesArray={seriesArray}
           definition={definition}
           type={"BarChartWithSlider"}
+          fullWidth={props.fullWidth}
         ></DpFilterBox>
       </span>
     </React.Fragment>

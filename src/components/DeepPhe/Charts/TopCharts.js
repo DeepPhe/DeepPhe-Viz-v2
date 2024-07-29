@@ -4,7 +4,6 @@ import CohortFilter from "./CohortFilter";
 import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import CssBaseline from "@mui/material/CssBaseline";
-import DataGridDemo from "./subcomponents/DemoDataGrid.js";
 
 const TopCharts = () => {
   const [patientsAndStagesInfo, setPatientsAndStagesInfo] = useState({});
@@ -97,7 +96,7 @@ const TopCharts = () => {
         <Grid container direction="row" justifyContent="center" align="center" spacing={10}>
           <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
             <CohortFilter></CohortFilter>
-            <DataGridDemo></DataGridDemo>
+            {/*<DataGridDemo></DataGridDemo>*/}
           </Grid>
         </Grid>
       </ThemeProvider>

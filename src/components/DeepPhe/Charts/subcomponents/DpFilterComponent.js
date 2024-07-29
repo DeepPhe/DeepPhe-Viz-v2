@@ -8,6 +8,7 @@ function DpFilterComponent(props) {
   const [definition, setDefinition] = useState(props.definition);
   const [filterControl, setFilterControl] = useState(props.filterControl);
   const [enabled, setEnabled] = useState(true);
+  const fullWidth = definition.fullWidth;
   const [toggleInfo, setToggleInfo] = useState({
     fieldName: props.definition.fieldName,
     enabled: true,

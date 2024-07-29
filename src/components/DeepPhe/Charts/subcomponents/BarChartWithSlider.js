@@ -178,9 +178,13 @@ function BarChartWithSlider(props) {
     }
 
     let width = 250;
-    if (definition.fieldName === "Clockface") {
-      width = 600;
+    let sizingProps = { height: 200 };
+    if (definition.fieldName === "clockface") {
+    } else {
+      // width = 150;
+      // sizingProps = { height: 200, width: width };
     }
+
     return (
       <React.Fragment>
         <BarChart
@@ -201,8 +205,7 @@ function BarChartWithSlider(props) {
               data: categories,
             },
           ]}
-          height={200}
-          width={width}
+          {...sizingProps}
         ></BarChart>
       </React.Fragment>
     );

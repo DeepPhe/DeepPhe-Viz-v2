@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Slider from "rc-slider";
 import { ChangeResult } from "multi-range-slider-react";
-import SwitchControl from "./controls/SwitchControl";
-import Typography from "@mui/material/Typography";
-import { ThemeProvider } from "@mui/material/styles";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
 import { useTheme } from "@mui/styles";
-import getChartTitle from "./FilterBuilder";
 import DpFilterBox from "./DpFilterBox";
 
 function DpNumericRangeSelector(props) {
@@ -76,7 +70,7 @@ function DpNumericRangeSelector(props) {
 
   return (
     <React.Fragment>
-      <DpFilterBox definition={definition} />
+      <DpFilterBox definition={definition} fullWidth={props.fullWidth} />
 
       {/*<SwitchControl broadcastUpdate={handleSwitchUpdate} definition={definition} />*/}
     </React.Fragment>

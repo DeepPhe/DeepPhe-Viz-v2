@@ -97,7 +97,12 @@ function DpCheckboxList(props) {
       <FormGroup
         alignItems="center"
         row
-        sx={{ width: width, justifyContent: "space-between", fontSize: "12px", marginTop: "-36px" }}
+        sx={{
+          width: width,
+          justifyContent: "space-between",
+          fontSize: "12px",
+          marginTop: "-36px",
+        }}
       >
         {Object.keys(checkedSeries).map((key) => (
           <FormControlLabel
@@ -134,8 +139,7 @@ function DpCheckboxList(props) {
             {
               scaleType: "band",
               valueFormatter: (value) => `${value}`,
-              data: categories,
-              // colorMap: {
+              data: categories, // colorMap: {
               //   type: "ordinal",
               //   values: ["m", "f", "u"],
               //   colors: ["blue", hue, "blue"],
@@ -155,6 +159,7 @@ function DpCheckboxList(props) {
   return (
     <React.Fragment>
       <DpFilterBox
+        fullWidth={props.fullWidth}
         definition={definition}
         chart={getChart()}
         list={getList()}
