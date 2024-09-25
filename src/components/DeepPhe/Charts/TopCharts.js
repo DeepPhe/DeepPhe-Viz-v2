@@ -66,20 +66,12 @@ const TopCharts = () => {
 
   const theme = createTheme({
     palette: {
-      mode: "dark",
+      type: "light",
       primary: {
-        main: "#3f51b5",
+        main: "#187bcd",
       },
       secondary: {
-        main: "#5c283a",
-      },
-      background: {
-        default: "rgba(0,0,0)",
-        paper: "#000000",
-      },
-      text: {
-        primary: "rgba(255,255,255,0.87)",
-        secondary: "rgba(255,255,255,0.90)",
+        main: "#f50057",
       },
     },
   });

@@ -55,24 +55,24 @@ function DpCheckboxList(props) {
     console.log(d);
   };
 
-  const sizingProps = { height: 200 };
+  const sizingProps = { height: 150 };
   const categories = props.definition.checkboxes.map((checkbox) => checkbox.name);
   const hue = checkedSeries["male"] ? "green" : "purple";
 
   const seriesA = {
-    data: [2, 3, 1],
+    data: [2, 3, 1, 3, 8, 6],
     label: "Patients Meeting All Filters",
     color: "#187bcd",
     id: "patients-meeting-all-filters",
   };
   const seriesB = {
-    data: [3, 1, 4],
+    data: [3, 1, 4, 2, 4, 2],
     label: "Patients Meeting This Filter",
     color: "#2a9df4",
     id: "patients-meeting-this-filter",
   };
   const seriesC = {
-    data: [3, 2, 4],
+    data: [3, 2, 4, 3, 2, 3],
     label: "Remaining Patients",
     color: "#d0efff",
     id: "remaining-patients",
@@ -82,15 +82,32 @@ function DpCheckboxList(props) {
     { ...seriesB, stack: "total" },
     { ...seriesC, stack: "total" },
   ];
+  let adjustedSeriesArray = [...seriesArray];
+  for (let i = 0; i < seriesArray.length; i++) {
+    adjustedSeriesArray[i].data = seriesArray[i].data.slice(
+      seriesArray[i].data.length - categories.length
+    );
+  }
 
   const getList = () => {
     let width = "100%";
+    let mt = 0;
+    let mr = 0;
+    let marginLeftCb = "0px";
     const numCheckboxes = definition.checkboxes.length;
     if (numCheckboxes === 2) {
-      width = "52%";
+      width = "59%";
+      mt = "-36px";
+      mr = "-48px";
+      marginLeftCb = "1px";
+    }
+    if (numCheckboxes === 3) {
+      width = "67.25%";
     }
     if (numCheckboxes === 4) {
-      width = "75%";
+      width = "80%";
+      mt = "-36px";
+      mr = "-64px";
     }
     const theme = useTheme();
     return (
@@ -99,6 +116,8 @@ function DpCheckboxList(props) {
         row
         sx={{
           width: width,
+          marginTop: mt,
+          marginLeft: mr,
           justifyContent: "space-between",
           fontSize: "12px",
           marginTop: "-36px",
@@ -135,6 +154,7 @@ function DpCheckboxList(props) {
           onAxisClick={(event, d) => setAxisData(d)}
           colors={blueberryTwilightPalette}
           slotProps={{ legend: { hidden: true } }}
+          margin={{ top: 10, right: 30, bottom: 30, left: 30 }}
           xAxis={[
             {
               scaleType: "band",
@@ -146,11 +166,7 @@ function DpCheckboxList(props) {
               // },
             },
           ]}
-          series={[
-            { ...seriesA, stack: "total" },
-            { ...seriesB, stack: "total" },
-            { ...seriesC, stack: "total" },
-          ]}
+          series={adjustedSeriesArray}
           {...sizingProps}
         />
       </span>
@@ -163,7 +179,7 @@ function DpCheckboxList(props) {
         definition={definition}
         chart={getChart()}
         list={getList()}
-        seriesArray={seriesArray}
+        seriesArray={adjustedSeriesArray}
       />
     </React.Fragment>
   );

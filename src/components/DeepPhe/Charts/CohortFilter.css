@@ -1,6 +1,6 @@
 
 #NewControl {
-    background: black;
+    /*background: black;*/
 }
 
 svg[id$="-hs"] {
@@ -61,6 +61,16 @@ svg[id$="-hs"] {
     /*flex-wrap: nowrap;*/
 }
 
+.filter-inner-container .MuiTypography-root {
+    position: absolute;
+    margin-left: 35px;
+    margin-top: -10px;
+}
+
+.outer-filter-container {
+
+}
+
 .filter-control {
     padding: 1px 30px !important;
 }
@@ -72,6 +82,10 @@ svg[id$="-hs"] {
 #boolean-list-row .switch_label, #boolean-list-row .switch-toggle, #numeric-range-selector-row .switch_label, #numeric-range-selector-row .switch-toggle, #categorical-range-selector-row .switch_label, #categorical-range-selector-row .switch-toggle {
     margin: 0px 3px 0px 0px !important;
     margin-right: 2px;
+}
+
+#NewControl > div.rtl-rbklcn-MuiResponsiveChart-container > svg > g.MuiChartsAxis-root.MuiChartsAxis-directionY.MuiChartsAxis-left.rtl-1k2u9zb-MuiChartsAxis-root > g.MuiChartsAxis-label > text {
+    font-size: 25px !important;
 }
 
 .switch-box {
@@ -93,7 +107,7 @@ svg[id$="-hs"] {
 
 .slider-container {
     height: 100% !important;
-    margin-top: -20px !important;
+    margin-top: -5px !important;
     display: flex;
     flex: 3 2 auto;
 }
@@ -101,7 +115,7 @@ svg[id$="-hs"] {
 .rc-slider {
     padding-left: 0px !important;
     padding-right: 0px !important;
-
+    left: 10px;
     margin-left: auto;
     margin-right: auto;
     padding: 0px !important;
@@ -114,7 +128,7 @@ svg[id$="-hs"] {
 
 .rc-slider-track-draggable {
     z-index: 100;
-    background-color: rgba(0, 45, 248) !important;
+    background-color: rgb(0, 0, 0) !important;
 
 }
 
@@ -123,7 +137,7 @@ svg[id$="-hs"] {
 }
 
 .rc-slider-rail, .rc-slider-track {
-    height: 5px !important;
+    height: 2px !important;
     border-radius: 0px !important;
     margin-top: 5px;
 }
@@ -167,11 +181,11 @@ svg[id$="-hs"] {
 
 .rc-slider-handle {
     /*clip-path: polygon(25% 25%, 75% 25%, 75% 75%, 50% 100%, 25% 75%);*/
-    background-color: #0017ff !important;
-    border: none !important;
-    width: 15px !important;
-    height: 15px !important;
-    margin-top: -5px !important;
+    background-color: #000000 !important;
+    /*border: none !important;*/
+    width: 8px !important;
+    height: 21px !important;
+    /*margin-top: -5px !important;*/
     opacity: 1.0 !important;
 }
 
@@ -301,7 +315,7 @@ svg[id$="-hs"] {
 }
 
 .MuiChartsAxis-directionX .MuiChartsAxis-tickLabel {
-    transform: translateX(40%) rotateZ(32deg)
+    /*transform: translateX(40%) rotateZ(32deg)*/
 }
 
 .Mui-selected {

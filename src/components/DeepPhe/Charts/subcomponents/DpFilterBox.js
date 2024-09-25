@@ -47,12 +47,12 @@ function DpFilterBox(props) {
       { ...seriesB, stack: "total" },
       { ...seriesC, stack: "total" },
     ];
-    let marginLeft = 0;
+    let marginLeft = 15;
     if (title === "Total") {
-      marginLeft = 10;
+      marginLeft = 15;
     }
     const categories = [title];
-    const sizingProps = { width: 60, height: 200 };
+    const sizingProps = { height: 150 };
     return (
       <React.Fragment>
         <BarChart
@@ -65,6 +65,7 @@ function DpFilterBox(props) {
           series={seriesArray}
           xAxis={[
             {
+              labelStyle: { fontSize: 9 },
               // id: "x-axis-id",
               // label: this.state.definition.fieldName,
               scaleType: "band",
@@ -83,8 +84,8 @@ function DpFilterBox(props) {
     );
   };
 
-  const chartColWidth = fullWidth ? 10 : 8;
-  const totalUnknownColWidth = (12 - chartColWidth) / 2;
+  const chartColWidth = fullWidth ? 9 : 9;
+  const totalUnknownColWidth = fullWidth ? 3 : 3;
 
   return (
     <React.Fragment>
@@ -96,21 +97,24 @@ function DpFilterBox(props) {
         <Grid item sm={chartColWidth} className={"filter-item"}>
           <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {props.chart && props.chart}
-            {/*{props.list && props.list}*/}
-            {/*{props.slider && props.slider}*/}
+            {props.slider && props.slider}
             {filterObject && filterObject}
+            {props.list && props.list}
           </Box>
         </Grid>
         <Grid item sm={totalUnknownColWidth}>
-          <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
+          <Box display={"flex"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {getChart("Unknown")}
-          </Box>
-        </Grid>
-        <Grid item sm={totalUnknownColWidth}>
-          <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {getChart("Total")}
           </Box>
         </Grid>
+        {/*<Grid item sm={1}>*/}
+        {/*  <Box*/}
+        {/*    align={"bottom"}*/}
+        {/*    bgcolor={theme.palette.background.default}*/}
+        {/*    sx={{ marginBottom: 0 }}*/}
+        {/*  ></Box>*/}
+        {/*</Grid>*/}
       </Grid>
     </React.Fragment>
   );

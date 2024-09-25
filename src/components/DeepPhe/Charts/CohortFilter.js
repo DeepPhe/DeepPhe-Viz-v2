@@ -560,9 +560,16 @@ export default class CohortFilter extends React.Component {
   getAgeChart = () => {
     const seriesA = {
       data: [Math.floor(Math.random() * 75)],
-      label: "Patients Meeting All Filters",
+      label: "Patients This Filter",
       color: "#187bcd",
       id: "patients-meeting-all-filters",
+    };
+
+    const seriesB = {
+      data: [20 + Math.floor(Math.random() * 150)],
+      label: "Patients Meeting All Filters",
+      color: "#2a9df4",
+      id: "this filter",
     };
     const seriesC = {
       data: [40 + Math.floor(Math.random() * 200)],
@@ -572,6 +579,7 @@ export default class CohortFilter extends React.Component {
     };
     const ageseriesArray = [
       { ...seriesA, stack: "total" },
+      { ...seriesB, stack: "total" },
       { ...seriesC, stack: "total" },
     ];
     const sizingProps = { height: 200 };
@@ -590,7 +598,8 @@ export default class CohortFilter extends React.Component {
             // id: "x-axis-id",
             // label: this.state.definition.fieldName,
             scaleType: "band",
-            data: ["patients"],
+            data: [""],
+            label: "Patients",
           },
         ]}
         {...sizingProps}

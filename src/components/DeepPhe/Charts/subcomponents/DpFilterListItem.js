@@ -9,6 +9,7 @@ import Grid from "@mui/material/Grid";
 
 function DpFilterListItem(props) {
   const [definition, setDefinition] = React.useState(props.definition);
+  const fullWidth = definition.fieldName.toLowerCase() === "clockface";
 
   React.useEffect(() => {
     setDefinition(props.definition);
@@ -16,7 +17,6 @@ function DpFilterListItem(props) {
 
   const getFilter = () => {
     const filterChangedState = props.filterChangedState;
-    const fullWidth = definition.fieldName.toLowerCase() === "clockface";
     switch (definition.class) {
       case "discreteList":
         return (
@@ -82,8 +82,8 @@ function DpFilterListItem(props) {
   //   size = 4;
   // }
   let lg = 4;
-  if (definition.fieldName === "clockface") {
-    lg = 12;
+  if (fullWidth) {
+    lg = 4;
   }
   return (
     // <Draggable key={props.key} draggableId={definition.fieldName} index={props.index}>
@@ -92,12 +92,8 @@ function DpFilterListItem(props) {
     //       <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
     //<DpFilterComponent provided={provided} definition={definition} filterControl={getFilter()} />
 
-    <Grid item md={lg} lg={lg}>
-      <DpFilterComponent
-        fullWidth={definition.fieldName.toLowerCase() === "clockface"}
-        definition={definition}
-        filterControl={getFilter()}
-      />
+    <Grid className={"outer-filter-container"} item md={lg} lg={lg}>
+      <DpFilterComponent fullWidth={false} definition={definition} filterControl={getFilter()} />
     </Grid>
 
     //       </ListItem>

@@ -57,8 +57,8 @@ function BarChartWithSlider(props) {
     });
     const numItems = Object.keys(marks2).length;
     let percent = 100;
-    if (numItems === 24) {
-      percent = 86;
+    if (numItems === 12) {
+      percent = 83.5;
     }
     if (numItems === 7) {
       percent = 79;
@@ -70,7 +70,7 @@ function BarChartWithSlider(props) {
       percent = 72;
     }
     if (numItems === 4) {
-      percent = 68;
+      percent = 68.7;
     }
     if (numItems === 3) {
       percent = 61;
@@ -117,30 +117,45 @@ function BarChartWithSlider(props) {
   };
   const getAgeChart = () => {
     const seriesA = {
-      data: [Math.floor(Math.random() * 20)],
+      data: Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)),
       label: "Patients Meeting All Filters",
       color: "#187bcd",
       id: "patients-meeting-all-filters",
     };
     const seriesB = {
-      data: [20 + Math.floor(Math.random() * 20)],
+      data: Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)),
       label: "Patients Meeting This Filter",
       color: "#2a9df4",
       id: "patients-meeting-this-filter",
     };
     const seriesC = {
-      data: [40 + Math.floor(Math.random() * 20)],
+      data: Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)),
       label: "Remaining Patients",
       color: "#d0efff",
       id: "remaining-patients",
     };
+    seriesA["data"][10] = 2;
+    seriesB["data"][10] = 3;
+    seriesC["data"][10] = 1;
     const ageseriesArray = [
       { ...seriesA, stack: "total" },
       { ...seriesB, stack: "total" },
       { ...seriesC, stack: "total" },
     ];
-    const categories = props.definition.categoricalRange;
-    const sizingProps = { height: 200 };
+    const categories = [
+      "0-9",
+      "10s",
+      "20s",
+      "30s",
+      "40s",
+      "50s",
+      "60s",
+      "70s",
+      "80s",
+      "90s",
+      "100+",
+    ];
+    const sizingProps = { height: 150 };
     return (
       <BarChart
         label="Patients Meeting All Filters"
@@ -152,7 +167,7 @@ function BarChartWithSlider(props) {
             // id: "x-axis-id",
             // label: this.state.definition.fieldName,
             scaleType: "band",
-            data: ["age"],
+            data: categories,
           },
         ]}
         {...sizingProps}
@@ -178,7 +193,7 @@ function BarChartWithSlider(props) {
     }
 
     let width = 250;
-    let sizingProps = { height: 200 };
+    let sizingProps = { height: 150 };
     if (definition.fieldName === "clockface") {
     } else {
       // width = 150;
@@ -194,7 +209,7 @@ function BarChartWithSlider(props) {
             },
           }}
           // label="Patients Meeting All Filters"
-          margin={{ top: 30, right: 10, bottom: 30, left: 30 }}
+          margin={{ top: 5, right: 10, bottom: 30, left: 30 }}
           // colors={blueberryTwilightPalette}
           slotProps={{ legend: { direction: "row", hidden: true } }}
           series={adjustedSeriesArray}
@@ -253,7 +268,7 @@ function BarChartWithSlider(props) {
   return (
     <React.Fragment>
       {definition.class === "categoricalRangeSelector" ? getChart() : getAgeChart()}
-      {/*{definition.class === "categoricalRangeSelector" ? getSlider() : getAgeSlider()}*/}
+      {definition.class === "categoricalRangeSelector" ? getSlider() : getAgeSlider()}
     </React.Fragment>
   );
 }

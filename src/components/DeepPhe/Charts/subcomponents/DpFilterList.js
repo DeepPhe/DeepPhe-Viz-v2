@@ -27,14 +27,14 @@ function DpFilterList(props) {
 
   return (
     <React.Fragment key={guiInfo}>
-      <Box className={guiInfo + "guiinfo"} sx={{ width: "100%", p: 2, border: "1px dashed grey" }}>
+      <Box className={guiInfo + "guiinfo"} sx={{ width: "100%", p: 2 }}>
         {/*<Typography align={"center"}>{guiInfo}</Typography>*/}
         <Grid
-          item
           alignItems="center"
           justifyContent="center"
           container
           md={12}
+          rowSpacing={0}
           className={"filter-list-container"}
         >
           {/*<DragDropContext>*/}
