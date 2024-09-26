@@ -96,8 +96,8 @@ function DpCheckboxList(props) {
     let marginLeftCb = "0px";
     const numCheckboxes = definition.checkboxes.length;
     if (numCheckboxes === 2) {
-      width = "59%";
-      mt = "-36px";
+      width = "53%";
+      mt = "-33px";
       mr = "-48px";
       marginLeftCb = "1px";
     }
@@ -105,9 +105,9 @@ function DpCheckboxList(props) {
       width = "67.25%";
     }
     if (numCheckboxes === 4) {
-      width = "80%";
-      mt = "-36px";
-      mr = "-64px";
+      width = "71%";
+      mt = "-33px";
+      mr = "-30px";
     }
     const theme = useTheme();
     return (
@@ -120,7 +120,7 @@ function DpCheckboxList(props) {
           marginLeft: mr,
           justifyContent: "space-between",
           fontSize: "12px",
-          marginTop: "-36px",
+          rowWrap: "nowrap",
         }}
       >
         {Object.keys(checkedSeries).map((key) => (
@@ -128,12 +128,15 @@ function DpCheckboxList(props) {
             sx={{
               "& .MuiFormControlLabel-label": { fontSize: "14px" },
               color: theme.palette.text.primary,
+              marginLeft: marginLeftCb,
+              marginRight: marginLeftCb,
+              fontSize: "12px",
             }}
             key={key}
             labelPlacement={"bottom"}
             control={
               <Checkbox
-                sx={{ "& .MuiSvgIcon-root": { fontSize: 20 } }}
+                sx={{ "& .MuiSvgIcon-root": { fontSize: 14 } }}
                 size={"small"}
                 checked={checkedSeries[key]}
                 onChange={handleCheckboxChange}

@@ -31,7 +31,6 @@ function DpFilterList(props) {
         {/*<Typography align={"center"}>{guiInfo}</Typography>*/}
         <Grid
           alignItems="center"
-          justifyContent="center"
           container
           md={12}
           rowSpacing={0}

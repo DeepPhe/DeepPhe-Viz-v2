@@ -5,6 +5,8 @@ import { useTheme } from "@mui/styles";
 import BarChartWithSlider from "./BarChartWithSlider";
 import { BarChart } from "@mui/x-charts";
 import Typography from "@mui/material/Typography";
+import { FormControlLabel, FormGroup } from "@mui/material";
+import Checkbox from "@mui/material/Checkbox";
 
 function DpFilterBox(props) {
   const theme = useTheme();
@@ -22,6 +24,58 @@ function DpFilterBox(props) {
       ></BarChartWithSlider>
     );
   }
+
+  const getList = (title) => {
+    let width = "100%";
+    let mt = 0;
+    let mr = 0;
+    let marginLeftCb = "0px";
+    const numCheckboxes = 1;
+    if (numCheckboxes === 1) {
+      width = "8%";
+      mt = "117px";
+      mr = "0px";
+      marginLeftCb = "-35px";
+    }
+    const theme = useTheme();
+    return (
+      <FormGroup
+        alignItems="center"
+        row
+        sx={{
+          width: width,
+          justifyContent: "space-between",
+          fontSize: "12px",
+          rowWrap: "nowrap",
+        }}
+      >
+        <FormControlLabel
+          sx={{
+            "& .MuiFormControlLabel-label": { fontSize: "14px" },
+            color: theme.palette.text.primary,
+            marginRight: marginLeftCb,
+
+            fontSize: "10px",
+          }}
+          key={title}
+          labelPlacement={"bottom"}
+          control={
+            <Checkbox
+              sx={{
+                "& .MuiSvgIcon-root": { fontSize: 14 },
+                marginTop: mt,
+                marginLeft: mr,
+              }}
+              size={"small"}
+              checked={true}
+              name={title}
+            />
+          }
+          label={""}
+        />
+      </FormGroup>
+    );
+  };
 
   const getChart = (title) => {
     const seriesA = {
@@ -47,26 +101,25 @@ function DpFilterBox(props) {
       { ...seriesB, stack: "total" },
       { ...seriesC, stack: "total" },
     ];
-    let marginLeft = 15;
+    let marginLeft = 0;
     if (title === "Total") {
-      marginLeft = 15;
+      marginLeft = 0;
     }
     const categories = [title];
     const sizingProps = { height: 150 };
     return (
       <React.Fragment>
         <BarChart
-          label={title}
+          label={"hi"}
           rightAxis={{}}
           leftAxis={null}
-          margin={{ top: 30, right: 30, bottom: 30, left: marginLeft }}
+          margin={{ top: 30, right: 28, bottom: 30, left: marginLeft }}
           // colors={blueberryTwilightPalette}
           slotProps={{ legend: { hidden: true } }}
           series={seriesArray}
           xAxis={[
             {
-              labelStyle: { fontSize: 9 },
-              // id: "x-axis-id",
+              labelStyle: { fontSize: 7 }, // id: "x-axis-id",
               // label: this.state.definition.fieldName,
               scaleType: "band",
               data: categories,
@@ -80,6 +133,7 @@ function DpFilterBox(props) {
           {/*  axisId="x-axis-id"*/}
           {/*/>*/}
         </BarChart>
+        {getList(title)}
       </React.Fragment>
     );
   };
@@ -104,8 +158,8 @@ function DpFilterBox(props) {
         </Grid>
         <Grid item sm={totalUnknownColWidth}>
           <Box display={"flex"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-            {getChart("Unknown")}
-            {getChart("Total")}
+            {getChart("U")}
+            {getChart("T")}
           </Box>
         </Grid>
         {/*<Grid item sm={1}>*/}
