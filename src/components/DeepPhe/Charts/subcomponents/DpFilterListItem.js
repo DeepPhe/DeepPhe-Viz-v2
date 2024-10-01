@@ -81,9 +81,9 @@ function DpFilterListItem(props) {
   // if (["t", "n", "m"].includes(definition.fieldName)) {
   //   size = 4;
   // }
-  let lg = 4;
+  let lg = 2;
   if (fullWidth) {
-    lg = 4;
+    lg = 2;
   }
   return (
     // <Draggable key={props.key} draggableId={definition.fieldName} index={props.index}>

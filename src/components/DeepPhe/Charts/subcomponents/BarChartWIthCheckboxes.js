@@ -1,6 +1,6 @@
 // BarChartWithCheckboxes.js
 import React, { useState } from "react";
-import { Checkbox, Container, FormControlLabel, FormGroup } from "@mui/material";
+import { Container } from "@mui/material";
 import { BarChart } from "@mui/x-charts";
 import { Tooltip } from "chart.js";
 
@@ -29,17 +29,17 @@ const BarChartWithCheckboxes = () => {
 
   return (
     <Container>
-      <FormGroup row>
-        {Object.keys(checkedSeries).map((key) => (
-          <FormControlLabel
-            key={key}
-            control={
-              <Checkbox checked={checkedSeries[key]} onChange={handleCheckboxChange} name={key} />
-            }
-            label={key.toUpperCase()}
-          />
-        ))}
-      </FormGroup>
+      {/*<FormGroup row>*/}
+      {/*  {Object.keys(checkedSeries).map((key) => (*/}
+      {/*    <FormControlLabel*/}
+      {/*      key={key}*/}
+      {/*      control={*/}
+      {/*        <Checkbox checked={checkedSeries[key]} onChange={handleCheckboxChange} name={key} />*/}
+      {/*      }*/}
+      {/*      label={key.toUpperCase()}*/}
+      {/*    />*/}
+      {/*  ))}*/}
+      {/*</FormGroup>*/}
       <BarChart
         slots={{
           barLabel:

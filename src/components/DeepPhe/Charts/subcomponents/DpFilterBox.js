@@ -79,19 +79,19 @@ function DpFilterBox(props) {
 
   const getChart = (title) => {
     const seriesA = {
-      data: [Math.floor(Math.random() * 20)],
+      data: [Math.floor(Math.random() * 2)],
       label: "Patients Meeting All Filters",
       color: "#187bcd",
       id: "patients-meeting-all-filters",
     };
     const seriesB = {
-      data: [20 + Math.floor(Math.random() * 20)],
+      data: [2 + Math.floor(Math.random() * 2)],
       label: "Patients Meeting This Filter",
       color: "#2a9df4",
       id: "patients-meeting-this-filter",
     };
     const seriesC = {
-      data: [40 + Math.floor(Math.random() * 20)],
+      data: [4 + Math.floor(Math.random() * 2)],
       label: "Remaining Patients",
       color: "#d0efff",
       id: "remaining-patients",
@@ -102,18 +102,21 @@ function DpFilterBox(props) {
       { ...seriesC, stack: "total" },
     ];
     let marginLeft = 0;
-    if (title === "Total") {
+    let checkbox = undefined;
+    if (title === "T") {
       marginLeft = 0;
+    } else {
+      checkbox = getList(title);
     }
     const categories = [title];
-    const sizingProps = { height: 150 };
+    const sizingProps = {};
     return (
       <React.Fragment>
         <BarChart
           label={"hi"}
           rightAxis={{}}
           leftAxis={null}
-          margin={{ top: 30, right: 28, bottom: 30, left: marginLeft }}
+          margin={{ top: 30, right: 28, bottom: 10, left: marginLeft }}
           // colors={blueberryTwilightPalette}
           slotProps={{ legend: { hidden: true } }}
           series={seriesArray}
@@ -133,7 +136,7 @@ function DpFilterBox(props) {
           {/*  axisId="x-axis-id"*/}
           {/*/>*/}
         </BarChart>
-        {getList(title)}
+        {/*{checkbox && checkbox}*/}
       </React.Fragment>
     );
   };
@@ -159,7 +162,7 @@ function DpFilterBox(props) {
         <Grid item sm={totalUnknownColWidth}>
           <Box display={"flex"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {getChart("U")}
-            {getChart("T")}
+            {/*{getChart("T")}*/}
           </Box>
         </Grid>
         {/*<Grid item sm={1}>*/}

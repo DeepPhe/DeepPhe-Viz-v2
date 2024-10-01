@@ -3,6 +3,7 @@ import { ChangeResult } from "multi-range-slider-react";
 import Slider from "rc-slider";
 import { axisClasses, BarChart } from "@mui/x-charts";
 import { useTheme } from "@mui/styles";
+import CheckboxXAxisLabel from "./controls/CheckboxXAxisLabel";
 
 function BarChartWithSlider(props) {
   const [barColors, setBarColors] = useState([]);
@@ -194,11 +195,10 @@ function BarChartWithSlider(props) {
 
     let width = 250;
     let sizingProps = { height: 150 };
-    if (definition.fieldName === "clockface") {
-    } else {
-      // width = 150;
-      // sizingProps = { height: 200, width: width };
-    }
+
+    const getCheckbox = (value) => {
+      return <CheckboxXAxisLabel value={value} checked={true} onCheck={() => {}} />;
+    };
 
     return (
       <React.Fragment>
@@ -209,13 +209,16 @@ function BarChartWithSlider(props) {
             },
           }}
           // label="Patients Meeting All Filters"
-          margin={{ top: 5, right: 10, bottom: 30, left: 30 }}
+          margin={{ top: 5, right: 0, bottom: 30, left: 30 }}
           // colors={blueberryTwilightPalette}
           slotProps={{ legend: { direction: "row", hidden: true } }}
           series={adjustedSeriesArray}
           xAxis={[
             {
               tickLabelInterval: () => true,
+              valueFormatter: (code, context) =>
+                context.location === "tick" ? getCheckbox(code) : code,
+
               scaleType: "band",
               data: categories,
             },
