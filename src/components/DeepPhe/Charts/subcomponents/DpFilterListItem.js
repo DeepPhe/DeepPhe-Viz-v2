@@ -92,7 +92,7 @@ function DpFilterListItem(props) {
     //       <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
     //<DpFilterComponent provided={provided} definition={definition} filterControl={getFilter()} />
 
-    <Grid className={"outer-filter-container"} item md={lg} lg={lg}>
+    <Grid className={"outer-filter-container"}>
       <DpFilterComponent fullWidth={false} definition={definition} filterControl={getFilter()} />
     </Grid>
 

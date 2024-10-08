@@ -185,6 +185,8 @@ function BarChartWithSlider(props) {
   const getHorizontalChart = () => {
     // const sizingProps = { height: 500 };
     const categories = props.definition.categoricalRange;
+    const numCategories = categories.length;
+    const width = numCategories * 50;
     let adjustedSeriesArray = [...seriesArray];
 
     for (let i = 0; i < seriesArray.length; i++) {
@@ -193,8 +195,7 @@ function BarChartWithSlider(props) {
       );
     }
 
-    let width = 250;
-    let sizingProps = { height: 150 };
+    let sizingProps = { height: 150, width: width };
 
     const getCheckbox = (value) => {
       return <CheckboxXAxisLabel value={value} checked={true} onCheck={() => {}} />;
@@ -218,7 +219,6 @@ function BarChartWithSlider(props) {
               tickLabelInterval: () => true,
               valueFormatter: (code, context) =>
                 context.location === "tick" ? getCheckbox(code) : code,
-
               scaleType: "band",
               data: categories,
             },

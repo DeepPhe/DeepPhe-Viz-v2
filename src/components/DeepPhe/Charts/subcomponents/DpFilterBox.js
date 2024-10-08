@@ -101,22 +101,21 @@ function DpFilterBox(props) {
       { ...seriesB, stack: "total" },
       { ...seriesC, stack: "total" },
     ];
-    let marginLeft = 0;
+    let marginLeft = 5;
     let checkbox = undefined;
     if (title === "T") {
-      marginLeft = 0;
+      marginLeft = 5;
     } else {
       checkbox = getList(title);
     }
     const categories = [title];
-    const sizingProps = {};
+    const sizingProps = { width: 65, height: 150 };
     return (
       <React.Fragment>
         <BarChart
-          label={"hi"}
           rightAxis={{}}
           leftAxis={null}
-          margin={{ top: 30, right: 28, bottom: 10, left: marginLeft }}
+          margin={{ top: 10, right: 28, bottom: 30, left: marginLeft }}
           // colors={blueberryTwilightPalette}
           slotProps={{ legend: { hidden: true } }}
           series={seriesArray}
@@ -151,7 +150,7 @@ function DpFilterBox(props) {
         {/*<Grid item md={2} sx={{ alignContent: "center" }}>*/}
         {/*  {getChartTitle(definition)}*/}
         {/*</Grid>*/}
-        <Grid item sm={chartColWidth} className={"filter-item"}>
+        <Grid item className={"filter-item"}>
           <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {props.chart && props.chart}
             {props.slider && props.slider}
@@ -159,10 +158,14 @@ function DpFilterBox(props) {
             {props.list && props.list}
           </Box>
         </Grid>
-        <Grid item sm={totalUnknownColWidth}>
-          <Box display={"flex"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
+        <Grid item>
+          <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
             {getChart("U")}
-            {/*{getChart("T")}*/}
+          </Box>
+        </Grid>
+        <Grid item>
+          <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
+            {getChart("T")}
           </Box>
         </Grid>
         {/*<Grid item sm={1}>*/}
