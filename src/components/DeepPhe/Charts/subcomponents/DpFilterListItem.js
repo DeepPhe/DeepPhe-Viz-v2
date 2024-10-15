@@ -6,10 +6,52 @@ import React from "react";
 import DpNumericRangeSelector from "./DpNumericRangeSelector";
 import DpCheckboxList from "./DpCheckboxList";
 import Grid from "@mui/material/Grid";
+import { Fab } from "@mui/material";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 
 function DpFilterListItem(props) {
   const [definition, setDefinition] = React.useState(props.definition);
   const fullWidth = definition.fieldName.toLowerCase() === "clockface";
+  const EXPANSION_LEVEL_NONE = 0;
+  const EXPANSION_LEVEL_6 = 6;
+  const EXPANSION_LEVEL_9 = 9;
+  const EXPANSION_LEVEL_12 = 12;
+  const [expandedLevel, setExpandedLevel] = React.useState(EXPANSION_LEVEL_NONE);
+
+  const getExpandContractButtons = () => {
+    return (
+      <React.Fragment>
+        <Fab size="small" color="secondary" aria-label="zoomIn" onClick={handleExpandContract}>
+          <ZoomInIcon />
+        </Fab>
+        <Fab size="small" color="secondary" aria-label="zoomOut" onClick={handleExpandContract}>
+          <ZoomOutIcon />
+        </Fab>
+      </React.Fragment>
+    );
+  };
+
+  const handleExpandContract = (e) => {
+    const id = e.target.getAttribute("data-testid");
+    if (id === "ZoomInIcon") {
+      if (expandedLevel === EXPANSION_LEVEL_NONE) {
+        setExpandedLevel(EXPANSION_LEVEL_6);
+      } else if (expandedLevel === EXPANSION_LEVEL_6) {
+        setExpandedLevel(EXPANSION_LEVEL_9);
+      } else if (expandedLevel === EXPANSION_LEVEL_9) {
+        setExpandedLevel(EXPANSION_LEVEL_12);
+      }
+    } else if (id === "ZoomOutIcon") {
+      if (expandedLevel === EXPANSION_LEVEL_12) {
+        setExpandedLevel(EXPANSION_LEVEL_9);
+      } else if (expandedLevel === EXPANSION_LEVEL_9) {
+        setExpandedLevel(EXPANSION_LEVEL_6);
+      } else if (expandedLevel === EXPANSION_LEVEL_6) {
+        setExpandedLevel(EXPANSION_LEVEL_NONE);
+      }
+    }
+  };
 
   React.useEffect(() => {
     setDefinition(props.definition);
@@ -92,7 +134,10 @@ function DpFilterListItem(props) {
     //       <ListItem sx={{ width: "100%" }} ref={provided.innerRef} {...provided.draggableProps}>
     //<DpFilterComponent provided={provided} definition={definition} filterControl={getFilter()} />
 
-    <Grid className={"outer-filter-container"}>
+      //jdljdl
+      right here, md isn't being read because of flex'
+    <Grid item md={expandedLevel} className={"outer-filter-container"}>
+      {getExpandContractButtons()}
       <DpFilterComponent fullWidth={false} definition={definition} filterControl={getFilter()} />
     </Grid>
 

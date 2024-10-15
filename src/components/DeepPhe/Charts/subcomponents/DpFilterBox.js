@@ -12,6 +12,7 @@ function DpFilterBox(props) {
   const theme = useTheme();
   const { definition } = props;
   const fullWidth = props.fullWidth;
+
   let filterObject = undefined;
   if (
     definition.class === "categoricalRangeSelector" ||
@@ -24,7 +25,6 @@ function DpFilterBox(props) {
       ></BarChartWithSlider>
     );
   }
-
   const getList = (title) => {
     let width = "100%";
     let mt = 0;
@@ -140,42 +140,42 @@ function DpFilterBox(props) {
     );
   };
 
-  const chartColWidth = fullWidth ? 9 : 9;
-  const totalUnknownColWidth = fullWidth ? 3 : 3;
-
   return (
     <React.Fragment>
       <Typography>{definition.fieldName}</Typography>
-      <Grid container>
-        {/*<Grid item md={2} sx={{ alignContent: "center" }}>*/}
-        {/*  {getChartTitle(definition)}*/}
-        {/*</Grid>*/}
-        <Grid item className={"filter-item"}>
-          <Box align={"bottom"} bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-            {props.chart && props.chart}
-            {props.slider && props.slider}
-            {filterObject && filterObject}
-            {props.list && props.list}
-          </Box>
-        </Grid>
-        <Grid item>
-          <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-            {getChart("U")}
-          </Box>
-        </Grid>
-        <Grid item>
-          <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-            {getChart("T")}
-          </Box>
-        </Grid>
-        {/*<Grid item sm={1}>*/}
-        {/*  <Box*/}
-        {/*    align={"bottom"}*/}
-        {/*    bgcolor={theme.palette.background.default}*/}
-        {/*    sx={{ marginBottom: 0 }}*/}
-        {/*  ></Box>*/}
-        {/*</Grid>*/}
+
+      {/*<Grid item md={2} sx={{ alignContent: "center" }}>*/}
+      {/*  {getChartTitle(definition)}*/}
+      {/*</Grid>*/}
+      <Grid item md={10} className={"filter-item"}>
+        <Box
+          align={"bottom"}
+          bgcolor={theme.palette.background.default}
+          sx={{ marginBottom: 0, width: "100" }}
+        >
+          {props.chart && props.chart}
+          {props.slider && props.slider}
+          {filterObject && filterObject}
+          {props.list && props.list}
+        </Box>
       </Grid>
+      <Grid item md={1}>
+        <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
+          {getChart("U")}
+        </Box>
+      </Grid>
+      <Grid item>
+        <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
+          {getChart("T")}
+        </Box>
+      </Grid>
+      {/*<Grid item sm={1}>*/}
+      {/*  <Box*/}
+      {/*    align={"bottom"}*/}
+      {/*    bgcolor={theme.palette.background.default}*/}
+      {/*    sx={{ marginBottom: 0 }}*/}
+      {/*  ></Box>*/}
+      {/*</Grid>*/}
     </React.Fragment>
   );
 }

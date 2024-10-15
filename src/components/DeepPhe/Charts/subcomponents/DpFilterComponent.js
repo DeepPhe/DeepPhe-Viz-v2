@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Grid from "@mui/material/Grid";
 import HSBar from "react-horizontal-stacked-bar-chart";
 import { ToggleButton } from "@mui/material";
 import Typography from "@mui/material/Typography";
 
 function DpFilterComponent(props) {
   const [definition, setDefinition] = useState(props.definition);
-  const [filterControl, setFilterControl] = useState(props.filterControl);
+  const filterControl = props.filterControl;
   const [enabled, setEnabled] = useState(true);
   const fullWidth = definition.fullWidth;
   const [toggleInfo, setToggleInfo] = useState({
@@ -143,14 +142,14 @@ function DpFilterComponent(props) {
       {/*>*/}
       {/*  {getSwitch(definition)}*/}
       {/*</Grid>*/}
-      <Grid
-        item
-        md={12}
-        sx={{ alignContent: "space-around" }}
-        className="filter-inner-container no_padding_grid filter-control"
-      >
-        {filterControl}
-      </Grid>
+      {/*<Grid*/}
+      {/*  item*/}
+      {/*  sx={{ alignContent: "space-around" }}*/}
+      {/*  className="filter-inner-container no_padding_grid filter-control"*/}
+      {/*  md={10}*/}
+      {/*>*/}
+      {filterControl}
+      {/*</Grid>*/}
       {/*<Grid item md={3} className="filter-inner-container no_padding_grid">*/}
       {/*  {getBar(definition)}*/}
       {/*</Grid>*/}

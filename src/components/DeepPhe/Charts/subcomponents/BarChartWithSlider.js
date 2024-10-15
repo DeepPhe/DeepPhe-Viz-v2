@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChangeResult } from "multi-range-slider-react";
 import Slider from "rc-slider";
-import { axisClasses, BarChart } from "@mui/x-charts";
+import { axisClasses, BarChart, BarPlot, ResponsiveChartContainer } from "@mui/x-charts";
 import { useTheme } from "@mui/styles";
 import CheckboxXAxisLabel from "./controls/CheckboxXAxisLabel";
 
@@ -158,7 +158,7 @@ function BarChartWithSlider(props) {
     ];
     const sizingProps = { height: 150 };
     return (
-      <BarChart
+      <ResponsiveChartContainer
         label="Patients Meeting All Filters"
         // colors={blueberryTwilightPalette}
         slotProps={{ legend: { hidden: true } }}
@@ -173,12 +173,14 @@ function BarChartWithSlider(props) {
         ]}
         {...sizingProps}
       >
+        {" "}
+        <BarPlot />
         {/*<ChartsXAxis*/}
         {/*  label={this.state.definition.fieldName}*/}
         {/*  position="bottom"*/}
         {/*  axisId="x-axis-id"*/}
         {/*/>*/}
-      </BarChart>
+      </ResponsiveChartContainer>
     );
   };
 
@@ -195,7 +197,7 @@ function BarChartWithSlider(props) {
       );
     }
 
-    let sizingProps = { height: 150, width: width };
+    let sizingProps = { height: 150 };
 
     const getCheckbox = (value) => {
       return <CheckboxXAxisLabel value={value} checked={true} onCheck={() => {}} />;
@@ -217,8 +219,10 @@ function BarChartWithSlider(props) {
           xAxis={[
             {
               tickLabelInterval: () => true,
-              valueFormatter: (code, context) =>
-                context.location === "tick" ? getCheckbox(code) : code,
+              valueFormatter: (
+                code,
+                context //context.location === "tick" ? getCheckbox(code) : code,
+              ) => (context.location === "tick" ? code : code),
               scaleType: "band",
               data: categories,
             },

@@ -124,7 +124,7 @@ function DpCategoricalRangeSelector(props) {
 
   return (
     <React.Fragment>
-      <span className={"dp-filter-box-" + definition.fieldName}>
+      <span className={"dp-filter-box-" + definition.fieldName + " dp-filter-box"}>
         <DpFilterBox
           seriesArray={seriesArray}
           definition={definition}

@@ -336,3 +336,8 @@ svg[id$="-hs"] {
 #NewControl > div.rtl-rbklcn-MuiResponsiveChart-container > svg {
     width: 80%;
 }
+
+.dp-filter-box {
+    display: flex;
+    flex-wrap: nowrap;
+}
