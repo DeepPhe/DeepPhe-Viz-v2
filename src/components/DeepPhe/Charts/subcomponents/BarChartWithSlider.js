@@ -186,6 +186,10 @@ function BarChartWithSlider(props) {
 
   const getHorizontalChart = () => {
     // const sizingProps = { height: 500 };
+    const barColorsMap = {
+      //jdl jdl
+    };
+
     const categories = props.definition.categoricalRange;
     const numCategories = categories.length;
     const width = numCategories * 50;
@@ -225,6 +229,10 @@ function BarChartWithSlider(props) {
               ) => (context.location === "tick" ? code : code),
               scaleType: "band",
               data: categories,
+              colorMap: {
+                type: "ordinal",
+                colors: barColorsMap,
+              },
             },
           ]}
           {...sizingProps}
