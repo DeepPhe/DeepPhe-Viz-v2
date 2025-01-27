@@ -1,14 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Grid from "@mui/material/Grid";
-import CohortFilter from "./CohortFilter";
 import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import CssBaseline from "@mui/material/CssBaseline";
+import CohortFilter from "./CohortFilter";
+import DataGridDemo from "./subcomponents/DemoDataGrid";
+import { initDb } from "../../../utils/db/DeepPheDb";
 
 const TopCharts = () => {
   const [patientsAndStagesInfo, setPatientsAndStagesInfo] = useState({});
   const [selectedStage, setSelectedStage] = useState("All Stages");
   const [isLoading, setIsLoading] = useState(true);
+  const [db, setDb] = useState(null);
   const maxAge = useMemo(() => {
     if (Object.keys(patientsAndStagesInfo).length !== 0) {
       const ages = patientsAndStagesInfo.stagesInfo
@@ -37,26 +40,9 @@ const TopCharts = () => {
   }, []);
 
   function reset() {
-    const fetchData = async () => {
-      return new Promise(function (resolve, reject) {
-        fetch("http://localhost:3001/api/cohortData").then(function (response) {
-          if (response) {
-            resolve(response);
-          } else {
-            reject("User not logged in");
-          }
-        });
-      });
-    };
-    fetchData().then(function (response) {
-      response.json().then(function (json) {
-        const newPatientsAndStagesInfo = {
-          patients: json.patients,
-          stagesInfo: json.stagesInfo,
-        };
-        setPatientsAndStagesInfo(newPatientsAndStagesInfo);
-        setIsLoading(false);
-      });
+    initDb().then((db) => {
+      setDb(db);
+      setIsLoading(false);
     });
   }
 
@@ -87,8 +73,8 @@ const TopCharts = () => {
         </Typography>
         <Grid container direction="row" justifyContent="center" align="center" spacing={10}>
           <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-            <CohortFilter></CohortFilter>
-            {/*<DataGridDemo></DataGridDemo>*/}
+            <CohortFilter db={db}></CohortFilter>
+            <DataGridDemo></DataGridDemo>
           </Grid>
         </Grid>
       </ThemeProvider>

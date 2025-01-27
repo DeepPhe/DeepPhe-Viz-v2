@@ -16,7 +16,7 @@ function DpCheckboxList(props) {
       const name = checkbox.name;
       initialCheckboxes[name] = checkbox.checked;
     });
-    console.log(initialCheckboxes);
+    //console.log(initialCheckboxes);
     return initialCheckboxes;
   };
 
@@ -52,7 +52,7 @@ function DpCheckboxList(props) {
   ];
 
   const setAxisData = (d) => {
-    console.log(d);
+    //console.log(d);
   };
 
   const sizingProps = { height: 150 };

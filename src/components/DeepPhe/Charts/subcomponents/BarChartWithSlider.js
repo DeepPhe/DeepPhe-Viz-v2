@@ -25,12 +25,12 @@ function BarChartWithSlider(props) {
         barColorsTmp = [...barColorsTmp, active ? null : "#0000008c"];
       });
       setBarColors(barColorsTmp);
-      console.log(barColorsTmp);
+      //console.log(barColorsTmp);
     }
   }, [sliderState]);
   const handleSliderRangeChange = (e: ChangeResult) => {
     let selectedCategoricalRange = [];
-    for (let i = e[0]; i <= e[1]; i++) console.log(e);
+    //for (let i = e[0]; i <= e[1]; i++) console.log(e);
     setSliderState(e);
     //selectedCategoricalRange.push(definition.globalPatientCountsForCategories[i].category);
     // this.props.definition.selectedCategoricalRange = selectedCategoricalRange
@@ -77,7 +77,7 @@ function BarChartWithSlider(props) {
       percent = 61;
     }
     const label = percent + "%";
-    console.log(label);
+    //console.log(label);
     return (
       <div className={"slider-container"}>
         <Slider
@@ -229,10 +229,10 @@ function BarChartWithSlider(props) {
               ) => (context.location === "tick" ? code : code),
               scaleType: "band",
               data: categories,
-              colorMap: {
-                type: "ordinal",
-                colors: barColorsMap,
-              },
+              // colorMap: {
+              //   type: "ordinal",
+              //   colors: barColorsMap,
+              // },
             },
           ]}
           {...sizingProps}

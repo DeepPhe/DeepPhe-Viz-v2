@@ -29,7 +29,7 @@ function DpFilterList(props) {
     <React.Fragment key={guiInfo}>
       <Box className={guiInfo + "guiinfo"} sx={{ width: "100%", p: 2 }}>
         {/*<Typography align={"center"}>{guiInfo}</Typography>*/}
-        <Grid alignItems="center" container rowSpacing={0} className={"filter-list-container"}>
+        <Grid container rowSpacing={0} className={"filter-list-container"}>
           {/*<DragDropContext>*/}
           {/*  <Droppable droppableId="droppable">*/}
           {/*    {(provided) => (*/}

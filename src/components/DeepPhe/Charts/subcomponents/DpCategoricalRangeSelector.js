@@ -10,7 +10,7 @@ function DpCategoricalRangeSelector(props) {
   const broadcastUpdate = (definition) => {
     props.broadcastUpdate(definition);
   };
-
+  debugger;
   const seriesA = {
     //24 random numbers
     data: [2, 3, 1, 4, 5, 8, 3, 9, 3, 7, 9, 3, 2, 5, 8, 3, 9, 3, 7, 9, 3, 2, 5, 8],

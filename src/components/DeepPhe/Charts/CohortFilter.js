@@ -3,12 +3,13 @@ import "./CohortFilter.css";
 import HSBar from "react-horizontal-stacked-bar-chart";
 import "rc-slider/assets/index.css";
 import $ from "jquery";
-import { fastIntersection, flattenObject } from "../../../utils/arrayHelpers.js";
+import { fastIntersection } from "../../../utils/arrayHelpers.js";
 import List from "@mui/material/List";
 import * as d3 from "d3";
 import ListItem from "@mui/material/ListItem";
 import DpFilterList from "./subcomponents/DpFilterList";
 import { BarChart } from "@mui/x-charts";
+import { filterAttribIds, getPatientIdsWithAllAttributes } from "../../../utils/db/Queries";
 
 export default class CohortFilter extends React.Component {
   state = {
@@ -33,10 +34,13 @@ export default class CohortFilter extends React.Component {
     patientArrays: null,
     patientArraysNotFlat: null,
     filters: {},
+    db: null,
   };
 
   constructor(props) {
     super(props);
+    this.state.db = props.db;
+    debugger;
     this.filterChangedState.bind(this);
 
     // this.moveListItem = this.moveListItem.bind(this);
@@ -45,19 +49,7 @@ export default class CohortFilter extends React.Component {
 
   reset = () => {
     const that = this;
-    const fetchPatientArrays = async () => {
-      return new Promise(function (resolve, reject) {
-        fetch(
-          "https://gist.githubusercontent.com/JohnLevander/d11ca4e6f43c6ec0d956567cb204c363/raw/53ffde5db9ddefbd1a07a3553a3224f17da610a9/query-results.js"
-        ).then(function (response) {
-          if (response) {
-            resolve(response);
-          } else {
-            reject("User not logged in");
-          }
-        });
-      });
-    };
+
     const fetchFilterDefinition = async () => {
       return new Promise(function (resolve, reject) {
         fetch("http://localhost:3001/api/filter/definitions").then(function (response) {
@@ -70,45 +62,22 @@ export default class CohortFilter extends React.Component {
       });
     };
 
-    const fetchPatientArraysPromise = new Promise((resolve, reject) =>
-      fetchPatientArrays().then(function (response) {
-        response.json().then(function (json) {
-          let patientArr = flattenObject(json, "");
-          patientArr["gender.m"] = ["fake_patient1", "fake_patient2"];
-          patientArr["gender.f"] = [
-            "fake_patient3",
-            "fake_patient4",
-            "fake_patient5",
-            "fake_patient6",
-            "fake_patient7",
-          ];
-          patientArr["city.la"] = ["fake_patient1", "fake_patient2", "fake_patient3"];
-          patientArr["city.ny"] = [
-            "fake_patient4",
-            "fake_patient5",
-            "fake_patient6",
-            "fake_patient7",
-          ];
-          Object.keys(patientArr).forEach((key) => {
-            const arr = patientArr[key];
-            delete patientArr[key];
-            patientArr[key.toLowerCase()] = arr;
-          });
-          that.setState(
-            {
-              patientArrays: patientArr,
-              patientArraysNotFlat: json,
-              patientArraysLoading: false,
-            },
-            () => {
-              resolve(flattenObject(json, ""));
-            }
-          );
-        });
-      })
-    );
+    const fetchPatientArraysPromise = new Promise((resolve, reject) => {
+      getPatientIdsWithAllAttributes(that.state.db).then((patientArr) => {
+        that.setState(
+          {
+            patientArrays: patientArr,
+            patientArraysLoading: false,
+          },
+          () => {
+            resolve(patientArr);
+          }
+        );
+      });
+    });
 
     const fetchFilterDefinitionPromise = (patientArrays) => {
+      const that = this;
       return new Promise((resolve, reject) => {
         fetchFilterDefinition().then(function (response) {
           response.json().then(function (json) {
@@ -165,13 +134,66 @@ export default class CohortFilter extends React.Component {
               //apply rules
               return sorted;
             };
-            const definitions = json["searchFilterDefinition"];
+            let definitions = json["searchFilterDefinition"];
             let filterGuiInfo = {};
+
+            const filterDefinitions = (definitions) => {
+              const allowedFieldNames = ["t", "n", "m"];
+              return definitions.filter((definition) =>
+                allowedFieldNames.includes(definition.fieldName.toLowerCase())
+              );
+            };
+
+            const setGlobalPatientCountsForCategories2 = (definitions, patientArrays) => {
+              //for each patientArray, get the first letter of the key
+              //if the key is in the definitions.fieldName, then get the length of the array
+              //set definitiions.globalPatientCountsForCategories to be an array of objects
+              //each object should contain a "category" and a "count" for the number of patients in that category
+              definitions.forEach((definition) => {
+                definition.categoricalRange = [];
+                definition.globalPatientCountsForCategories = [];
+                const fieldName = definition.fieldName.toLowerCase();
+                //could be t
+                for (const key in patientArrays) {
+                  if (key.toLowerCase().startsWith(fieldName)) {
+                    definition.categoricalRange.push(key);
+                    definition.globalPatientCountsForCategories.push({
+                      category: key,
+                      count: patientArrays[key].length,
+                    });
+                  }
+                }
+                definition.selectedCategoricalRange = definition.categoricalRange;
+              });
+              console.log(definitions);
+            };
+
+            getPatientIdsWithAllAttributes(that.state.db).then((allAttributesArray) => {
+              console.log("All attributes array:", allAttributesArray);
+              //write allAttributesArray to a file
+
+              //
+              filterAttribIds(allAttributesArray, ["T Stage", "N Stage", "M Stage"]).then(
+                (tnmArray) => {
+                  debugger;
+                  setGlobalPatientCountsForCategories2(definitions, tnmArray);
+                }
+              );
+            });
+
+            const setGlobalPatientCountsForCategories = (definitions, patientArrays) => {};
+            setGlobalPatientCountsForCategories(definitions, patientArrays);
+
+            // Example usage
+            definitions = filterDefinitions(definitions);
+            debugger;
             definitions.forEach((definition) => {
               if (definition.class === "categoricalRangeSelector") {
                 definition.categoricalRange = [...definition.selectedCategoricalRange];
               }
               filterGuiInfo = addGuiInfo(filterGuiInfo, definition);
+              debugger;
+              //need to sum the members of each array
               definition.numberOfPossiblePatientsForThisFilter = that.getPatientsInFilter(
                 definition,
                 that.state.patientArrays,
@@ -385,6 +407,7 @@ export default class CohortFilter extends React.Component {
         {
           filterDefinitions: this.state.filterDefinitions.map((def) => {
             if (def.fieldName === definition.fieldName) {
+              debugger;
               return definition;
             } else {
               return def;
@@ -624,8 +647,8 @@ export default class CohortFilter extends React.Component {
     else {
       let simpleInterface = [];
       // simpleInterface.push(this.state.filterDefinitions.findIndex((a) => a.fieldName === "gender"));
-      simpleInterface.push(this.state.filterDefinitions.findIndex((a) => a.fieldName === "age"));
-      simpleInterface.push(this.state.filterDefinitions.findIndex((a) => a.fieldName === "city"));
+      // simpleInterface.push(this.state.filterDefinitions.findIndex((a) => a.fieldName === "age"));
+      // simpleInterface.push(this.state.filterDefinitions.findIndex((a) => a.fieldName === "city"));
       const that = this;
       return (
         <React.Fragment>
@@ -683,7 +706,7 @@ export default class CohortFilter extends React.Component {
             {/*  spacing={0}*/}
             {/*  width={"100%"}*/}
             {/*>*/}
-            {this.getAgeChart()}
+            {/*{this.getAgeChart()}*/}
             {this.state.filterGuiInfoKeys.map((guiInfo, index) => (
               <DpFilterList
                 key={index}
