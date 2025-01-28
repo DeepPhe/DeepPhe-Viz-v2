@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 function DpFilterList(props) {
   const [guiInfo, setGuiInfo] = React.useState(props.guiInfo);
   const [filterGuiInfo, setFilterGuiInfo] = React.useState(props.filterGuiInfo);
-  const [filterGuiInfoKeys, setFilterGuiInfoKeys] = React.useState(props.filterGuiInfoKeys);
   const [filterDefinitions, setFilterDefinitions] = React.useState(props.filterDefinitions);
 
   React.useEffect(() => {
