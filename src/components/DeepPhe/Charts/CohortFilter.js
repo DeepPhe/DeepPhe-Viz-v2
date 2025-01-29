@@ -2,7 +2,12 @@ import React, { useEffect } from "react";
 import "./CohortFilter.css";
 import "rc-slider/assets/index.css";
 import DpFilterList from "./subcomponents/DpFilterList";
-import { fetchFilterDefinitions, initializeFilterDefinitions } from "../../../utils/Filter";
+import $ from "jquery";
+import {
+  fetchFilterDefinitions,
+  initializeFilterDefinitions,
+  updatePatientsMatchingAllFilters,
+} from "../../../utils/Filter";
 import { fetchPatientArrays } from "../../../utils/db/Patient";
 
 const CohortFilter = (props) => {
@@ -13,49 +18,49 @@ const CohortFilter = (props) => {
   const [patientArraysLoading, setPatientArraysLoading] = React.useState(true);
   const [filterDefinitions, setFilterDefinitions] = React.useState([]);
   const [patientArrays, setPatientArrays] = React.useState([]);
+  const [patientsMatchingAllFiltersUpToDate, setPatientsMatchingAllFiltersUpToDate] =
+    React.useState(false);
+  const [patientsMatchingAllFilters, setPatientsMatchingAllFilters] = React.useState([]);
 
   useEffect(() => {
-    fetchPatientArrays.then((patientArrays) => {
+    fetchPatientArrays(db).then((patientArrays) => {
       setPatientArrays(patientArrays);
       setPatientArraysLoading(false);
-    });
 
-    fetchFilterDefinitions().then((filterDefinitions) => {
-      initializeFilterDefinitions(filterDefinitions).then((arr) => {
-        setFilterDefinitionLoading(false);
-        setFilterDefinitions(arr[0]); //filterDefinitions);
-        setFilterGuiInfo(arr[1]); //filterGuiInfo);
+      fetchFilterDefinitions().then((filterDefinitions) => {
+        initializeFilterDefinitions(filterDefinitions, patientArrays).then((arr) => {
+          setFilterDefinitionLoading(false);
+          setFilterDefinitions(arr[0]); //filterDefinitions);
+          setFilterGuiInfo(arr[1]); //filterGuiInfo);
+        });
       });
     });
+    filterChangedState();
   }, []);
 
   const filterChangedState = (definition) => {
-    if (!this.state.isLoading) {
-      this.setState(
-        {
-          filterDefinitions: this.state.filterDefinitions.map((def) => {
-            if (def.fieldName === definition.fieldName) {
-              debugger;
-              return definition;
-            } else {
-              return def;
-            }
-          }),
-          patientsMeetingAllFiltersUpToDate: false,
-        },
-        () => {
-          this.updatePatientsMatchingAllFilters().then(() => {});
+    if (stillLoading()) {
+    } else {
+      //make each rect in each filter that isn't selected, gray
+      const rects = $(".dp-filter-box-T_Stage svg g[clip-path]");
+      const labels = rects.next("g");
+      if (rects.length > 0) {
+        console.log("There are {} bars.", rects[0].childNodes.length);
+        console.log("There are {} labels.", labels[0].childNodes.length);
+      }
+
+      updatePatientsMatchingAllFilters(filterDefinitions, patientArrays).then(
+        (patientsMatchingAllFilters) => {
+          setPatientsMatchingAllFilters(patientsMatchingAllFilters);
         }
       );
     }
   };
 
-  const filterStateChaned = (definition) => {};
-
   const sizingProps = { height: 200 };
 
   const stillLoading = () => {
-    return isLoading || filterDefinitionLoading || patientArraysLoading;
+    return filterDefinitionLoading || patientArraysLoading;
   };
 
   if (stillLoading()) return <div>Data is coming soon...</div>;
@@ -63,6 +68,7 @@ const CohortFilter = (props) => {
     return (
       <React.Fragment>
         <div id={"NewBasicControl"}></div>
+        <div>{patientsMatchingAllFilters.length}</div>
 
         <div id="NewControl">
           {Object.keys(filterGuiInfo).map((guiInfo, index) => (
@@ -71,7 +77,7 @@ const CohortFilter = (props) => {
               guiInfo={guiInfo}
               filterGuiInfo={filterGuiInfo}
               filterDefinitions={filterDefinitions}
-              filterChangedState={filterStateChanged}
+              filterChangedState={filterChangedState}
             />
           ))}
         </div>
@@ -79,3 +85,4 @@ const CohortFilter = (props) => {
     );
   }
 };
+export default CohortFilter;

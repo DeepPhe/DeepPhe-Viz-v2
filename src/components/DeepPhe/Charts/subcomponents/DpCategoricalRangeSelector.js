@@ -1,41 +1,38 @@
 import React, { useState } from "react";
 import DpFilterBox from "./DpFilterBox.js";
 import { useTheme } from "@mui/styles";
-import { FormControlLabel, FormGroup } from "@mui/material";
-import Checkbox from "@mui/material/Checkbox";
+import { FormGroup } from "@mui/material";
 
 function DpCategoricalRangeSelector(props) {
   const [definition, setDefinition] = useState(props.definition);
+  const broadcastUpdate = props.broadcastUpdate;
+  const maximumPatients = definition.globalPatientCountsForCategories.map((item) => item.count);
 
-  const broadcastUpdate = (definition) => {
-    props.broadcastUpdate(definition);
-  };
-  debugger;
   const seriesA = {
     //24 random numbers
-    data: [2, 3, 1, 4, 5, 8, 3, 9, 3, 7, 9, 3, 2, 5, 8, 3, 9, 3, 7, 9, 3, 2, 5, 8],
+    data: maximumPatients,
     label: "Patients Meeting All Filters", // color: "#187bcd",
     // id: "patients-meeting-all-filters",
     color: "#187bcd",
     stack: "total",
     stackOffset: "none",
   };
-  const seriesB = {
-    data: [3, 1, 4, 2, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5],
-    label: "Patients Meeting This Filter", // color: "#2a9df4",
-    // id: "patients-meeting-this-filter",
-    color: "#2a9df4",
-    stack: "total",
-  };
-  const seriesC = {
-    data: [3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 5, 2, 4, 5, 5, 3, 2, 4, 5],
-    label: "Remaining Patients", // color: "#d0efff",
-    // id: "remaining-patients",
-    color: "#d0efff",
-    stack: "total",
-  };
+  // const seriesB = {
+  //   data: [3, 1, 4, 2, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5],
+  //   label: "Patients Meeting This Filter", // color: "#2a9df4",
+  //   // id: "patients-meeting-this-filter",
+  //   color: "#2a9df4",
+  //   stack: "total",
+  // };
+  // const seriesC = {
+  //   data: [3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 5, 2, 4, 5, 5, 3, 2, 4, 5],
+  //   label: "Remaining Patients", // color: "#d0efff",
+  //   // id: "remaining-patients",
+  //   color: "#d0efff",
+  //   stack: "total",
+  // };
 
-  const seriesArray = [{ ...seriesA }, { ...seriesB }, { ...seriesC }];
+  const seriesArray = [{ ...seriesA }];
 
   const getList = () => {
     let width = "100%";
@@ -91,33 +88,33 @@ function DpCategoricalRangeSelector(props) {
           fontSize: "12px",
         }}
       >
-        {definition.categoricalRange.map((key) => (
-          <FormControlLabel
-            sx={{
-              "& .MuiFormControlLabel-label": { fontSize: "14px" },
-              color: theme.palette.text.primary,
-              marginLeft: marginLeftCb,
-              marginRight: marginLeftCb,
-            }}
-            key={key}
-            labelPlacement={"bottom"}
-            control={
-              <Checkbox
-                sx={{
-                  "& .MuiSvgIcon-root": {
-                    fontSize: 14,
-                  },
-                }}
-                color={"primary"}
-                size={"small"}
-                checked={true}
-                // onChange={handleCheckboxChange}
-                name={key}
-              />
-            }
-            label={""}
-          />
-        ))}
+        {/*{definition.categoricalRange.map((key) => (*/}
+        {/*  <FormControlLabel*/}
+        {/*    sx={{*/}
+        {/*      "& .MuiFormControlLabel-label": { fontSize: "14px" },*/}
+        {/*      color: theme.palette.text.primary,*/}
+        {/*      marginLeft: marginLeftCb,*/}
+        {/*      marginRight: marginLeftCb,*/}
+        {/*    }}*/}
+        {/*    key={key}*/}
+        {/*    labelPlacement={"bottom"}*/}
+        {/*    control={*/}
+        {/*      <Checkbox*/}
+        {/*        sx={{*/}
+        {/*          "& .MuiSvgIcon-root": {*/}
+        {/*            fontSize: 14,*/}
+        {/*          },*/}
+        {/*        }}*/}
+        {/*        color={"primary"}*/}
+        {/*        size={"small"}*/}
+        {/*        checked={true}*/}
+        {/*        // onChange={handleCheckboxChange}*/}
+        {/*        name={key}*/}
+        {/*      />*/}
+        {/*    }*/}
+        {/*    label={""}*/}
+        {/*  />*/}
+        {/*))}*/}
       </FormGroup>
     );
   };
@@ -126,7 +123,10 @@ function DpCategoricalRangeSelector(props) {
     <React.Fragment>
       <span
         className={
-          "dp-filter-box-" + definition.fieldName + " dp-filter-box col-md-" + props.expandedLevel
+          "dp-filter-box-" +
+          definition.fieldName.replace(" ", "_") +
+          " dp-filter-box col-md-" +
+          props.expandedLevel
         }
       >
         <DpFilterBox
@@ -135,6 +135,7 @@ function DpCategoricalRangeSelector(props) {
           type={"BarChartWithSlider"}
           fullWidth={props.fullWidth}
           list={getList()}
+          broadcastUpdate={broadcastUpdate}
         ></DpFilterBox>
       </span>
     </React.Fragment>

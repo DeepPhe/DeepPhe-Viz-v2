@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChangeResult } from "multi-range-slider-react";
 import Slider from "rc-slider";
-import { axisClasses, BarChart, BarPlot, ResponsiveChartContainer } from "@mui/x-charts";
+import { axisClasses, BarChart } from "@mui/x-charts";
 import { useTheme } from "@mui/styles";
 import CheckboxXAxisLabel from "./controls/CheckboxXAxisLabel";
 
@@ -10,13 +10,12 @@ function BarChartWithSlider(props) {
   const [sliderState, setSliderState] = useState(undefined);
   const seriesArray = props.seriesArray;
   const definition = props.definition;
-  const globalPatientCountsForCategories = props.definition.globalPatientCountsForCategories;
   const theme = useTheme();
   // debugger;
   useEffect(() => {
     let barColorsTmp = [];
     if (definition.class === "categoricalRangeSelector") {
-      globalPatientCountsForCategories.forEach((category, idx) => {
+      definition.globalPatientCountsForCategories.forEach((category, idx) => {
         const sliderIdx = idx;
         const active =
           sliderState === undefined
@@ -25,19 +24,16 @@ function BarChartWithSlider(props) {
         barColorsTmp = [...barColorsTmp, active ? null : "#0000008c"];
       });
       setBarColors(barColorsTmp);
-      //console.log(barColorsTmp);
+      props.broadcastUpdate(definition);
     }
   }, [sliderState]);
   const handleSliderRangeChange = (e: ChangeResult) => {
     let selectedCategoricalRange = [];
-    //for (let i = e[0]; i <= e[1]; i++) console.log(e);
+    for (let i = e[0]; i <= e[1]; i++) {
+      selectedCategoricalRange.push(definition.globalPatientCountsForCategories[i].category);
+    }
+    definition.selectedCategoricalRange = selectedCategoricalRange;
     setSliderState(e);
-    //selectedCategoricalRange.push(definition.globalPatientCountsForCategories[i].category);
-    // this.props.definition.selectedCategoricalRange = selectedCategoricalRange
-    // this.setState({
-    //   ...(definition.selectedCategoricalRange = selectedCategoricalRange),
-    //   updated: false,
-    // });
   };
 
   const getSlider = () => {
@@ -45,7 +41,7 @@ function BarChartWithSlider(props) {
     const marks2 = {};
     let minSelectedInRange = 10000000000;
     let maxSelectedInRange = 0;
-    globalPatientCountsForCategories.map((item, index) => {
+    props.definition.globalPatientCountsForCategories.map((item, index) => {
       marks2[index] = {
         label: item.category,
         style: { color: theme.palette.text.primary },
@@ -85,7 +81,7 @@ function BarChartWithSlider(props) {
           className={"bar-chart-filter-slider"}
           range
           min={0}
-          max={globalPatientCountsForCategories.length - 1}
+          max={props.definition.globalPatientCountsForCategories.length - 1}
           defaultValue={[minSelectedInRange, maxSelectedInRange]}
           onChange={(e) => handleSliderRangeChange(e)}
           draggableTrack={true}
@@ -97,109 +93,19 @@ function BarChartWithSlider(props) {
     );
   };
 
-  const getAgeSlider = () => {
-    return (
-      <div className={"slider-container"}>
-        <Slider
-          style={{ width: "91%", margin: "auto" }}
-          className={"bar-chart-filter-slider"}
-          range
-          min={0}
-          max={100}
-          defaultValue={[0, 100]}
-          onChange={(e) => handleSliderRangeChange(e)}
-          draggableTrack={true}
-          included={true}
-          dots={false}
-          step={1}
-        />
-      </div>
-    );
-  };
-  const getAgeChart = () => {
-    const seriesA = {
-      data: Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)),
-      label: "Patients Meeting All Filters",
-      color: "#187bcd",
-      id: "patients-meeting-all-filters",
-    };
-    const seriesB = {
-      data: Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)),
-      label: "Patients Meeting This Filter",
-      color: "#2a9df4",
-      id: "patients-meeting-this-filter",
-    };
-    const seriesC = {
-      data: Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)),
-      label: "Remaining Patients",
-      color: "#d0efff",
-      id: "remaining-patients",
-    };
-    seriesA["data"][10] = 2;
-    seriesB["data"][10] = 3;
-    seriesC["data"][10] = 1;
-    const ageseriesArray = [
-      { ...seriesA, stack: "total" },
-      { ...seriesB, stack: "total" },
-      { ...seriesC, stack: "total" },
-    ];
-    const categories = [
-      "0-9",
-      "10s",
-      "20s",
-      "30s",
-      "40s",
-      "50s",
-      "60s",
-      "70s",
-      "80s",
-      "90s",
-      "100+",
-    ];
-    const sizingProps = { height: 150 };
-    return (
-      <ResponsiveChartContainer
-        label="Patients Meeting All Filters"
-        // colors={blueberryTwilightPalette}
-        slotProps={{ legend: { hidden: true } }}
-        series={ageseriesArray}
-        xAxis={[
-          {
-            // id: "x-axis-id",
-            // label: this.state.definition.fieldName,
-            scaleType: "band",
-            data: categories,
-          },
-        ]}
-        {...sizingProps}
-      >
-        {" "}
-        <BarPlot />
-        {/*<ChartsXAxis*/}
-        {/*  label={this.state.definition.fieldName}*/}
-        {/*  position="bottom"*/}
-        {/*  axisId="x-axis-id"*/}
-        {/*/>*/}
-      </ResponsiveChartContainer>
-    );
-  };
-
   const getHorizontalChart = () => {
     // const sizingProps = { height: 500 };
     const barColorsMap = {
       //jdl jdl
     };
 
-    const categories = props.definition.categoricalRange;
+    let categories = props.definition.categoricalRange;
+    //for each category, remove the prefix, which is the props.definition.fieldname
+    categories = categories.map((category) => {
+      return category.replace(props.definition.fieldName + ".", "");
+    });
     const numCategories = categories.length;
     const width = numCategories * 50;
-    let adjustedSeriesArray = [...seriesArray];
-
-    for (let i = 0; i < seriesArray.length; i++) {
-      adjustedSeriesArray[i].data = seriesArray[i].data.slice(
-        seriesArray[i].data.length - categories.length
-      );
-    }
 
     let sizingProps = { height: 150 };
 
@@ -219,7 +125,7 @@ function BarChartWithSlider(props) {
           margin={{ top: 5, right: 0, bottom: 30, left: 30 }}
           // colors={blueberryTwilightPalette}
           slotProps={{ legend: { direction: "row", hidden: true } }}
-          series={adjustedSeriesArray}
+          series={seriesArray}
           xAxis={[
             {
               tickLabelInterval: () => true,
@@ -241,37 +147,6 @@ function BarChartWithSlider(props) {
     );
   };
 
-  // const getVerticalChart = () => {
-  //   const sizingProps = { height: 200 };
-  //   const categories = props.definition.categoricalRange;
-  //   return (
-  //     <BarChart
-  //       label="Patients Meeting All Filters2"
-  //       layout={"horizontal"}
-  //       // colors={blueberryTwilightPalette}
-  //       slotProps={{ legend: { hidden: true } }}
-  //       series={seriesArray}
-  //       yAxis={[
-  //         {
-  //           scaleType: "band",
-  //           data: categories,
-  //           colorMap: {
-  //             type: "ordinal",
-  //             colors: barColors,
-  //           },
-  //         },
-  //       ]}
-  //       {...sizingProps}
-  //     >
-  //       {/*<ChartsXAxis*/}
-  //       {/*  label={this.state.definition.fieldName}*/}
-  //       {/*  position="bottom"*/}
-  //       {/*  axisId="x-axis-id"*/}
-  //       {/*/>*/}
-  //     </BarChart>
-  //   );
-  // };
-
   const getChart = () => {
     // if (["t", "n", "m"].includes(definition.fieldName)) {
     //   //return getVerticalChart();
@@ -282,8 +157,8 @@ function BarChartWithSlider(props) {
 
   return (
     <React.Fragment>
-      {definition.class === "categoricalRangeSelector" ? getChart() : getAgeChart()}
-      {definition.class === "categoricalRangeSelector" ? getSlider() : getAgeSlider()}
+      {getChart()}
+      {getSlider()}
     </React.Fragment>
   );
 }

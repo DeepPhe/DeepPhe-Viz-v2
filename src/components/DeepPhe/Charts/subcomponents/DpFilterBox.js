@@ -12,6 +12,7 @@ function DpFilterBox(props) {
   const theme = useTheme();
   const { definition } = props;
   const fullWidth = props.fullWidth;
+  const broadcastUpdate = props.broadcastUpdate;
 
   let filterObject = undefined;
   if (
@@ -22,6 +23,7 @@ function DpFilterBox(props) {
       <BarChartWithSlider
         definition={props.definition}
         seriesArray={props.seriesArray}
+        broadcastUpdate={broadcastUpdate}
       ></BarChartWithSlider>
     );
   }
@@ -160,14 +162,14 @@ function DpFilterBox(props) {
         </Box>
       </Grid>
       <Grid item md={1}>
-        <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-          {getChart("U")}
-        </Box>
+        {/*<Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>*/}
+        {/* / {getChart("U")}*/}
+        {/*</Box>*/}
       </Grid>
       <Grid item>
-        <Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>
-          {getChart("T")}
-        </Box>
+        {/*<Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>*/}
+        {/*  {getChart("T")}*/}
+        {/*</Box>*/}
       </Grid>
       {/*<Grid item sm={1}>*/}
       {/*  <Box*/}

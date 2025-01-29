@@ -3,12 +3,21 @@ import parsePipeSeparatedFile from "./DbFileReader";
 import { DEEPPHE_DB, DEEPPHE_STORE, DEEPPHE_TXT_FILE } from "./DbConsts";
 
 const initDB = async () => {
-  await deleteDB(DEEPPHE_DB);
-  return await openDB(DEEPPHE_DB, 1, {
-    upgrade(db) {
-      db.createObjectStore(DEEPPHE_STORE, { keyPath: "id", autoIncrement: true });
-    },
-  });
+  try {
+    await deleteDB(DEEPPHE_DB, {
+      blocked() {
+        console.error("Blocked from deleting database");
+      },
+    });
+    return await openDB(DEEPPHE_DB, 1, {
+      upgrade(db) {
+        db.createObjectStore(DEEPPHE_STORE, { keyPath: "id", autoIncrement: true });
+      },
+    });
+  } catch (error) {
+    console.error("Error deleting or opening database:", error);
+    throw error;
+  }
 };
 
 const loadFileData = async () => {
@@ -42,15 +51,21 @@ const loadData = async (db) => {
   }
 };
 
-const initDb = () => {
+const fetchPatientDatabase = () => {
   return new Promise((resolve, reject) => {
-    debugger;
-    initDB().then((db) => {
-      loadData(db).then(() => {
-        resolve(db);
+    initDB()
+      .then((db) => {
+        loadData(db)
+          .then(() => {
+            resolve(db);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      })
+      .catch((error) => {
+        reject(error);
       });
-    });
   });
 };
-
-export { initDb };
+export { fetchPatientDatabase };
