@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import HSBar from "react-horizontal-stacked-bar-chart";
 import { ToggleButton } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -12,13 +12,6 @@ function DpFilterComponent(props) {
     fieldName: props.definition.fieldName,
     enabled: true,
   });
-
-  useEffect(() => {
-    if (props) {
-      setDefinition(props.definition);
-      setToggleInfo(toggleInfo);
-    }
-  }, [props.definition]);
 
   const getToggleSwitch = (definition) => {
     return (
@@ -83,7 +76,7 @@ function DpFilterComponent(props) {
         name: "Matching All",
         description: patientsMeetingEntireSetOfFilters,
         value: patientsMeetingEntireSetOfFilters,
-        color: "blue",
+        color: "#003594",
       });
     }
     if (patientsMeetingThisFilterOnlyGreaterThanZero) {
@@ -91,7 +84,7 @@ function DpFilterComponent(props) {
         name: "Matching Filter",
         description: patientsMeetingThisFilterOnly - patientsMeetingEntireSetOfFilters,
         value: patientsMeetingThisFilterOnly,
-        color: "lightblue",
+        color: "#FFB81C",
       });
     }
     if (remainderGreaterThanZero) {

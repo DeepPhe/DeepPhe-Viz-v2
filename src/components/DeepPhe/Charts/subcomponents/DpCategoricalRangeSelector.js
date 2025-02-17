@@ -1,38 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DpFilterBox from "./DpFilterBox.js";
-import { useTheme } from "@mui/styles";
 import { FormGroup } from "@mui/material";
+import { getDataset, getSeries } from "../../../../utils/Filter";
 
 function DpCategoricalRangeSelector(props) {
-  const [definition, setDefinition] = useState(props.definition);
+  const [series, setSeries] = useState(undefined);
+  const [dataset, setDataset] = useState(undefined);
+  const [isLoading, setIsLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [newChartReady, setNewChartReady] = useState(false);
+  const filterStates = props.filterStates;
   const broadcastUpdate = props.broadcastUpdate;
-  const maximumPatients = definition.globalPatientCountsForCategories.map((item) => item.count);
+  const { definition } = props;
+  const thisFilter = filterStates.find((a) => a.filter === props.definition.fieldName);
 
-  const seriesA = {
-    //24 random numbers
-    data: maximumPatients,
-    label: "Patients Meeting All Filters", // color: "#187bcd",
-    // id: "patients-meeting-all-filters",
-    color: "#187bcd",
-    stack: "total",
-    stackOffset: "none",
-  };
-  // const seriesB = {
-  //   data: [3, 1, 4, 2, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5],
-  //   label: "Patients Meeting This Filter", // color: "#2a9df4",
-  //   // id: "patients-meeting-this-filter",
-  //   color: "#2a9df4",
-  //   stack: "total",
-  // };
-  // const seriesC = {
-  //   data: [3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 3, 2, 4, 5, 1, 5, 2, 4, 5, 5, 3, 2, 4, 5],
-  //   label: "Remaining Patients", // color: "#d0efff",
-  //   // id: "remaining-patients",
-  //   color: "#d0efff",
-  //   stack: "total",
-  // };
+  useEffect(() => {
+    const newDataset = getDataset(
+      thisFilter,
+      definition.categoricalRange,
+      definition.selectedCategoricalRange
+    );
+    setDataset(newDataset);
+    const newSeries = getSeries();
+    setSeries(newSeries);
+  }, [definition, filterStates]);
 
-  const seriesArray = [{ ...seriesA }];
+  useEffect(() => {
+    if (dataset && series) {
+      setIsLoading(false);
+      setInitialLoad(false);
+      setNewChartReady(true);
+    }
+  }, [dataset, series]);
 
   const getList = () => {
     let width = "100%";
@@ -74,10 +73,9 @@ function DpCategoricalRangeSelector(props) {
       mt = "-42px";
       mr = "-41px";
     }
-    const theme = useTheme();
+
     return (
       <FormGroup
-        alignItems="center"
         row
         sx={{
           flexWrap: "nowrap",
@@ -119,27 +117,31 @@ function DpCategoricalRangeSelector(props) {
     );
   };
 
-  return (
-    <React.Fragment>
-      <span
-        className={
-          "dp-filter-box-" +
-          definition.fieldName.replace(" ", "_") +
-          " dp-filter-box col-md-" +
-          props.expandedLevel
-        }
-      >
-        <DpFilterBox
-          seriesArray={seriesArray}
-          definition={definition}
-          type={"BarChartWithSlider"}
-          fullWidth={props.fullWidth}
-          list={getList()}
-          broadcastUpdate={broadcastUpdate}
-        ></DpFilterBox>
-      </span>
-    </React.Fragment>
-  );
+  if (initialLoad) {
+  } else {
+    return (
+      <React.Fragment>
+        <span
+          className={
+            "dp-filter-box-" +
+            definition.fieldName.replace(" ", "_") +
+            " dp-filter-box col-md-" +
+            props.expandedLevel
+          }
+        >
+          <DpFilterBox
+            series={newChartReady ? series : props.oldSeries}
+            dataset={newChartReady ? dataset : props.oldDataset}
+            definition={definition}
+            type={"BarChartWithSlider"}
+            fullWidth={props.fullWidth}
+            list={getList()}
+            broadcastUpdate={broadcastUpdate}
+          />
+        </span>
+      </React.Fragment>
+    );
+  }
 }
 
 export default DpCategoricalRangeSelector;

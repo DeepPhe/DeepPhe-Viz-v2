@@ -1,5 +1,58 @@
 import { fastIntersection } from "./arrayHelpers";
 import { initFilterDefinitions } from "./FilterDefinitions";
+import filterPatients from "./FilterPatients";
+
+const getSeries = () => {
+  return [
+    {
+      dataKey: "Patients Meeting All Filters",
+      label: "Patients Meeting All Filters",
+      color: "#003594",
+      stack: "total",
+    },
+    {
+      dataKey: "Patients Meeting This Filter Only",
+      label: "Patients Meeting This Filter Only",
+      color: "#FFB81C",
+      stack: "total",
+    },
+    {
+      dataKey: "Patients Not Meeting This Filter",
+      label: "Patients Not Meeting This Filter",
+      color: "rgba(178,178,178,0.8)",
+      stack: "total",
+    },
+  ];
+};
+
+const getDataset = (thisFilter, categoricalRange, selectedCategoricalRange) => {
+  return categoricalRange.map((category, catIdx) => {
+    const categoryEnabled = selectedCategoricalRange.includes(category);
+
+    let patientsMeetingAllFilters =
+      thisFilter.patientsInThisFilterAndMatchingThisFilterAndMatchingAllOtherFiltersByCategory[
+        catIdx
+      ];
+    let patientsMeetingThisFilterOnly =
+      thisFilter.patientsInThisFilterAndMatchingThisFilterAndNotMatchingAllOtherFiltersByCategory[
+        catIdx
+      ];
+    let patientsNotMeetingThisFilter =
+      thisFilter.patientsInThisFilterAndNotMatchingThisFilterByCategory[catIdx];
+
+    if (!categoryEnabled) {
+      patientsNotMeetingThisFilter += patientsMeetingThisFilterOnly + patientsMeetingAllFilters;
+      patientsMeetingThisFilterOnly = 0;
+      patientsMeetingAllFilters = 0;
+    }
+    return {
+      category: category.replace(thisFilter.filter + ".", ""),
+      "Patients Meeting All Filters": patientsMeetingAllFilters,
+      "Patients Meeting This Filter Only": patientsMeetingThisFilterOnly,
+      "Patients Not Meeting This Filter": patientsNotMeetingThisFilter,
+    };
+  });
+};
 
 const fetchFilterDefinitions = () => {
   return new Promise(function (resolve, reject) {
@@ -26,70 +79,90 @@ const initializeFilterDefinitions = (filterDefinitions, patientArrays) => {
 //   //
 //   filterAttribIds(allAttributesArray, ["T Stage", "N Stage", "M Stage"]).then((tnmArray) => {
 //     debugger;
-//     setGlobalPatientCountsForCategories2(definitions, tnmArray);
+//     setpatientCountsByCategory2(definitions, tnmArray);
 //   });
 // });
 
 const getPatientsInFilter = (definition, patientArrays, matchesOnly) => {
   const getPatientsForArrayName = (name) => {
     const arrayRow = name;
-    console.log("Array row:", arrayRow);
     return patientArrays[arrayRow];
   };
   let matchingPatients = [];
-  switch (definition.class) {
-    case "discreteList":
-      break;
-    case "checkboxList":
-      definition.checkboxes.forEach((switchDefinition) => {
-        // if (switchDefinition.checked || !matchesOnly) {
-        //   matchingPatients = matchingPatients.concat(
-        //     getPatientsForArrayName(switchDefinition.name)
-        //   );
-        // }
-      });
-      break;
-    case "categoricalRangeSelector":
-      let arr;
-      arr = definition.selectedCategoricalRange;
-
-      arr.forEach((range) => {
-        matchingPatients = matchingPatients.concat(getPatientsForArrayName(range));
-      });
-      break;
-    case "numericRangeSelector":
-      break;
-    case "booleanList":
-      definition.switches.forEach((switchDefinition) => {
-        if (switchDefinition.value || !matchesOnly) {
-          matchingPatients = matchingPatients.concat(
-            getPatientsForArrayName(switchDefinition.name)
-          );
-        }
-      });
-      break;
-    default:
-      console.log("Unknown filter type", definition.class);
+  let matchingPatientsByCategory = [];
+  if (definition.class === "discreteList") {
+  } else if (definition.class === "checkboxList") {
+    definition.checkboxes.forEach((switchDefinition) => {
+      // if (switchDefinition.checked || !matchesOnly) {
+      //   matchingPatients = matchingPatients.concat(
+      //     getPatientsForArrayName(switchDefinition.name)
+      //   );
+      // }
+    });
+  } else if (definition.class === "categoricalRangeSelector") {
+    let arr;
+    arr = definition.categoricalRange;
+    arr.forEach((range) => {
+      const pats = getPatientsForArrayName(range);
+      if (definition.selectedCategoricalRange.includes(range) || !definition.enabled) {
+        matchingPatients = matchingPatients.concat(pats);
+        matchingPatientsByCategory.push(pats);
+      } else {
+        matchingPatientsByCategory.push([]);
+      }
+    });
+    definition.patientsMeetingThisFilterOnly = matchingPatientsByCategory;
+  } else if (definition.class === "numericRangeSelector") {
+  } else if (definition.class === "booleanList") {
+    definition.switches.forEach((switchDefinition) => {
+      if (switchDefinition.value || !matchesOnly) {
+        matchingPatients = matchingPatients.concat(getPatientsForArrayName(switchDefinition.name));
+      }
+    });
+  } else {
+    console.log("Unknown filter type", definition.class);
   }
-  return matchingPatients;
+  return [matchingPatients];
 };
 const updateFilterData = () => {};
+const extractUniquePatientIds = (patientArrays) => {
+  const uniquePatientIds = new Set();
 
+  for (const arrayName in patientArrays) {
+    if (patientArrays.hasOwnProperty(arrayName)) {
+      const patients = patientArrays[arrayName];
+      patients.forEach((patientId) => {
+        uniquePatientIds.add(patientId);
+      });
+    }
+  }
+
+  return Array.from(uniquePatientIds);
+};
 const updateFilterCountsAndGetMatches = (filterDefinitions, patientArrays) => {
   return new Promise((resolve, reject) => {
-    let matchesArray = [];
-    filterDefinitions.forEach((definition) => {
-      let numPatientsInFilter = 0;
-      definition.globalPatientCountsForCategories.forEach((category) => {
-        numPatientsInFilter += category.count;
-      });
-
-      const patientsInFilter = getPatientsInFilter(definition, patientArrays, true);
-      matchesArray.push(patientsInFilter);
-      definition.patientsMeetingThisFilterOnly = numPatientsInFilter;
-      //console.log("Patients meeting " + fieldName + " only: " + patientsInFilter.length);
+    // const allArray = extractUniquePatientIds(patientArrays);
+    // let matchesArray = [];
+    // filterDefinitions.forEach((definition) => {
+    //   let numPatientsInFilter = 0;
+    //   definition.patientCountsByCategory.forEach((category) => {
+    //     numPatientsInFilter += category.count;
+    //   });
+    //   let patientsInFilter = [];
+    //   if (definition.enabled) {
+    //     patientsInFilter = getPatientsInFilter(definition, patientArrays, true);
+    //   } else {
+    //     patientsInFilter = [...allArray];
+    //   }
+    //   matchesArray.push(...patientsInFilter);
+    //   //console.log("Patients meeting " + fieldName + " only: " + patientsInFilter.length);
+    // });
+    // //create an array with all patientids from patientArrays
+    //
+    // matchesArray.push(allArray);
+    filterPatients(filterDefinitions, patientArrays).then((matchesArray) => {
+      console.log("filterDefinitions", filterDefinitions);
     });
-    resolve(matchesArray);
   });
 };
 
@@ -112,10 +185,15 @@ const updatePatientsMatchingAllFilters = (filterDefinitions, patientArrays) => {
   return new Promise((resolve, reject) => {
     updateFilterCountsAndGetMatches(filterDefinitions, patientArrays).then((matchesArray) => {
       const patientsMeetingAllFilters = fastIntersection(...matchesArray);
-
       resolve(patientsMeetingAllFilters);
     });
   });
 };
 
-export { updatePatientsMatchingAllFilters, fetchFilterDefinitions, initializeFilterDefinitions };
+export {
+  updatePatientsMatchingAllFilters,
+  fetchFilterDefinitions,
+  initializeFilterDefinitions,
+  getSeries,
+  getDataset,
+};

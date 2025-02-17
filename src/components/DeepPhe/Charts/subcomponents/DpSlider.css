@@ -1,0 +1,90 @@
+/* RcSlider.css */
+
+.rc-slider {
+    left: 15px;
+    margin-top: -93px !important;
+    padding-bottom: 95px !important;
+}
+
+.rc-slider-dot {
+    color: red;
+}
+
+.rc-slider-track {
+    z-index: 101;
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    margin-top: -57px;
+    height: 115px !important;
+    opacity: 0.2 !important;
+}
+
+.rc-slider-track-draggable {
+    z-index: 100;
+    background-color: rgb(0, 0, 0) !important;
+}
+
+.rc-slider-handle-1 {
+    /*margin-left: -16px !important;*/
+}
+
+.rc-slider-handle-2 {
+    /*margin-left: 16px !important;*/
+}
+
+.rc-slider-step {
+    /*visibility: hidden;*/
+    color: red;
+}
+
+.rc-slider-rail {
+    visibility: hidden;
+}
+
+.rc-slider-mark {
+    top: 8px !important;
+    z-index: 99 !important;
+}
+
+#numeric-range-selector-row .rc-slider-mark-text {
+    padding-left: 0px !important;
+}
+
+.rc-slider-mark-text {
+    /*padding-left: calc(5%) !important;*/
+    font-size: 12px !important;
+    margin-top: 5px !important;
+    text-wrap: nowrap;
+    z-index: 99;
+    /*transform: translateX(+0%) !important;*/
+}
+
+.rc-slider-dot {
+    bottom: 0px !important;
+    border-color: white;
+}
+
+.rc-slider-handle {
+    /*clip-path: polygon(25% 25%, 75% 25%, 75% 75%, 50% 100%, 25% 75%);*/
+    background-color: #000000 !important;
+    /*border: none !important;*/
+    width: 8px !important;
+    height: 8px !important;
+    border: solid 2px black !important;
+    margin-top: -4px !important;
+    opacity: 1.0 !important;
+    color: red;
+    z-index: 100 !important;
+}
+
+.rc-slider-dot-active {
+    border-color: white !important;
+    background-color: white !important;
+}
+
+.rc-slider-handle-1 {
+    /*transform: translate(-100%) !important;*/
+}
+
+.rc-slider-handle-2 {
+    /*transform: translate(0%) !important;*/
+}

@@ -7,7 +7,7 @@ function DpDiscreteList(props) {
     return null;
   }
   const { definition } = props;
-  const items = definition.globalPatientCountsForCategories.map((item, index) => {
+  const items = definition.patientCountsByCategory.map((item, index) => {
     return { category: item.category, selected: false };
   });
   const [state, setState] = React.useState({
@@ -29,7 +29,7 @@ function DpDiscreteList(props) {
   const getList = () => {
     return (
       <div className={"filter-inner-container"}>
-        {props.definition.globalPatientCountsForCategories.map((item, index) => {
+        {props.definition.patientCountsByCategory.map((item, index) => {
           return (
             <ToggleButton
               sx={{ color: "blue", fontSize: "12px" }}

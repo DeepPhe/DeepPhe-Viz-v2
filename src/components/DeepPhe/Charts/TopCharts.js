@@ -36,7 +36,7 @@ const TopCharts = () => {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Typography align={"center"} variant={"h3"}>
+        <Typography align={"center"} variant={"h6"}>
           DeepPhe Cohort Filter
         </Typography>
         <Grid container direction="row" justifyContent="center" align="center" spacing={10}>

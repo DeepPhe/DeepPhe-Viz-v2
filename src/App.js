@@ -27,7 +27,6 @@ import Icon from "@mui/material/Icon";
 import MDBox from "components/MDBox";
 
 // Material Dashboard 2 React example components
-
 // Material Dashboard 2 React themes
 import theme from "assets/theme";
 import themeRTL from "assets/theme/theme-rtl";
@@ -148,7 +147,8 @@ export default function App() {
         <Routes>
           {console.log(theme)}
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/deepphe" />} />
+          <Route path="/deepphe" element={<Navigate to="/deepphe" />} />
+          <Route path="/test" element={<Navigate to="/test" />} />
         </Routes>
       </ThemeProvider>
     </CacheProvider>

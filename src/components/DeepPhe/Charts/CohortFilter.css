@@ -106,103 +106,9 @@ svg[id$="-hs"] {
 }
 
 .slider-container {
-    height: 100% !important;
-    margin-top: -5px !important;
-    display: flex;
-    flex: 3 2 auto;
-}
-
-.rc-slider {
-    padding-left: 0px !important;
-    padding-right: 0px !important;
-    left: 10px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0px !important;
-}
-
-.rc-slider-track {
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.75) !important;
-}
-
-.rc-slider-track-draggable {
-    z-index: 100;
-    background-color: rgb(0, 0, 0) !important;
 
 }
 
-.rc-slider-step {
-    /*visibility: hidden;*/
-}
-
-.rc-slider-rail, .rc-slider-track {
-    height: 2px !important;
-    border-radius: 0px !important;
-    margin-top: 5px;
-}
-
-.rc-slider-mark {
-    top: 8px !important;
-    z-index: 99 !important;
-}
-
-#numeric-range-selector-row .rc-slider-mark-text {
-    padding-left: 0px !important;
-}
-
-.rc-slider-mark-text {
-    /*padding-left: calc(5%) !important;*/
-    font-size: 12px !important;
-    margin-top: 5px !important;
-    text-wrap: nowrap;
-    z-index: 99;
-    /*transform: translateX(+0%) !important;*/
-
-}
-
-.rc-slider-dot {
-    bottom: 0px !important;
-}
-
-.rc-slider-handle {
-    /*width: 10px !important;*/
-    /*height: 40px !important;*/
-    /*border: none !important;*/
-    /*border-radius: 0px !important;*/
-    /*background-color: #fbdfab !important;*/
-    /*margin-top: 0px !important;*/
-    z-index: 100 !important;
-}
-
-.rc-slider-dot {
-    border-color: white;
-}
-
-.rc-slider-handle {
-    /*clip-path: polygon(25% 25%, 75% 25%, 75% 75%, 50% 100%, 25% 75%);*/
-    background-color: #000000 !important;
-    /*border: none !important;*/
-    width: 8px !important;
-    height: 21px !important;
-    /*margin-top: -5px !important;*/
-    opacity: 1.0 !important;
-}
-
-.rc-slider-dot-active {
-    border-color: white !important;
-    background-color: white !important;
-
-}
-
-
-.rc-slider-handle-1 {
-    /*transform: translate(-100%) !important;*/
-}
-
-.rc-slider-handle-2 {
-    /*transform: translate(0%) !important;*/
-}
 
 .cohort-size-label {
     padding: 0px 5px 0px 0px !important;
@@ -316,6 +222,14 @@ svg[id$="-hs"] {
 
 .MuiChartsAxis-directionX .MuiChartsAxis-tickLabel {
     /*transform: translateX(40%) rotateZ(32deg)*/
+}
+
+.MuiChartsAxis-tickLabel {
+    user-select: none;
+}
+
+.dp-bar-chart > div, .dp-bar-chart > div > svg {
+    overflow: visible;
 }
 
 .Mui-selected {

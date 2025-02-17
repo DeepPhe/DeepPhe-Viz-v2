@@ -1,18 +1,21 @@
 import Grid from "@mui/material/Grid";
-import React from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import { useTheme } from "@mui/styles";
-import BarChartWithSlider from "./BarChartWithSlider";
-import { BarChart } from "@mui/x-charts";
+import DpBarChart from "./DpBarChart";
 import Typography from "@mui/material/Typography";
-import { FormControlLabel, FormGroup } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 
 function DpFilterBox(props) {
   const theme = useTheme();
-  const { definition } = props;
-  const fullWidth = props.fullWidth;
-  const broadcastUpdate = props.broadcastUpdate;
+  const { definition, broadcastUpdate, dataset, series } = props;
+  const [isChecked, setIsChecked] = useState(definition.enabled);
+
+  const handleCheckboxChange = (event, definition) => {
+    setIsChecked(event.target.checked);
+    definition.enabled = event.target.checked;
+    broadcastUpdate(definition);
+  };
 
   let filterObject = undefined;
   if (
@@ -20,140 +23,75 @@ function DpFilterBox(props) {
     definition.class === "numericRangeSelector"
   ) {
     filterObject = (
-      <BarChartWithSlider
+      <DpBarChart
+        wantSlider={true}
+        wantCheckboxes={false}
         definition={props.definition}
-        seriesArray={props.seriesArray}
+        dataset={dataset}
+        series={series}
         broadcastUpdate={broadcastUpdate}
-      ></BarChartWithSlider>
+      ></DpBarChart>
+    );
+  } else if (definition.class === "valueSelector") {
+    filterObject = (
+      <DpBarChart
+        wantSlider={false}
+        wantCheckboxes={true}
+        definition={props.definition}
+        dataset={dataset}
+        series={series}
+        broadcastUpdate={broadcastUpdate}
+      ></DpBarChart>
     );
   }
-  const getList = (title) => {
-    let width = "100%";
-    let mt = 0;
-    let mr = 0;
-    let marginLeftCb = "0px";
-    const numCheckboxes = 1;
-    if (numCheckboxes === 1) {
-      width = "8%";
-      mt = "117px";
-      mr = "0px";
-      marginLeftCb = "-35px";
-    }
-    const theme = useTheme();
-    return (
-      <FormGroup
-        alignItems="center"
-        row
-        sx={{
-          width: width,
-          justifyContent: "space-between",
-          fontSize: "12px",
-          rowWrap: "nowrap",
-        }}
-      >
-        <FormControlLabel
-          sx={{
-            "& .MuiFormControlLabel-label": { fontSize: "14px" },
-            color: theme.palette.text.primary,
-            marginRight: marginLeftCb,
-
-            fontSize: "10px",
-          }}
-          key={title}
-          labelPlacement={"bottom"}
-          control={
-            <Checkbox
-              sx={{
-                "& .MuiSvgIcon-root": { fontSize: 14 },
-                marginTop: mt,
-                marginLeft: mr,
-              }}
-              size={"small"}
-              checked={true}
-              name={title}
-            />
-          }
-          label={""}
-        />
-      </FormGroup>
-    );
-  };
-
-  const getChart = (title) => {
-    const seriesA = {
-      data: [Math.floor(Math.random() * 2)],
-      label: "Patients Meeting All Filters",
-      color: "#187bcd",
-      id: "patients-meeting-all-filters",
-    };
-    const seriesB = {
-      data: [2 + Math.floor(Math.random() * 2)],
-      label: "Patients Meeting This Filter",
-      color: "#2a9df4",
-      id: "patients-meeting-this-filter",
-    };
-    const seriesC = {
-      data: [4 + Math.floor(Math.random() * 2)],
-      label: "Remaining Patients",
-      color: "#d0efff",
-      id: "remaining-patients",
-    };
-    const seriesArray = [
-      { ...seriesA, stack: "total" },
-      { ...seriesB, stack: "total" },
-      { ...seriesC, stack: "total" },
-    ];
-    let marginLeft = 5;
-    let checkbox = undefined;
-    if (title === "T") {
-      marginLeft = 5;
-    } else {
-      checkbox = getList(title);
-    }
-    const categories = [title];
-    const sizingProps = { width: 65, height: 150 };
-    return (
-      <React.Fragment>
-        <BarChart
-          rightAxis={{}}
-          leftAxis={null}
-          margin={{ top: 10, right: 28, bottom: 30, left: marginLeft }}
-          // colors={blueberryTwilightPalette}
-          slotProps={{ legend: { hidden: true } }}
-          series={seriesArray}
-          xAxis={[
-            {
-              labelStyle: { fontSize: 7 }, // id: "x-axis-id",
-              // label: this.state.definition.fieldName,
-              scaleType: "band",
-              data: categories,
-            },
-          ]}
-          {...sizingProps}
-        >
-          {/*<ChartsXAxis*/}
-          {/*  label={this.state.definition.fieldName}*/}
-          {/*  position="bottom"*/}
-          {/*  axisId="x-axis-id"*/}
-          {/*/>*/}
-        </BarChart>
-        {/*{checkbox && checkbox}*/}
-      </React.Fragment>
-    );
-  };
 
   return (
     <React.Fragment>
-      <Typography>{definition.fieldName}</Typography>
-
-      {/*<Grid item md={2} sx={{ alignContent: "center" }}>*/}
-      {/*  {getChartTitle(definition)}*/}
-      {/*</Grid>*/}
-      <Grid item md={10} className={"filter-item"}>
+      <Grid item md={2}>
         <Box
           align={"bottom"}
           bgcolor={theme.palette.background.default}
-          sx={{ marginBottom: 0, width: "100" }}
+          sx={{ textAlign: "end", marginBottom: 0, marginRight: 0, width: "100%" }}
+        >
+          <Typography sx={{ textAlign: "left", fontSize: "18px" }}>
+            {definition.fieldName}
+          </Typography>
+          <Typography
+            sx={{
+              "& .MuiSvgIcon-root": { fontSize: 14 },
+              marginTop: "10px",
+              marginLeft: "5px",
+              textAlign: "left",
+              fontSize: "12px",
+            }}
+          >
+            Enabled:
+          </Typography>
+          <Checkbox
+            sx={{
+              "& .MuiSvgIcon-root": { fontSize: 14 },
+              marginTop: "-20px",
+              marginLeft: "0px",
+              textAlign: "left",
+            }}
+            size={"small"}
+            checked={isChecked}
+            onChange={(event) => handleCheckboxChange(event, definition)}
+            name={"exampleCheckbox"}
+          />
+        </Box>
+      </Grid>
+      <Grid item md={10} className={"filter-item"} sx={{ position: "relative" }}>
+        <Box
+          align={"bottom"}
+          bgcolor={theme.palette.background.default}
+          sx={{
+            marginBottom: 0,
+            width: "100%",
+            position: "relative",
+            zIndex: 0,
+            overflow: "visible",
+          }}
         >
           {props.chart && props.chart}
           {props.slider && props.slider}
@@ -161,23 +99,6 @@ function DpFilterBox(props) {
           {props.list && props.list}
         </Box>
       </Grid>
-      <Grid item md={1}>
-        {/*<Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>*/}
-        {/* / {getChart("U")}*/}
-        {/*</Box>*/}
-      </Grid>
-      <Grid item>
-        {/*<Box bgcolor={theme.palette.background.default} sx={{ marginBottom: 0 }}>*/}
-        {/*  {getChart("T")}*/}
-        {/*</Box>*/}
-      </Grid>
-      {/*<Grid item sm={1}>*/}
-      {/*  <Box*/}
-      {/*    align={"bottom"}*/}
-      {/*    bgcolor={theme.palette.background.default}*/}
-      {/*    sx={{ marginBottom: 0 }}*/}
-      {/*  ></Box>*/}
-      {/*</Grid>*/}
     </React.Fragment>
   );
 }
