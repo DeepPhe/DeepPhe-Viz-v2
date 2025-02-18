@@ -100,11 +100,11 @@ function DpBarChart(props) {
       }
 
       if (wantCheckboxes && checkedItems !== undefined) {
-        for (const [key, value] of Object.entries(checkedItems)) {
+        checkedItems.forEach((value, idx) => {
           if (value) {
-            selectedCategoricalRange.push(key);
+            selectedCategoricalRange.push(definition.patientCountsByCategory[idx].category);
           }
-        }
+        });
       }
       resolve(selectedCategoricalRange);
     });
@@ -130,8 +130,7 @@ function DpBarChart(props) {
             sx={{
               [`.${axisClasses.bottom} .${axisClasses.tickLabel}`]: {
                 fontSize: "9px !important",
-                overflow: "visible !important",
-                // transform: "translate(-10px, -10px) rotate(45deg)",
+                overflow: "visible !important", // transform: "translate(-10px, -10px) rotate(45deg)",
                 textAnchor: "start",
                 zIndex: 1000,
               },

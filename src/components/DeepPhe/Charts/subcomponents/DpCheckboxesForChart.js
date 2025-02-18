@@ -13,6 +13,7 @@ const DpCheckboxesForChart = ({
   const fontSize = "9px"; // Adjust label font size
   const checkboxSize = "18px"; // Adjust checkbox size
   const columnGap = "0px"; // Adjust spacing between checkboxes
+  const [checkedItemsArray, setCheckedItemsArray] = useState([]);
 
   const [checkedItems, setCheckedItems] = useState(
     categoricalRange.reduce((acc, item) => {
@@ -21,15 +22,19 @@ const DpCheckboxesForChart = ({
     }, {}) // Initialize accumulator as an empty object
   );
 
-  const handleChange = (event) => {
+  const handleChange = (event, index) => {
     setCheckedItems({
       ...checkedItems,
-      [event.target.name]: event.target.checked,
+      [index]: event.target.checked,
     });
   };
 
   useEffect(() => {
-    handleCheckboxClick(checkedItems);
+    handleCheckboxClick(checkedItemsArray);
+  }, [checkedItemsArray]);
+
+  useEffect(() => {
+    setCheckedItemsArray(Object.values(checkedItems));
   }, [checkedItems]);
 
   if (!(paddingRight && minWidth)) {
@@ -63,7 +68,7 @@ const DpCheckboxesForChart = ({
               }}
             >
               <Checkbox
-                checked={checkedItems[name]}
+                checked={checkedItemsArray[i]}
                 onChange={handleChange}
                 name={name}
                 sx={{
@@ -77,8 +82,7 @@ const DpCheckboxesForChart = ({
                   // transform: "translate(-15px, 5px) rotate(25deg)", // Ensure readable text
                   mb: 0.5, // Reduce spacing between label and checkbox
                   fontSize: fontSize,
-                  whiteSpace: "nowrap",
-                  // wordWrap: "break-word",
+                  whiteSpace: "nowrap", // wordWrap: "break-word",
                   lineHeight: "1",
                 }}
               >
