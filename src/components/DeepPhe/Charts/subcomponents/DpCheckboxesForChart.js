@@ -1,5 +1,5 @@
-import { Box, Checkbox, FormGroup, FormLabel } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { Box, Checkbox, FormGroup, FormLabel } from "@mui/material";
 
 const DpCheckboxesForChart = ({
   fieldName,
@@ -15,6 +15,9 @@ const DpCheckboxesForChart = ({
   const columnGap = "0px"; // Adjust spacing between checkboxes
   const [checkedItemsArray, setCheckedItemsArray] = useState([]);
 
+  // Create a Map to behave like a hashmap
+  const abbrevCategoriesIndexMap = new Map(abbrevCategories.map((item, index) => [item, index]));
+
   const [checkedItems, setCheckedItems] = useState(
     categoricalRange.reduce((acc, item) => {
       acc[item] = true;
@@ -22,10 +25,11 @@ const DpCheckboxesForChart = ({
     }, {}) // Initialize accumulator as an empty object
   );
 
-  const handleChange = (event, index) => {
+  const handleChange = (event) => {
+    const index = abbrevCategoriesIndexMap.get(event.target.name);
     setCheckedItems({
       ...checkedItems,
-      [index]: event.target.checked,
+      [categoricalRange[index]]: event.target.checked,
     });
   };
 
@@ -94,4 +98,5 @@ const DpCheckboxesForChart = ({
       </FormGroup>
     );
 };
+
 export default DpCheckboxesForChart;

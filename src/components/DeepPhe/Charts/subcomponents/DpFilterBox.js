@@ -7,11 +7,13 @@ import Typography from "@mui/material/Typography";
 import Checkbox from "@mui/material/Checkbox";
 
 function DpFilterBox(props) {
+  const filterInitialized = props.filterInitialized;
   const theme = useTheme();
   const { definition, broadcastUpdate, dataset, series } = props;
   const [isChecked, setIsChecked] = useState(definition.enabled);
 
   const handleCheckboxChange = (event, definition) => {
+    console.log("Checkbox changed:", event.target.checked);
     setIsChecked(event.target.checked);
     definition.enabled = event.target.checked;
     broadcastUpdate(definition);
@@ -24,12 +26,13 @@ function DpFilterBox(props) {
   ) {
     filterObject = (
       <DpBarChart
-        wantSlider={true}
-        wantCheckboxes={false}
+        wantSlider={props.wantSlider}
+        wantCheckboxes={true}
         definition={props.definition}
         dataset={dataset}
         series={series}
         broadcastUpdate={broadcastUpdate}
+        filterInitialized={filterInitialized}
       ></DpBarChart>
     );
   } else if (definition.class === "valueSelector") {
@@ -41,6 +44,7 @@ function DpFilterBox(props) {
         dataset={dataset}
         series={series}
         broadcastUpdate={broadcastUpdate}
+        filterInitialized={filterInitialized}
       ></DpBarChart>
     );
   }
@@ -51,9 +55,9 @@ function DpFilterBox(props) {
         <Box
           align={"bottom"}
           bgcolor={theme.palette.background.default}
-          sx={{ textAlign: "end", marginBottom: 0, marginRight: 0, width: "100%" }}
+          sx={{ textAlign: "start", marginBottom: 0, marginRight: 0, width: "100%" }}
         >
-          <Typography sx={{ textAlign: "left", fontSize: "18px" }}>
+          <Typography sx={{ textAlign: "right", fontSize: "18px" }}>
             {definition.fieldName}
           </Typography>
           <Typography
@@ -61,7 +65,7 @@ function DpFilterBox(props) {
               "& .MuiSvgIcon-root": { fontSize: 14 },
               marginTop: "10px",
               marginLeft: "5px",
-              textAlign: "left",
+              textAlign: "right",
               fontSize: "12px",
             }}
           >
@@ -72,7 +76,7 @@ function DpFilterBox(props) {
               "& .MuiSvgIcon-root": { fontSize: 14 },
               marginTop: "-20px",
               marginLeft: "0px",
-              textAlign: "left",
+              textAlign: "right",
             }}
             size={"small"}
             checked={isChecked}

@@ -37,7 +37,7 @@ const TopCharts = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Typography align={"center"} variant={"h6"}>
-          DeepPhe Cohort Filter
+          OMOP Cohort Filter
         </Typography>
         <Grid container direction="row" justifyContent="center" align="center" spacing={10}>
           <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>

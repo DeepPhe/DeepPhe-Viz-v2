@@ -4,11 +4,13 @@ import { FormGroup } from "@mui/material";
 import { getDataset, getSeries } from "../../../../utils/Filter";
 
 function DpCategoricalRangeSelector(props) {
+  const filterInitialized = props.filterInitialized;
   const [series, setSeries] = useState(undefined);
   const [dataset, setDataset] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
   const [newChartReady, setNewChartReady] = useState(false);
+  const [wantSlider, setWantSlider] = useState(false);
   const filterStates = props.filterStates;
   const broadcastUpdate = props.broadcastUpdate;
   const { definition } = props;
@@ -133,10 +135,12 @@ function DpCategoricalRangeSelector(props) {
             series={newChartReady ? series : props.oldSeries}
             dataset={newChartReady ? dataset : props.oldDataset}
             definition={definition}
+            wantSlider={wantSlider}
             type={"BarChartWithSlider"}
             fullWidth={props.fullWidth}
             list={getList()}
             broadcastUpdate={broadcastUpdate}
+            filterInitialized={filterInitialized}
           />
         </span>
       </React.Fragment>

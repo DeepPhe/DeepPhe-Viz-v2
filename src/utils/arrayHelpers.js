@@ -12,6 +12,102 @@ export const flattenObject = (obj, parent) => {
 };
 
 export const fastIntersection = (...arrays) => {
+  // Handle edge cases
+  if (arrays.length === 0) return [];
+  if (arrays.length === 1) return [...new Set(arrays[0])]; // Remove duplicates
+
+  // Use frequency counter approach
+  const counts = new Map();
+
+  // Count items in first array
+  for (const item of arrays[0]) {
+    counts.set(item, 1);
+  }
+
+  // For each subsequent array, increment count for items that exist
+  for (let i = 1; i < arrays.length; i++) {
+    const currentArray = arrays[i];
+    const seen = new Set(); // Track items we've seen in this array
+
+    for (const item of currentArray) {
+      // Only count each unique item once per array
+      if (!seen.has(item) && counts.has(item)) {
+        counts.set(item, counts.get(item) + 1);
+        seen.add(item);
+      }
+    }
+  }
+
+  // Return items that appear in all arrays
+  return Array.from(counts.entries())
+    .filter(([_, count]) => count === arrays.length)
+    .map(([item]) => item);
+};
+
+export const newerfastIntersection = (...arrays) => {
+  // Handle edge cases
+  if (arrays.length === 0) return [];
+  if (arrays.length === 1) return [...arrays[0]];
+
+  // Sort arrays by length (ascending)
+  const ordered = arrays.sort((a1, a2) => a1.length - a2.length);
+  const result = [];
+
+  // Get unique items from shortest array
+  const uniqueItems = [...new Set(ordered[0])];
+
+  // Binary search function
+  const binarySearch = (arr, target) => {
+    let left = 0;
+    let right = arr.length - 1;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      if (arr[mid] === target) return true;
+      if (arr[mid] < target) left = mid + 1;
+      else right = mid - 1;
+    }
+
+    return false;
+  };
+
+  // Check each unique item from shortest array
+  for (const item of uniqueItems) {
+    // Use binary search to check if item exists in all other arrays
+    let inAllArrays = true;
+    for (let i = 1; i < ordered.length; i++) {
+      if (!binarySearch(ordered[i], item)) {
+        inAllArrays = false;
+        break;
+      }
+    }
+
+    if (inAllArrays) {
+      result.push(item);
+    }
+  }
+
+  return result;
+};
+
+export const fastIncludes = (array, item) => {
+  //assume the array is sorted
+  let left = 0;
+  let right = array.length - 1;
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    if (array[mid] === item) {
+      return true;
+    } else if (array[mid] < item) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+  return false;
+};
+
+export const oldfastIntersection = (...arrays) => {
   // if we process the arrays from shortest to longest
   // then we will identify failure points faster, i.e. when
   // one item is not in all arrays

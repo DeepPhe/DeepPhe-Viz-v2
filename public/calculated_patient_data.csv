@@ -1,0 +1,6 @@
+COL|VAL|PERSON_IDS
+GENDER|F|fake_patient1,fake_patient1,fake_patient2,fake_patient3,fake_patient4,fake_patient4,fake_patient4,fake_patient5,fake_patient5,fake_patient6,fake_patient7,fake_patient7,patientX
+RACE|Asian|fake_patient3
+RACE|Black|fake_patient2,fake_patient6
+RACE|White|fake_patient1,fake_patient1,fake_patient4,fake_patient4,fake_patient4,fake_patient5,fake_patient5,fake_patient7,fake_patient7,patientX
+ETHNICITY|Not Hispanic or Latino|fake_patient1,fake_patient1,fake_patient2,fake_patient3,fake_patient4,fake_patient4,fake_patient4,fake_patient5,fake_patient5,fake_patient6,fake_patient7,fake_patient7,patientX

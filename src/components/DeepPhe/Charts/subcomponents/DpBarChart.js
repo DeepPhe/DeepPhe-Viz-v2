@@ -3,21 +3,37 @@ import { axisClasses, BarChart } from "@mui/x-charts";
 import { useTheme } from "@mui/styles";
 import DpCheckboxesForChart from "./DpCheckboxesForChart";
 import $ from "jquery";
+import DpSlider from "./DpSlider";
+import isEqual from "lodash/isEqual";
+
+function CustomTooltip({ active, payload, label }) {
+  if (active && payload && payload.length) {
+    debugger;
+    return (
+      <div className="custom-tooltip">
+        <p className="label">{`Category: ${label}`}</p>
+        <p className="intro">{`Value: ${payload[0].value}`}</p>
+        <p className="desc">{`Custom Row: ${payload[0].payload.customData}`}</p>
+      </div>
+    );
+  }
+  return null;
+}
 
 function DpBarChart(props) {
-  const { wantSlider, wantCheckboxes } = props;
+  const { wantLogs, wantSlider, wantCheckboxes, series, dataset, definition, broadcastUpdate } =
+    props;
+  const { fieldName, abbrevCategories, categoricalRange } = definition;
   const [sliderState, setSliderState] = useState(undefined);
   const [checkedItems, setCheckedItems] = useState(undefined);
-  const { series, dataset, definition } = props;
-  const theme = useTheme();
-  const fieldName = definition.fieldName;
-  const filterBoxSvgSelector =
-    ".dp-filter-box-" + fieldName.replace(" ", "_") + " svg g[clip-path]";
   const [paddingRight, setPaddingRight] = useState(undefined);
   const [minWidth, setMinWidth] = useState(undefined);
   const [width, setWidth] = useState(undefined);
+  const theme = useTheme();
+  const filterBoxSvgSelector =
+    ".dp-filter-box-" + fieldName.replace(" ", "_") + " svg g[clip-path]";
   const [coordinates, setCoordinates] = useState([]);
-
+  const [oldDefinition, setOldDefinition] = useState(JSON.parse(JSON.stringify(definition)));
   const [rects, setRects] = useState([]);
 
   useEffect(() => {
@@ -78,14 +94,39 @@ function DpBarChart(props) {
     }
   }, [rects]);
 
+  const definitionIsEqual = (def1, def2) => {
+    if (wantLogs) {
+      const str1 = JSON.stringify(def1);
+      const str2 = JSON.stringify(def2);
+
+      for (let i = 0; i < Math.max(str1.length, str2.length); i++) {
+        if (str1[i] !== str2[i]) {
+          console.log(`Difference at index ${i}:`);
+          console.log(`str1[${i}]:`, str1.toString().substring(i - 40, i + 40));
+          console.log(`str2[${i}]:`, str2.toString().substring(i - 40, i + 40));
+          break;
+        }
+      }
+    }
+    return isEqual(def1, def2);
+  };
+
   useEffect(() => {
     if (
       (wantSlider && sliderState !== undefined) ||
-      (wantCheckboxes && checkedItems !== undefined)
+      (wantCheckboxes && checkedItems !== undefined && checkedItems.length > 0)
     ) {
       getSelectedCategoricalRange().then((selectedCategoricalRange) => {
         definition.selectedCategoricalRange = selectedCategoricalRange;
-        props.broadcastUpdate(definition);
+        if (wantLogs) {
+          console.log(definition.fieldName + ":getSelectedCategoricalRange");
+          console.log("oldDefinition", oldDefinition);
+          console.log("definition", definition);
+        }
+        if (!definitionIsEqual(oldDefinition, definition)) {
+          broadcastUpdate(definition);
+          setOldDefinition(JSON.parse(JSON.stringify(definition)));
+        }
       });
     }
   }, [sliderState, checkedItems]);
@@ -102,6 +143,17 @@ function DpBarChart(props) {
       if (wantCheckboxes && checkedItems !== undefined) {
         checkedItems.forEach((value, idx) => {
           if (value) {
+            if (
+              !definition ||
+              !definition.patientCountsByCategory ||
+              !definition.patientCountsByCategory[idx] ||
+              !definition.patientCountsByCategory[idx].category
+            ) {
+              console.warn(
+                `Category at index ${idx} is undefined in patientCountsByCategory for field ${fieldName}.`
+              );
+              return;
+            }
             selectedCategoricalRange.push(definition.patientCountsByCategory[idx].category);
           }
         });
@@ -111,16 +163,21 @@ function DpBarChart(props) {
   };
 
   const getChart = () => {
-    let categories = props.definition.categoricalRange;
+    let categories = categoricalRange;
     categories = categories.map((category) => {
-      return category.replace(props.definition.fieldName + ".", "");
+      return category.replace(fieldName + ".", "");
     });
 
     const valueFormatter = (code, context) => {
       if (context.location === "tick") {
-        return wantCheckboxes ? "" : code;
+        if (wantCheckboxes) {
+          return "";
+        } else if (wantSlider) {
+          return abbrevCategories[categoricalRange.indexOf(fieldName + "." + code)];
+        }
+      } else {
+        return code;
       }
-      return code;
     };
 
     return (
@@ -131,7 +188,7 @@ function DpBarChart(props) {
               [`.${axisClasses.bottom} .${axisClasses.tickLabel}`]: {
                 fontSize: "9px !important",
                 overflow: "visible !important", // transform: "translate(-10px, -10px) rotate(45deg)",
-                textAnchor: "start",
+                // textAnchor: "start",
                 zIndex: 1000,
               },
             }}
@@ -148,8 +205,16 @@ function DpBarChart(props) {
                 height: 5,
               },
             ]}
+            yAxis={[
+              {
+                domain: [0, 100], // Adjust the range of the Y-axis as needed
+                ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], // Explicitly define tick values
+                interval: 0, // Ensure all ticks are displayed
+              },
+            ]}
             skipAnimation={true}
             height={150}
+            tooltip={{ content: <CustomTooltip />, trigger: "axis" }}
           ></BarChart>
         </span>
       </React.Fragment>
@@ -169,6 +234,19 @@ function DpBarChart(props) {
           minWidth={minWidth}
           width={width}
         ></DpCheckboxesForChart>
+      )}
+      {wantSlider && (
+        <DpSlider
+          fieldName={definition.fieldName}
+          categoricalRange={definition.categoricalRange}
+          abbrevCategories={definition.abbrevCategories}
+          handleSliderChangeExternal={handleSliderChange}
+          patientCountsByCategory={definition.patientCountsByCategory}
+          selectedCategoricalRange={definition.selectedCategoricalRange}
+          paddingRight={paddingRight}
+          minWidth={minWidth}
+          width={width}
+        ></DpSlider>
       )}
     </React.Fragment>
   );

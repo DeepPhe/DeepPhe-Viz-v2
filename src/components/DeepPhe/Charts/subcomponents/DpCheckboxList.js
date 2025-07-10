@@ -36,20 +36,6 @@ function DpCheckboxList(props) {
   useEffect(() => {
     props.broadcastUpdate(definition);
   }, [definition]);
-  const dataset = [
-    {
-      value: 50,
-      month: "m",
-    },
-    {
-      value: 10,
-      month: "f",
-    },
-    {
-      value: 40,
-      month: "u",
-    },
-  ];
 
   const setAxisData = (d) => {
     //console.log(d);
@@ -60,19 +46,19 @@ function DpCheckboxList(props) {
   const hue = checkedSeries["male"] ? "green" : "purple";
 
   const seriesA = {
-    data: [2, 3, 1, 3, 8, 6],
+    data: [],
     label: "Patients Meeting All Filters",
     color: "#187bcd",
     id: "patients-meeting-all-filters",
   };
   const seriesB = {
-    data: [3, 1, 4, 2, 4, 2],
+    data: [],
     label: "Patients Meeting This Filter",
     color: "#2a9df4",
     id: "patients-meeting-this-filter",
   };
   const seriesC = {
-    data: [3, 2, 4, 3, 2, 3],
+    data: [],
     label: "Remaining Patients",
     color: "#d0efff",
     id: "remaining-patients",

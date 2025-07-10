@@ -10,6 +10,7 @@ import Grid from "@mui/material/Grid";
 function DpFilterListItem(props) {
   const [definition, setDefinition] = useState(props.definition);
   const [filterStates, setFilterStates] = useState(props.filterStates);
+  const filterInitialized = props.filterInitialized;
   const fullWidth = definition.fieldName.toLowerCase() === "clockface";
   const EXPANSION_LEVEL_NONE = 0;
   const EXPANSION_LEVEL_3 = 3;
@@ -74,6 +75,7 @@ function DpFilterListItem(props) {
             definition={definition}
             broadcastUpdate={filterChangedState}
             filterStates={filterStates}
+            filterInitialized={filterInitialized}
           />
         );
 

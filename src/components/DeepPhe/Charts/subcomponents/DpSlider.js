@@ -3,56 +3,60 @@ import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/styles";
 import "./DpSlider.css";
 
-const DpSlider = (props) => {
-  const [sliderState, setSliderState] = useState(undefined);
+const DpSlider = ({
+  fieldName,
+  categoricalRange,
+  abbrevCategories,
+  handleSliderChangeExternal,
+  paddingRight,
+  patientCountsByCategory,
+  selectedCategoricalRange,
+  minWidth,
+  width,
+}) => {
   const theme = useTheme();
-  const { selectedCategoricalRange, patientCountsByCategory } = props;
-  const { minWidth, paddingRight, width } = props;
+  const [marks, setMarks] = useState(undefined);
 
-  const handleSliderChange = (sliderData) => {
-    setSliderState(sliderData);
+  const handleSliderChangeInternal = (sliderData) => {
+    handleSliderChangeExternal(sliderData);
   };
 
   useEffect(() => {
-    if (sliderState) {
-      props.handleSliderChange(sliderState);
+    if (patientCountsByCategory !== undefined) {
+      let newMarks = {};
+      patientCountsByCategory.forEach((item, index) => {
+        newMarks[index] = {
+          label: item.category,
+          style: { color: theme.palette.text.primary },
+        };
+      });
+      setMarks(newMarks);
     }
-  }, [sliderState]);
+  }, [patientCountsByCategory]);
 
   const marks2 = {};
-  let minSelectedInRange = 10000000000;
-  let maxSelectedInRange = 0;
-  patientCountsByCategory.map((item, index) => {
-    marks2[index] = {
-      label: item.category,
-      style: { color: theme.palette.text.primary },
-    };
-    if (selectedCategoricalRange.indexOf(item.category) !== -1) {
-      minSelectedInRange = Math.min(minSelectedInRange, index);
-      maxSelectedInRange = Math.max(maxSelectedInRange, index);
-    }
-    return true;
-  });
-  const numItems = Object.keys(marks2).length;
-  return (
-    <div className={"slider-container no-select"} style={{ width: width }}>
-      <Slider
-        style={{
-          width: width + "px",
-        }}
-        className={"bar-chart-filter-slider"}
-        range
-        min={0}
-        max={patientCountsByCategory.length}
-        defaultValue={[minSelectedInRange, maxSelectedInRange + 1]}
-        onChange={(e) => handleSliderChange(e)}
-        draggableTrack={true}
-        included={true}
-        dots={true}
-        step={1}
-      />
-    </div>
-  );
-};
 
+  if (marks === undefined) {
+    return "...";
+  } else
+    return (
+      <div className={"slider-container no-select"} style={{ width: width }}>
+        <Slider
+          style={{
+            width: width + "px",
+          }}
+          className={"bar-chart-filter-slider"}
+          range
+          min={0}
+          max={patientCountsByCategory.length}
+          defaultValue={[0, patientCountsByCategory.length]}
+          onChange={(e) => handleSliderChangeInternal(e)}
+          draggableTrack={true}
+          included={true}
+          dots={true}
+          step={1}
+        />
+      </div>
+    );
+};
 export default DpSlider;

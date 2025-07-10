@@ -28,7 +28,6 @@ const getSeries = () => {
 const getDataset = (thisFilter, categoricalRange, selectedCategoricalRange) => {
   return categoricalRange.map((category, catIdx) => {
     const categoryEnabled = selectedCategoricalRange.includes(category);
-
     let patientsMeetingAllFilters =
       thisFilter.patientsInThisFilterAndMatchingThisFilterAndMatchingAllOtherFiltersByCategory[
         catIdx
@@ -56,15 +55,21 @@ const getDataset = (thisFilter, categoricalRange, selectedCategoricalRange) => {
 
 const fetchFilterDefinitions = () => {
   return new Promise(function (resolve, reject) {
-    fetch("http://localhost:3001/api/filter/definitions").then(function (response) {
-      if (response) {
-        response.json().then(function (json) {
-          resolve(json["searchFilterDefinition"]);
-        });
-      } else {
-        reject("User not logged in");
-      }
-    });
+    fetch("/SearchFilterDefinition.json")
+      .then(function (response) {
+        if (response.ok) {
+          return response.json();
+        } else {
+          reject(`Failed to load filter definitions: ${response.status}`);
+        }
+      })
+      .then(function (json) {
+        resolve(json["searchFilterDefinition"]);
+      })
+      .catch(function (error) {
+        console.error("Error loading filter definitions:", error);
+        reject(error);
+      });
   });
 };
 

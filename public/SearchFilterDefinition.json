@@ -1,0 +1,644 @@
+{
+  "searchFilterDefinition": [
+    {
+      "fieldName": "Lymph Involvement",
+      "guiOptions": {
+        "displayName": "Lymph Involvement",
+        "displayGroup": "LNI",
+        "displayPriority": 1
+      },
+      "class": "valueSelector"
+    },
+    {
+      "fieldName": "Course",
+      "guiOptions": {
+        "displayName": "Course",
+        "displayGroup": "LNI",
+        "displayPriority": 2
+      },
+      "class": "valueSelector"
+    },
+    {
+      "fieldName": "Genes",
+      "guiOptions": {
+        "displayName": "Genes",
+        "displayGroup": "LNI",
+        "displayPriority": 3
+      },
+      "class": "valueSelector"
+    },
+    {
+      "fieldName": "Age_at_DX",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "AGE_at_dx",
+        "displayGroup": "Demo",
+        "displayPriority": 1
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "M",
+          "count": 2
+        },
+        {
+          "category": "F",
+          "count": 5
+        },
+        {
+          "category": "U",
+          "count": 0
+        }
+      ],
+      "checkboxes": [
+        {
+          "name": "M",
+          "checked": true
+        },
+        {
+          "name": "F",
+          "checked": true
+        },
+        {
+          "name": "U",
+          "checked": false
+        }
+      ],
+      "patientsMeetingThisFilterOnly": 7
+    },
+    {
+      "fieldName": "Stage",
+      "guiOptions": {
+        "displayName": "Stage",
+        "displayGroup": "john",
+        "displayPriority": 1
+      },
+      "class": "categoricalRangeSelector",
+      "globalPatientCountsForCategories": [
+        {
+          "category": "I",
+          "count": 1
+        },
+        {
+          "category": "II",
+          "count": 2
+        },
+        {
+          "category": "III",
+          "count": 1
+        },
+        {
+          "category": "IV",
+          "count": 2
+        }
+      ],
+      "selectedCategoricalRange": [
+        "I",
+        "II",
+        "III",
+        "IV"
+      ],
+      "patientsMeetingThisFilterOnly": 6,
+      "patientsMeetingEntireSetOfFilters": 6,
+      "numberOfPossiblePatientsForThisFilter": 6,
+      "switches": [
+        {
+          "name": "Unknown",
+          "value": false
+        }
+      ]
+    },
+    {
+      "fieldName": "Grade",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "Grade",
+        "displayGroup": "john",
+        "displayPriority": 2
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "1",
+          "count": 2
+        },
+        {
+          "category": "2",
+          "count": 2
+        },
+        {
+          "category": "3",
+          "count": 3
+        },
+        {
+          "category": "4",
+          "count": 3
+        },
+        {
+          "category": "5",
+          "count": 3
+        },
+        {
+          "category": "9",
+          "count": 1
+        }
+      ],
+      "selectedCategoricalRange": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "9"
+      ],
+      "patientsMeetingThisFilterOnly": 2,
+      "patientsMeetingEntireSetOfFilters": 2,
+      "numberOfPossiblePatientsForThisFilter": 2,
+      "switches": []
+    },
+    {
+      "fieldName": "T Stage",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "T",
+        "displayGroup": "john1",
+        "displayPriority": 4
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "PTis",
+          "count": 1
+        },
+        {
+          "category": "T1",
+          "count": 2
+        },
+        {
+          "category": "T2",
+          "count": 1
+        },
+        {
+          "category": "T3",
+          "count": 3
+        }
+      ],
+      "selectedCategoricalRange": [
+        "PTis",
+        "T1",
+        "T2",
+        "T3"
+      ],
+      "patientsMeetingThisFilterOnly": 7,
+      "patientsMeetingEntireSetOfFilters": 7,
+      "numberOfPossiblePatientsForThisFilter": 7,
+      "switches": []
+    },
+    {
+      "fieldName": "N Stage",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "N",
+        "displayGroup": "john1",
+        "displayPriority": 5
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "NX",
+          "count": 1
+        },
+        {
+          "category": "N0",
+          "count": 1
+        },
+        {
+          "category": "N1",
+          "count": 1
+        },
+        {
+          "category": "N1mi",
+          "count": 1
+        },
+        {
+          "category": "N2",
+          "count": 4
+        },
+        {
+          "category": "N3",
+          "count": 4
+        },
+        {
+          "category": "PNx",
+          "count": 1
+        }
+      ],
+      "selectedCategoricalRange": [
+        "N1mi",
+        "N1",
+        "N2",
+        "PNx",
+        "N3",
+        "NX",
+        "N0"
+      ],
+      "patientsMeetingThisFilterOnly": 7,
+      "patientsMeetingEntireSetOfFilters": 7,
+      "numberOfPossiblePatientsForThisFilter": 7,
+      "switches": []
+    },
+    {
+      "fieldName": "M Stage",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "M",
+        "displayGroup": "john1",
+        "displayPriority": 6
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "M0",
+          "count": 7
+        },
+        {
+          "category": "M1",
+          "count": 7
+        },
+        {
+          "category": "MX",
+          "count": 7
+        }
+      ],
+      "selectedCategoricalRange": [
+        "M0",
+        "M1",
+        "MX"
+      ],
+      "patientsMeetingThisFilterOnly": 7,
+      "patientsMeetingEntireSetOfFilters": 7,
+      "numberOfPossiblePatientsForThisFilter": 7,
+      "switches": []
+    },
+    {
+      "fieldName": "Clockface",
+      "guiOptions": {
+        "displayName": "Clockface",
+        "displayGroup": "ql",
+        "displayPriority": 5
+      },
+      "class": "categoricalRangeSelector",
+      "globalPatientCountsForCategories": [
+        {
+          "category": "1",
+          "count": 1
+        },
+        {
+          "category": "2",
+          "count": 1
+        },
+        {
+          "category": "3",
+          "count": 1
+        },
+        {
+          "category": "4",
+          "count": 1
+        },
+        {
+          "category": "5",
+          "count": 1
+        },
+        {
+          "category": "6",
+          "count": 1
+        },
+        {
+          "category": "7",
+          "count": 1
+        },
+        {
+          "category": "8",
+          "count": 1
+        },
+        {
+          "category": "9",
+          "count": 1
+        },
+        {
+          "category": "10",
+          "count": 1
+        },
+        {
+          "category": "11",
+          "count": 1
+        },
+        {
+          "category": "12",
+          "count": 1
+        }
+      ],
+      "selectedCategoricalRange": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "patientsMeetingThisFilterOnly": 5,
+      "patientsMeetingEntireSetOfFilters": 5,
+      "numberOfPossiblePatientsForThisFilter": 5,
+      "switches": []
+    },
+    {
+      "fieldName": "Quadrant",
+      "class": "checkboxList",
+      "guiOptions": {
+        "displayName": "Quadrant",
+        "displayGroup": "ql",
+        "displayPriority": 1
+      },
+      "checkboxes": [
+        {
+          "name": "UI",
+          "value": "Upper_inner_Quadrant",
+          "checked": true
+        },
+        {
+          "name": "UO",
+          "value": "Upper_Outer_Quadrant",
+          "checked": true
+        },
+        {
+          "name": "LI",
+          "value": "Lower_inner_Quadrant",
+          "checked": true
+        },
+        {
+          "name": "LO",
+          "value": "Lower_Outer_Quadrant",
+          "checked": true
+        }
+      ],
+      "globalPatientCountsForCategories": [
+        {
+          "category": "Upper_inner_Quadrant",
+          "count": 2
+        },
+        {
+          "category": "Upper_Outer_Quadrant",
+          "count": 3
+        },
+        {
+          "category": "Lower_inner_Quadrant",
+          "count": 2
+        },
+        {
+          "category": "Lower_Outer_Quadrant",
+          "count": 2
+        }
+      ],
+      "patientsMeetingThisFilterOnly": 5,
+      "patientsMeetingEntireSetOfFilters": 0,
+      "numberOfPossiblePatientsForThisFilter": 5
+    },
+    {
+      "fieldName": "Laterality",
+      "class": "checkboxList",
+      "guiOptions": {
+        "displayName": "Stage",
+        "displayGroup": "ql",
+        "displayPriority": 1
+      },
+      "checkboxes": [
+        {
+          "name": "Left",
+          "value": "Left",
+          "checked": true
+        },
+        {
+          "name": "Right",
+          "value": "Right",
+          "checked": true
+        }
+      ],
+      "globalPatientCountsForCategories": [
+        {
+          "category": "Left",
+          "count": 4
+        },
+        {
+          "category": "Right",
+          "count": 3
+        }
+      ],
+      "patientsMeetingThisFilterOnly": 7,
+      "patientsMeetingEntireSetOfFilters": 7,
+      "numberOfPossiblePatientsForThisFilter": 7
+    },
+    {
+      "fieldName": "Gender",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "Gender",
+        "displayGroup": "Demographics",
+        "displayPriority": 2
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "M",
+          "count": 2
+        },
+        {
+          "category": "F",
+          "count": 5
+        },
+        {
+          "category": "U",
+          "count": 0
+        }
+      ],
+      "checkboxes": [
+        {
+          "name": "M",
+          "checked": true
+        },
+        {
+          "name": "F",
+          "checked": true
+        },
+        {
+          "name": "U",
+          "checked": false
+        }
+      ],
+      "patientsMeetingThisFilterOnly": 7
+    },
+    {
+      "fieldName": "Ethnicity",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "Ethnicity",
+        "displayGroup": "Demographics",
+        "displayPriority": 2
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "M",
+          "count": 2
+        },
+        {
+          "category": "F",
+          "count": 5
+        },
+        {
+          "category": "U",
+          "count": 0
+        }
+      ],
+      "checkboxes": [
+        {
+          "name": "M",
+          "checked": true
+        },
+        {
+          "name": "F",
+          "checked": true
+        },
+        {
+          "name": "U",
+          "checked": false
+        }
+      ],
+      "patientsMeetingThisFilterOnly": 7
+    },
+    {
+      "fieldName": "Race",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "Race",
+        "displayGroup": "Demographics",
+        "displayPriority": 2
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "M",
+          "count": 2
+        },
+        {
+          "category": "F",
+          "count": 5
+        },
+        {
+          "category": "U",
+          "count": 0
+        }
+      ],
+      "checkboxes": [
+        {
+          "name": "M",
+          "checked": true
+        },
+        {
+          "name": "F",
+          "checked": true
+        },
+        {
+          "name": "U",
+          "checked": false
+        }
+      ],
+      "patientsMeetingThisFilterOnly": 7
+    },
+    {
+      "fieldName": "Cancer",
+      "class": "categoricalRangeSelector",
+      "guiOptions": {
+        "displayName": "Cancer",
+        "displayGroup": "Demo",
+        "displayPriority": 1
+      },
+      "globalPatientCountsForCategories": [
+        {
+          "category": "M",
+          "count": 2
+        },
+        {
+          "category": "F",
+          "count": 5
+        },
+        {
+          "category": "U",
+          "count": 0
+        }
+      ],
+      "checkboxes": [
+        {
+          "name": "M",
+          "checked": true
+        },
+        {
+          "name": "F",
+          "checked": true
+        },
+        {
+          "name": "U",
+          "checked": false
+        }
+      ],
+      "patientsMeetingThisFilterOnly": 7
+    },
+    {
+      "fieldName": "Age",
+      "class": "numericRangeSelector",
+      "guiOptions": {
+        "displayName": "Age",
+        "displayGroup": "Demographics",
+        "displayPriority": 1
+      },
+      "switches": [],
+      "numericRangeSelectorDefinition": {
+        "min": 40,
+        "max": 70,
+        "step": 10
+      },
+      "selectedNumericRange": {
+        "min": 40,
+        "max": 70
+      },
+      "rangeItems": [
+        {
+          "name": "fake_patient1",
+          "value": 35
+        },
+        {
+          "name": "fake_patient2",
+          "value": 40
+        },
+        {
+          "name": "fake_patient3",
+          "value": 45
+        },
+        {
+          "name": "fake_patient4",
+          "value": 50
+        },
+        {
+          "name": "fake_patient5",
+          "value": 55
+        },
+        {
+          "name": "fake_patient6",
+          "value": 60
+        },
+        {
+          "name": "fake_patient7",
+          "value": 65
+        }
+      ]
+    }
+  ],
+  "patientsMeetingThisFilterOnly": 0
+}

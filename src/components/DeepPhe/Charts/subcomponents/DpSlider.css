@@ -16,6 +16,7 @@
     margin-top: -57px;
     height: 115px !important;
     opacity: 0.2 !important;
+    pointer-events: none;
 }
 
 .rc-slider-track-draggable {
@@ -86,5 +87,5 @@
 }
 
 .rc-slider-handle-2 {
-    /*transform: translate(0%) !important;*/
+
 }

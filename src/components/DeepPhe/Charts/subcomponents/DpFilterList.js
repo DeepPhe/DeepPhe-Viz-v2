@@ -7,6 +7,19 @@ function DpFilterList(props) {
   const [filterDefinitions, setFilterDefinitions] = useState(props.filterDefinitions);
   const [filterStates, setFilterStates] = useState(props.filterStates);
   const [newItemsReady, setNewItemsReady] = useState(false);
+  const filterInitialized = props.filterInitialized;
+  const [isRendered, setIsRendered] = useState(false);
+
+  useEffect(() => {
+    setIsRendered(true);
+  }, []);
+
+  const getFilterStateChange = (definition) => {
+    if (!isRendered) {
+      return () => {}; // Empty function as fallback
+    }
+    return props.filterChangedState(definition);
+  };
 
   useEffect(() => {
     if (props.filterDefinitions) {
@@ -49,8 +62,9 @@ function DpFilterList(props) {
                 definition={definition}
                 index={index}
                 moveListItem={props.moveListItem}
-                filterChangedState={props.filterChangedState}
+                filterChangedState={getFilterStateChange}
                 filterStates={newItemsReady ? filterStates : props.oldFilterStates}
+                filterInitialized={filterInitialized}
               />
             );
           })}
