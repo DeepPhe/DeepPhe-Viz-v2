@@ -1,0 +1,204 @@
+
+#NewControl {
+    padding-top:25px
+}
+.no_padding_grid {
+    padding: 0px !important;
+}
+
+.switch_list {
+    display: inline-grid;
+    justify-content: right;
+}
+
+.cohort-size-label-container {
+
+    padding: 0px 3px 0px 0px !important;
+    display: table !important;
+
+}
+.cohort-size-label {
+    font-size: 14px;
+    font-weight: 400;
+    color: #000000;
+    text-align: right;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#cohort-size-bar{
+    height:inherit;
+}
+
+.cohort-size-bar-container {
+   height:45px;
+    padding-bottom: 55px !important;
+
+}
+
+.cohort-size-bar-container .MuiGrid-item {
+    height:inherit;
+}
+
+
+.filter-inner-container {
+    margin-right: 5px !important;
+    margin-left: 5px !important;
+    border: 2px solid #e5e5e5;
+    border-radius: 4px;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+
+#metastasis-row .switch_label, #metastasis-row .switch-toggle, #age-at-dx-row .switch_label, #age-at-dx-row .switch-toggle, #stage-row .switch_label, #stage-row .switch-toggle {
+    margin: 0px 3px 0px 0px !important;
+    margin-right: 2px;
+}
+#metastasis-row .switch {
+    width:20% !important;
+    align-items: center;
+    display: inline-flex;
+}
+
+#age-at-dx-row .switch, #stage-row .switch {
+    width:15% !important;
+    align-items: center;
+    display: inline-flex;
+}
+
+.slider-container {
+    width:80% !important;
+    height: 100% !important;
+    margin-top: 3px !important;
+}
+.rc-slider {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    width: 99% !important;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0px !important;
+}
+
+.rc-slider-track {
+    z-index: 100;
+    background-color:#1cff002b !important;
+}
+
+.rc-slider-step {
+    visibility: hidden;
+}
+
+.rc-slider-rail, .rc-slider-track {
+    height: 30px !important;
+    border-radius: 0px !important;
+    margin-top: 5px;
+}
+.rc-slider-mark {
+    top:8px !important;
+    z-index: 99 !important;
+}
+#age-at-dx-row .rc-slider-mark-text {
+    padding-left: calc(1%) !important;
+}
+.rc-slider-mark-text {
+    padding-left: calc(5%) !important;
+    font-size: 12px !important;
+    margin-top: 5px !important;
+    z-index:99;
+    transform: translateX(+60%) !important;
+
+}
+.rc-slider-dot {
+    bottom: -8px;
+}
+
+.rc-slider-handle {
+    width:10px !important;
+    height: 40px !important;
+    border: none !important;
+    border-radius: 0px !important;
+    background-color: #fbdfab !important;
+    margin-top: 0px !important;
+    z-index: 100 !important;
+}
+
+.rc-slider-handle-1 {
+    transform: translate(-100%) !important;
+}
+
+.rc-slider-handle-2 {
+    transform: translate(0%) !important;
+}
+
+.cohort-size-label {
+    padding: 0px 5px 0px 0px !important;
+}
+
+.cohort-size-label-container {
+    padding: 0px 0px 0px 0px !important;
+    display: flex;
+    align-content: center;
+}
+.no-gutter {
+    --bs-gutter-x: 0px !important;
+    --bs-gutter-y: 0px !important;
+}
+
+.box-for-word-filter {
+    --bs-gutter-x: 0px;
+    --bs-gutter-y: 0px;
+    width: auto !important;
+    margin-left: 10px !important;
+    line-height: 1em !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    height: 27px !important;
+    display: grid !important;
+    align-items: center !important;
+    align-content:  center !important;
+    margin-top: 10px !important;
+}
+
+.blue-border-for-word-filter {
+    border: 1px solid blue;
+}
+
+.red-border-for-word-filter {
+    border: 1px solid red;
+}
+
+.gray-border-for-word-filter {
+    border: 1px solid gray;
+}
+
+#diagnosis-row, #agents-row {
+    height: 47px !important;
+}
+
+.blue-plus {
+    color: blue;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.red-plus {
+    color: red;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.gray-plus {
+    color: gray;
+    font-size: 1.5em;
+    cursor: pointer;
+
+}
+
+.overlay-row {
+    background: gray;
+    margin-left: 5px;
+    margin-right: 5px;
+    opacity: 0.4;
+    pointer-events: none;
+}
