@@ -21,8 +21,20 @@ const initDB = async () => {
     });
     return await openDB(DEEPPHE_DB, 1, {
       upgrade(db) {
-        db.createObjectStore(CANCER_ATTRIBUTES_STORE, { keyPath: "id", autoIncrement: true });
-        db.createObjectStore(TUMOR_ATTRIBUTES_STORE, { keyPath: "id", autoIncrement: true });
+        const cancerAttributeStore = db.createObjectStore(CANCER_ATTRIBUTES_STORE, {
+          keyPath: "id",
+          autoIncrement: true,
+        });
+        cancerAttributeStore.createIndex("by_patientid", "patientid");
+        cancerAttributeStore.createIndex("by_cancerid", "cancerid");
+
+        const tumorAttributeSTore = db.createObjectStore(TUMOR_ATTRIBUTES_STORE, {
+          keyPath: "id",
+          autoIncrement: true,
+        });
+        tumorAttributeSTore.createIndex("by_patientid", "patientid");
+        tumorAttributeSTore.createIndex("by_tumorid", "tumorid");
+
         db.createObjectStore(OMAP_PATIENT_STORE, { keyPath: "id", autoIncrement: true });
         db.createObjectStore(OMAP_DX_STORE, { keyPath: "id", autoIncrement: true });
       },
@@ -34,8 +46,9 @@ const initDB = async () => {
 };
 
 const loadFileData = (filePath) => {
+  const fullPath = `${process.env.PUBLIC_URL}/${filePath}`;
   return new Promise((resolve, reject) => {
-    fetch(filePath)
+    fetch(fullPath)
       .then((res) => resolve(res.text()))
       .catch((e) => {
         console.log(e);

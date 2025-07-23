@@ -192,11 +192,11 @@ const initFilterDefinitions = (filterDefinitions, patientArrays) => {
   return new Promise((resolve, reject) => {
     let filterGuiInfo = {};
     let definitions = filterTheDefinitionsByName(filterDefinitions, [
-      // "T Stage",
-      // "N Stage",
-      // "M Stage",
+      "T Stage",
+      "N Stage",
+      "M Stage",
       "Stage",
-      // "Grade",
+      //"Grade",
       // "Lymph Involvement",
       // "Course",
       // "Genes",

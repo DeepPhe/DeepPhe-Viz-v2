@@ -26,6 +26,7 @@ const getSeries = () => {
 };
 
 const getDataset = (thisFilter, categoricalRange, selectedCategoricalRange) => {
+  console.log("getDataset", thisFilter, categoricalRange, selectedCategoricalRange);
   return categoricalRange.map((category, catIdx) => {
     const categoryEnabled = selectedCategoricalRange.includes(category);
     let patientsMeetingAllFilters =

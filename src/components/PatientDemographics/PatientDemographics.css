@@ -1,0 +1,44 @@
+.patient-demographics-container {
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+.patient-id-section {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.demographic-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.demographic-row {
+    display: flex;
+    align-items: flex-start;
+}
+
+.demographic-label {
+    width: 150px;
+    font-weight: 600;
+    color: #555;
+}
+
+.demographic-value {
+    flex: 1;
+}
+
+h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+h3 {
+    margin: 0;
+    color: #444;
+}

@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap');
+
+/* Core timeline styling */
+.timeline_svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.patient_episode_timeline_svg {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Episode and report elements */
+.episode_legend_circle,
+.main_report_PE {
+    fill-opacity: 0.3;
+}
+
+.episode_legend_text {
+    font-size: 14px;
+}
+
+.selected_episode_legend_circle {
+    fill-opacity: 0 !important;
+}
+
+.selected_episode_legend_text {
+    font-weight: bold;
+}
+
+.selected_report {
+    fill-opacity: 1 !important;
+    stroke: black !important;
+    stroke-width: 2px !important;
+}
+
+.selected_report_temporal {
+    fill: none !important;
+    stroke: red !important;
+    stroke-width: 2px !important;
+}
+
+.fact_highlighted_report {
+    fill-opacity: 1 !important;
+}
+
+.main_report_PE:hover {
+    fill-opacity: 1;
+}
+
+.overview_report {
+    stroke: #fff;
+}
+
+/* Zoom functionality */
+.zoom_ER, .zoom_PE {
+    fill: none;
+    pointer-events: visibleFill;
+}
+
+/* Axes and visual elements */
+.main-x-axis,
+.overview-x-axis {
+    stroke-width: 0.5px;
+    stroke: #888;
+}
+
+.main-x-axis > path,
+.overview-x-axis > path {
+    stroke: #888;
+}
+
+/* Brush for timeline selection */
+.brush .overlay {
+    fill: #dbdbdb;
+    fill-opacity: 0.3;
+}
+
+.brush .selection {
+    stroke: #999;
+    fill: dodgerblue;
+    fill-opacity: 0.3;
+}
+
+.handle--custom {
+    fill: #eee;
+    stroke: #666;
+    fill-opacity: 0.3;
+    shape-rendering: crispEdges;
+}
+
+.legend_group_divider {
+    stroke-width: 1px;
+    stroke: #dbdbdb;
+    shape-rendering: crispEdges;
+}
+
+.report_type_divider {
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    stroke: #666;
+}
+
+.encounter_age_guideline {
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    stroke: red;
+}
+
+.report_type_label,
+.overview_label,
+.age_label {
+    font-size: 14px;
+    text-anchor: end;
+}
+
+.encounter_age {
+    font-size: 11px;
+    fill: #444;
+    text-anchor: middle;
+}
+
+/* Relation icons */
+.relation-icon.selected {
+    fill: rgb(49, 163, 84);
+    stroke-opacity: 1;
+}
+
+.relation-icon.unselected {
+    /* Default styling for unselected state */
+}
+
+/* Utility classes */
+.hide {
+    display: none;
+}

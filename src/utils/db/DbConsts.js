@@ -11,21 +11,23 @@ const OMAP_PATIENT_STORE = "omapPatientStore";
 const DEEPPHE_TXT_FILE = "DeepPheOutput.txt";
 
 const CANCER_ATTRIBUTES_MAP = {
-  PATIENT_NAME: "PATIENT_NAME",
-  CANCER_ID: "CANCER_ID",
-  CANCER_TYPE: "CANCER_TYPE",
-  ATTRIBUTE_NAME: "ATTRIBUTE_NAME",
-  ATTRIBUTE_VALUE: "ATTRIBUTE_VALUE",
-  CONFIDENCE: "CONFIDENCE",
+  PATIENT_NAME: "patientid",
+  CANCER_ID: "cancerid",
+  CANCER_TYPE: "cancer_type",
+  ATTRIBUTE_NAME: "attribid",
+  ATTRIBUTE_VALUE: "attribval",
+  CONFIDENCE: "confidence",
 };
 
 const TUMOR_ATTRIBUTES_MAP = {
-  PATIENT_NAME: "PATIENT_NAME",
+  PATIENT_NAME: "patientid",
+  CANCER_ID: "CANCER_ID",
   TUMOR_ID: "TUMOR_ID",
-  TUMOR_TYPE: "TUMOR_TYPE",
-  ATTRIBUTE_NAME: "ATTRIBUTE_NAME",
-  ATTRIBUTE_VALUE: "ATTRIBUTE_VALUE",
-  CONFIDENCE: "CONFIDENCE",
+  TUMOR_TYPE: "tumor_type",
+  ATTRIBUTE_NAME: "attribute_name",
+  ATTRIBUTE_VALUE: "attribute_value",
+  CONFIDENCE: "confidence",
+  ATTRIBUTE_STATUS: "attribute_status",
 };
 
 export {

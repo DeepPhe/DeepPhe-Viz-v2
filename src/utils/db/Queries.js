@@ -15,7 +15,32 @@ const getPatientIdsWithAllAttributes = (db) => {
         store
           .getAll()
           .then((items) => {
-            resolve(items);
+            // Deduplicate items based on patientid
+            const uniqueItems = [];
+            //const patientIdSet = new Set();
+
+            items.forEach((item) => {
+              console.log(item);
+              if (item.patientid || item.patientids) {
+                // For objects with patientid property
+                if (item.patientid) {
+                  // patientIdSet.add(item.patientid);
+                  uniqueItems.push(item);
+                }
+                // For objects with patientids array
+                else if (item.patientids) {
+                  // Deduplicate the patientids array itself
+                  item.patientids = [...new Set(item.patientids)];
+                  uniqueItems.push(item);
+                }
+                // Add other item types that don't have patient info
+                else if (!item.patientid && !item.patientids) {
+                  uniqueItems.push(item);
+                }
+              }
+            });
+
+            resolve(uniqueItems);
           })
           .catch((err) => {
             console.error(`Error fetching data from ${store}:`, err);
@@ -36,6 +61,7 @@ const getPatientIdsWithAllAttributes = (db) => {
         const combinedResults = {};
         // Process DeepPhe data
         cancerAttributeItems.forEach((item) => {
+          console.log("cancerAttributeItems", item);
           const rowName = `${item.attribid}.${item.attribval}`;
           if (!combinedResults[rowName]) {
             combinedResults[rowName] = [];
@@ -52,10 +78,18 @@ const getPatientIdsWithAllAttributes = (db) => {
             if (!combinedResults[rowName]) {
               combinedResults[rowName] = [];
             }
-            combinedResults[rowName].push(...item.patientids);
+
+            // Handle case where patientids is a string or an array
+            let patientIds = item.patientids;
+            if (typeof patientIds === "string") {
+              patientIds = patientIds.split(",");
+            }
+
+            // Create a Set from existing patients plus new ones to ensure uniqueness
+            const uniquePatients = new Set([...combinedResults[rowName], ...patientIds]);
+            combinedResults[rowName] = [...uniquePatients];
           });
         });
-
         resolve(combinedResults);
       })
       .catch((error) => {

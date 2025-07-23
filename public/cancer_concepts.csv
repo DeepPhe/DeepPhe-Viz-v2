@@ -1,4 +1,4 @@
-PATIENT_NAME|CANCER_ID|concept_description|concept_category|concept_status|attribute_value|attribute_name
+patientid|cancerid|concept_description|concept_category|concept_status|attribute_value|attribute_name
 fake_patient1|fake_patient1_07072025191757_C_106_C|Breast Lobular Carcinoma In Situ|Neoplasm|Historical||Location
 fake_patient1|fake_patient1_07072025191757_C_106_C|Breast Lobular Carcinoma In Situ|Neoplasm|Historical|Axilla|Location
 fake_patient1|fake_patient1_07072025191757_C_106_C|Breast Lobular Carcinoma In Situ|Neoplasm|Historical|Lower-Outer Quadrant of the Breast|Location

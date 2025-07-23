@@ -63,6 +63,7 @@ const filterPatients = (patients, uniquePatientIds, definitions, wantLogs) => {
             // Must be in every filter to be included
             for (const obj of filterArrayLookupObjects) {
               if (!obj[patientId]) {
+                debugger;
                 inAllFilters = false;
                 break;
               }
@@ -79,6 +80,7 @@ const filterPatients = (patients, uniquePatientIds, definitions, wantLogs) => {
             );
           const filterData = definitions.map((filter, filterIdx) => {
             if (filter.enabled) {
+              debugger;
               const patientsInThisFilterAndMatchingThisFilterAndMatchingAllOtherFilters =
                 Array.from(
                   new Set(
@@ -147,7 +149,6 @@ const filterPatients = (patients, uniquePatientIds, definitions, wantLogs) => {
               patientsInThisFilterAndNotMatchingThisFilter.forEach((patient) => {
                 nextLookup[patient] = true;
               });
-              debugger;
               const patientsInThisFilterAndNotMatchingThisFilterByCategory =
                 filter.patientCountsByCategory.map((item, idx) => {
                   return item.patients.filter((patient) => nextLookup[patient]).length;

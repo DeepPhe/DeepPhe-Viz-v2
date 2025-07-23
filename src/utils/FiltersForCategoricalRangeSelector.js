@@ -22,7 +22,11 @@ const getPatientsinThisFilterMatchingAllOtherFilters = (
 ) => {
   return patientsInRange.map((range) => {
     return range.filter((patient) => {
-      return includes && patientsMatchingAllFilters.has(patient);
+      if (includes) {
+        return patientsMatchingAllFilters.has(patient);
+      } else {
+        return !patientsMatchingAllFilters.has(patient);
+      }
     });
   });
 };

@@ -8,7 +8,6 @@ import isEqual from "lodash/isEqual";
 
 function CustomTooltip({ active, payload, label }) {
   if (active && payload && payload.length) {
-    debugger;
     return (
       <div className="custom-tooltip">
         <p className="label">{`Category: ${label}`}</p>
@@ -37,9 +36,15 @@ function DpBarChart(props) {
   const [rects, setRects] = useState([]);
 
   useEffect(() => {
-    if (coordinates && coordinates.length && width) {
-      setPaddingRight(coordinates[1] / 2 - 10 + "px");
-      setMinWidth(coordinates[1]);
+    if (coordinates.length && width) {
+      if (coordinates[1] === 0) {
+        setPaddingRight("0px");
+        setMinWidth(width);
+      } else {
+        setPaddingRight(coordinates[1] / 2 - 10 + "px");
+        setMinWidth(coordinates[1]);
+      }
+
       setWidth(width);
     }
   }, [coordinates, width]);
@@ -174,12 +179,13 @@ function DpBarChart(props) {
           return "";
         } else if (wantSlider) {
           return abbrevCategories[categoricalRange.indexOf(fieldName + "." + code)];
+        } else {
+          return code;
         }
       } else {
         return code;
       }
     };
-
     return (
       <React.Fragment>
         <span className={"dp-bar-chart"} style={{ overflow: "visible" }}>
@@ -252,4 +258,18 @@ function DpBarChart(props) {
   );
 }
 
+/**
+ * Returns an array of objects with the left and right pixel positions of each bar rect in the chart.
+ * @param {NodeList|Array} rectNodes - The rect DOM nodes (SVGRectElement) for the bars.
+ * @returns {Array<{left: number, right: number}>}
+ */
+function getBarLeftRightArray(rectNodes) {
+  if (!rectNodes || !rectNodes.length) return [];
+  return Array.from(rectNodes).map((rect) => {
+    const { left, right } = rect.getBoundingClientRect();
+    return { left, right };
+  });
+}
+
+export { getBarLeftRightArray };
 export default DpBarChart;

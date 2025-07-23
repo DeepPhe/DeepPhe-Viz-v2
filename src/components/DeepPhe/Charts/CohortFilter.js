@@ -7,6 +7,7 @@ import { fetchPatientArrays } from "../../../utils/db/Patient";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import filterPatients from "../../../utils/FilterPatients";
+import { Link } from "react-router-dom";
 
 // Outside your component:
 const MemoizedDpFilterList = React.memo(DpFilterList);
@@ -157,11 +158,52 @@ const CohortFilter = (props) => {
 
   if (stillLoading()) return <div>Data is coming soon...</div>;
   else {
+    // Build a patientId-to-gender, patientId-to-age, and patientId-to-cancer map
+    const patientIdToGender = {};
+    const patientIdToAge = {};
+    const patientIdToCancer = {};
+    const patientIdToStage = {};
+    if (patientArrays) {
+      Object.keys(patientArrays).forEach((key) => {
+        if (key.startsWith("GENDER.")) {
+          const gender = key.split("GENDER.")[1];
+          patientArrays[key].forEach((pid) => {
+            patientIdToGender[pid] = gender;
+          });
+        }
+        if (key.startsWith("AGE_AT_DX.")) {
+          const age = key.split("AGE_AT_DX.")[1];
+          patientArrays[key].forEach((pid) => {
+            patientIdToAge[pid] = age;
+          });
+        }
+        if (key.startsWith("CANCER.")) {
+          const cancer = key.split("CANCER.")[1];
+          patientArrays[key].forEach((pid) => {
+            // If a patient has multiple cancers, concatenate them with a comma
+            if (patientIdToCancer[pid]) {
+              patientIdToCancer[pid] += `, ${cancer}`;
+            } else {
+              patientIdToCancer[pid] = cancer;
+            }
+          });
+        }
+        if (key.startsWith("STAGE.")) {
+          const stage = key.split("STAGE.")[1];
+          patientArrays[key].forEach((pid) => {
+            if (patientIdToStage[pid]) {
+              patientIdToStage[pid] += `, ${stage}`;
+            } else {
+              patientIdToStage[pid] = stage;
+            }
+          });
+        }
+      });
+    }
     console.log("loading again");
     return (
       <React.Fragment>
         <div id={"NewBasicControl"}></div>
-        <div>Selected Patients: {patientsMatchingAllFilters.length}</div>
 
         <div id="NewControl">{getMemoizedFilterList}</div>
 
@@ -182,13 +224,39 @@ const CohortFilter = (props) => {
               }}
             >
               {Array.from(patientsMatchingAllFilters).map((patientId, index) => (
-                <Typography
+                <Link
                   key={index}
-                  component="div"
-                  sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                  to={{
+                    pathname: `/patient/${patientId}`,
+                    state: { db: db },
+                  }}
+                  style={{ textDecoration: "none" }}
                 >
-                  {patientId}
-                </Typography>
+                  <Typography
+                    component="div"
+                    sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      cursor: "pointer",
+                      color: "primary.main",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    {patientId}
+                    {patientIdToGender[patientId] ||
+                    patientIdToAge[patientId] ||
+                    patientIdToCancer[patientId] ||
+                    patientIdToStage[patientId]
+                      ? ` (${patientIdToGender[patientId] || "?"}, Age at Dx: ${
+                          patientIdToAge[patientId] || "?"
+                        }, Cancer: ${patientIdToCancer[patientId] || "?"}, Stage: ${
+                          patientIdToStage[patientId] || "?"
+                        })`
+                      : ""}
+                  </Typography>
+                </Link>
               ))}
             </Box>
           ) : (

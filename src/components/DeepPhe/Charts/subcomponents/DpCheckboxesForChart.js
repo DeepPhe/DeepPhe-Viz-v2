@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Box, Checkbox, FormGroup, FormLabel } from "@mui/material";
 
 const DpCheckboxesForChart = ({
   fieldName,
@@ -45,57 +44,58 @@ const DpCheckboxesForChart = ({
     return false;
   } else
     return (
-      <FormGroup
-        row
-        sx={{
-          display: "flex",
-          flexDirection: "row", // Align checkboxes from right to left
-          gap: columnGap, // Use variable for adjustable spacing
-          width: width,
-          alignItems: "baseline",
-          flexWrap: "nowrap",
-          marginTop: "-30px",
-          paddingRight: paddingRight,
-          overflow: "visible", // Ensures checkboxes are in a scrollable row
-        }}
-      >
-        {abbrevCategories.map((name, i) => {
-          return (
-            <Box
-              id={"checkbox-row" + i}
-              key={name}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                width: minWidth,
-                alignItems: "normal",
-              }}
-            >
-              <Checkbox
-                checked={checkedItemsArray[i]}
-                onChange={handleChange}
-                name={name}
-                sx={{
-                  "& .MuiSvgIcon-root": {
-                    fontSize: checkboxSize, // Set checkbox size dynamically
-                  },
-                }}
-              />
-              <FormLabel
-                sx={{
-                  // transform: "translate(-15px, 5px) rotate(25deg)", // Ensure readable text
-                  mb: 0.5, // Reduce spacing between label and checkbox
-                  fontSize: fontSize,
-                  whiteSpace: "nowrap", // wordWrap: "break-word",
-                  lineHeight: "1",
-                }}
-              >
-                {name.replace(fieldName + ".", "")}
-              </FormLabel>
-            </Box>
-          );
-        })}
-      </FormGroup>
+      <React.Fragment></React.Fragment>
+      // <FormGroup
+      //   row
+      //   sx={{
+      //     display: "flex",
+      //     flexDirection: "row", // Align checkboxes from right to left
+      //     gap: columnGap, // Use variable for adjustable spacing
+      //     width: width,
+      //     alignItems: "baseline",
+      //     flexWrap: "nowrap",
+      //     marginTop: "-30px",
+      //     paddingRight: paddingRight,
+      //     overflow: "visible", // Ensures checkboxes are in a scrollable row
+      //   }}
+      // >
+      //   {abbrevCategories.map((name, i) => {
+      //     return (
+      //       <Box
+      //         id={"checkbox-row" + i}
+      //         key={name}
+      //         sx={{
+      //           display: "flex",
+      //           flexDirection: "column",
+      //           width: minWidth,
+      //           alignItems: "normal",
+      //         }}
+      //       >
+      //         <Checkbox
+      //           checked={checkedItemsArray[i]}
+      //           onChange={handleChange}
+      //           name={name}
+      //           sx={{
+      //             "& .MuiSvgIcon-root": {
+      //               fontSize: checkboxSize, // Set checkbox size dynamically
+      //             },
+      //           }}
+      //         />
+      //         <FormLabel
+      //           sx={{
+      //             // transform: "translate(-15px, 5px) rotate(25deg)", // Ensure readable text
+      //             mb: 0.5, // Reduce spacing between label and checkbox
+      //             fontSize: fontSize,
+      //             whiteSpace: "nowrap", // wordWrap: "break-word",
+      //             lineHeight: "1",
+      //           }}
+      //         >
+      //           {name.replace(fieldName + ".", "")}
+      //         </FormLabel>
+      //       </Box>
+      //     );
+      //   })}
+      // </FormGroup>
     );
 };
 
