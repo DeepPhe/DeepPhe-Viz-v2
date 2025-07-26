@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import { useTheme } from "@mui/styles";
 import DpBarChart from "./DpBarChart";
-import Typography from "@mui/material/Typography";
-import Checkbox from "@mui/material/Checkbox";
 
 function DpFilterBox(props) {
   const filterInitialized = props.filterInitialized;
@@ -20,79 +18,38 @@ function DpFilterBox(props) {
   };
 
   let filterObject = undefined;
-  if (
-    definition.class === "categoricalRangeSelector" ||
-    definition.class === "numericRangeSelector"
-  ) {
-    filterObject = (
-      <DpBarChart
-        wantSlider={props.wantSlider}
-        wantCheckboxes={true}
-        definition={props.definition}
-        dataset={dataset}
-        series={series}
-        broadcastUpdate={broadcastUpdate}
-        filterInitialized={filterInitialized}
-      ></DpBarChart>
-    );
-  } else if (definition.class === "valueSelector") {
-    filterObject = (
-      <DpBarChart
-        wantSlider={false}
-        wantCheckboxes={true}
-        definition={props.definition}
-        dataset={dataset}
-        series={series}
-        broadcastUpdate={broadcastUpdate}
-        filterInitialized={filterInitialized}
-      ></DpBarChart>
-    );
-  }
+
+  filterObject = (
+    <DpBarChart
+      definition={props.definition}
+      dataset={dataset}
+      series={series}
+      broadcastUpdate={broadcastUpdate}
+      filterInitialized={filterInitialized}
+    ></DpBarChart>
+  );
 
   return (
     <React.Fragment>
-      <Grid item md={2}>
+      <Grid size={12} sx={{ width: "100%" }}>
         <Box
-          align={"bottom"}
-          bgcolor={theme.palette.background.default}
-          sx={{ textAlign: "start", marginBottom: 0, marginRight: 0, width: "100%" }}
+          sx={{
+            top: 0,
+            right: 0,
+            zIndex: 1,
+            padding: "10px",
+          }}
         >
-          <Typography sx={{ textAlign: "right", fontSize: "18px" }}>
-            {definition.fieldName}
-          </Typography>
-          <Typography
-            sx={{
-              "& .MuiSvgIcon-root": { fontSize: 14 },
-              marginTop: "10px",
-              marginLeft: "5px",
-              textAlign: "right",
-              fontSize: "12px",
-            }}
-          >
-            Enabled:
-          </Typography>
-          <Checkbox
-            sx={{
-              "& .MuiSvgIcon-root": { fontSize: 14 },
-              marginTop: "-20px",
-              marginLeft: "0px",
-              textAlign: "right",
-            }}
-            size={"small"}
-            checked={isChecked}
-            onChange={(event) => handleCheckboxChange(event, definition)}
-            name={"exampleCheckbox"}
-          />
+          <label>{definition.fieldName}</label>
         </Box>
       </Grid>
-      <Grid item md={10} className={"filter-item"} sx={{ position: "relative" }}>
+      <Grid size={12} className={"filter-item"} sx={{ width: "100%" }}>
         <Box
           align={"bottom"}
           bgcolor={theme.palette.background.default}
           sx={{
             marginBottom: 0,
             width: "100%",
-            position: "relative",
             zIndex: 0,
             overflow: "visible",
           }}

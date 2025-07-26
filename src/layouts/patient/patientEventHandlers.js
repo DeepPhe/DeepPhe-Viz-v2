@@ -1,8 +1,7 @@
 import $ from "jquery";
 import { getFact } from "./FactUtils";
 
-export function setEventHandlers(patientId)  {
-
+export function setEventHandlers(patientId) {
   $(document).on("click", ".list_view .fact", function () {
     //JDL when someone clicks on a cancer fact, it goes here....probably need to make a map from old/new property names now to explain my thinking
     const cssClass = "highlighted_fact";
@@ -86,5 +85,4 @@ export function setEventHandlers(patientId)  {
     $("#report_mentioned_terms").html("");
     $("#report_text").html("");
   });
-
 }

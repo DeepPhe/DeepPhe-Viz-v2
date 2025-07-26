@@ -46,7 +46,7 @@ const getDataset = (thisFilter, categoricalRange, selectedCategoricalRange) => {
       patientsMeetingAllFilters = 0;
     }
     return {
-      category: category.replace(thisFilter.filter + ".", ""),
+      category: category,
       "Patients Meeting All Filters": patientsMeetingAllFilters,
       "Patients Meeting This Filter Only": patientsMeetingThisFilterOnly,
       "Patients Not Meeting This Filter": patientsNotMeetingThisFilter,
@@ -74,8 +74,8 @@ const fetchFilterDefinitions = () => {
   });
 };
 
-const initializeFilterDefinitions = (filterDefinitions, patientArrays) => {
-  return initFilterDefinitions(filterDefinitions, patientArrays);
+const initializeFilterDefinitions = (filterDefinitions, patientArrays, uniquePatientIds) => {
+  return initFilterDefinitions(filterDefinitions, patientArrays, uniquePatientIds);
 };
 
 // getPatientIdsWithAllAttributes(db).then((allAttributesArray) => {
@@ -96,38 +96,20 @@ const getPatientsInFilter = (definition, patientArrays, matchesOnly) => {
   };
   let matchingPatients = [];
   let matchingPatientsByCategory = [];
-  if (definition.class === "discreteList") {
-  } else if (definition.class === "checkboxList") {
-    definition.checkboxes.forEach((switchDefinition) => {
-      // if (switchDefinition.checked || !matchesOnly) {
-      //   matchingPatients = matchingPatients.concat(
-      //     getPatientsForArrayName(switchDefinition.name)
-      //   );
-      // }
-    });
-  } else if (definition.class === "categoricalRangeSelector") {
-    let arr;
-    arr = definition.categoricalRange;
-    arr.forEach((range) => {
-      const pats = getPatientsForArrayName(range);
-      if (definition.selectedCategoricalRange.includes(range) || !definition.enabled) {
-        matchingPatients = matchingPatients.concat(pats);
-        matchingPatientsByCategory.push(pats);
-      } else {
-        matchingPatientsByCategory.push([]);
-      }
-    });
-    definition.patientsMeetingThisFilterOnly = matchingPatientsByCategory;
-  } else if (definition.class === "numericRangeSelector") {
-  } else if (definition.class === "booleanList") {
-    definition.switches.forEach((switchDefinition) => {
-      if (switchDefinition.value || !matchesOnly) {
-        matchingPatients = matchingPatients.concat(getPatientsForArrayName(switchDefinition.name));
-      }
-    });
-  } else {
-    console.log("Unknown filter type", definition.class);
-  }
+
+  let arr;
+  arr = definition.categoricalRange;
+  arr.forEach((range) => {
+    const pats = getPatientsForArrayName(range);
+    if (definition.selectedCategoricalRange.includes(range) || !definition.enabled) {
+      matchingPatients = matchingPatients.concat(pats);
+      matchingPatientsByCategory.push(pats);
+    } else {
+      matchingPatientsByCategory.push([]);
+    }
+  });
+  definition.patientsMeetingThisFilterOnly = matchingPatientsByCategory;
+
   return [matchingPatients];
 };
 const updateFilterData = () => {};

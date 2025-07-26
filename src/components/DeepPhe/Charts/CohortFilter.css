@@ -67,10 +67,6 @@ svg[id$="-hs"] {
     margin-top: -10px;
 }
 
-.outer-filter-container {
-    min-height: 230px;
-
-}
 
 .filter-control {
     padding: 1px 30px !important;
@@ -252,7 +248,6 @@ svg[id$="-hs"] {
     width: 80%;
 }
 
-.dp-filter-box {
-    display: flex;
-    flex-wrap: nowrap;
+#NewControl > div, #NewControl > div > .MuiGrid-item {
+    padding: 0px !important;
 }

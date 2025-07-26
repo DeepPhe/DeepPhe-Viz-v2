@@ -1,13 +1,36 @@
 {
   "searchFilterDefinition": [
     {
+      "fieldName": "Topography, major",
+      "guiOptions": {
+        "displayName": "Topography, major",
+        "displayGroup": "Topography",
+        "displayPriority": 0
+      }
+    },
+    {
+      "fieldName": "Topography, minor",
+      "guiOptions": {
+        "displayName": "Topography, minor",
+        "displayGroup": "Topography",
+        "displayPriority": 0
+      }
+    },
+    {
+      "fieldName": "Metastatic Site",
+      "guiOptions": {
+        "displayName": "Metastatic Site",
+        "displayGroup": "LNI",
+        "displayPriority": 0
+      }
+    },
+    {
       "fieldName": "Lymph Involvement",
       "guiOptions": {
         "displayName": "Lymph Involvement",
         "displayGroup": "LNI",
         "displayPriority": 1
-      },
-      "class": "valueSelector"
+      }
     },
     {
       "fieldName": "Course",
@@ -15,8 +38,7 @@
         "displayName": "Course",
         "displayGroup": "LNI",
         "displayPriority": 2
-      },
-      "class": "valueSelector"
+      }
     },
     {
       "fieldName": "Genes",
@@ -24,31 +46,15 @@
         "displayName": "Genes",
         "displayGroup": "LNI",
         "displayPriority": 3
-      },
-      "class": "valueSelector"
+      }
     },
     {
       "fieldName": "Age_at_DX",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "AGE_at_dx",
         "displayGroup": "Demo",
         "displayPriority": 1
-      },
-      "checkboxes": [
-        {
-          "name": "M",
-          "checked": true
-        },
-        {
-          "name": "F",
-          "checked": true
-        },
-        {
-          "name": "U",
-          "checked": false
-        }
-      ]
+      }
     },
     {
       "fieldName": "Stage",
@@ -57,7 +63,6 @@
         "displayGroup": "john",
         "displayPriority": 1
       },
-      "class": "categoricalRangeSelector",
       "selectedCategoricalRange": [
         "I",
         "II",
@@ -73,7 +78,6 @@
     },
     {
       "fieldName": "Grade",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "Grade",
         "displayGroup": "john",
@@ -91,7 +95,6 @@
     },
     {
       "fieldName": "T Stage",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "T",
         "displayGroup": "john1",
@@ -107,7 +110,6 @@
     },
     {
       "fieldName": "N Stage",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "N",
         "displayGroup": "john1",
@@ -126,7 +128,6 @@
     },
     {
       "fieldName": "M Stage",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "M",
         "displayGroup": "john1",
@@ -146,7 +147,6 @@
         "displayGroup": "ql",
         "displayPriority": 5
       },
-      "class": "categoricalRangeSelector",
       "selectedCategoricalRange": [
         "1",
         "2",
@@ -165,151 +165,62 @@
     },
     {
       "fieldName": "Quadrant",
-      "class": "checkboxList",
       "guiOptions": {
         "displayName": "Quadrant",
         "displayGroup": "ql",
         "displayPriority": 1
-      },
-      "checkboxes": [
-        {
-          "name": "UI",
-          "value": "Upper_inner_Quadrant",
-          "checked": true
-        },
-        {
-          "name": "UO",
-          "value": "Upper_Outer_Quadrant",
-          "checked": true
-        },
-        {
-          "name": "LI",
-          "value": "Lower_inner_Quadrant",
-          "checked": true
-        },
-        {
-          "name": "LO",
-          "value": "Lower_Outer_Quadrant",
-          "checked": true
-        }
-      ]
+      }
     },
     {
       "fieldName": "Laterality",
-      "class": "checkboxList",
       "guiOptions": {
         "displayName": "Stage",
         "displayGroup": "ql",
         "displayPriority": 1
-      },
-      "checkboxes": [
-        {
-          "name": "Left",
-          "value": "Left",
-          "checked": true
-        },
-        {
-          "name": "Right",
-          "value": "Right",
-          "checked": true
-        }
-      ]
+      }
+    },
+    {
+      "fieldName": "Location",
+      "guiOptions": {
+        "displayName": "Stage",
+        "displayGroup": "ql",
+        "displayPriority": 1
+      }
     },
     {
       "fieldName": "Gender",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "Gender",
         "displayGroup": "Demographics",
         "displayPriority": 2
-      },
-      "checkboxes": [
-        {
-          "name": "M",
-          "checked": true
-        },
-        {
-          "name": "F",
-          "checked": true
-        },
-        {
-          "name": "U",
-          "checked": false
-        }
-      ]
+      }
     },
     {
       "fieldName": "Ethnicity",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "Ethnicity",
         "displayGroup": "Demographics",
         "displayPriority": 2
-      },
-      "checkboxes": [
-        {
-          "name": "M",
-          "checked": true
-        },
-        {
-          "name": "F",
-          "checked": true
-        },
-        {
-          "name": "U",
-          "checked": false
-        }
-      ]
+      }
     },
     {
       "fieldName": "Race",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "Race",
         "displayGroup": "Demographics",
         "displayPriority": 2
-      },
-      "checkboxes": [
-        {
-          "name": "M",
-          "checked": true
-        },
-        {
-          "name": "F",
-          "checked": true
-        },
-        {
-          "name": "U",
-          "checked": false
-        }
-      ]
+      }
     },
     {
       "fieldName": "Cancer",
-      "class": "categoricalRangeSelector",
       "guiOptions": {
         "displayName": "Cancer",
         "displayGroup": "Demo",
         "displayPriority": 1
-      },
-      "checkboxes": [
-        {
-          "name": "M",
-          "checked": true
-        },
-        {
-          "name": "F",
-          "checked": true
-        },
-        {
-          "name": "U",
-          "checked": false
-        }
-      ]
+      }
     },
     {
       "fieldName": "Age",
-      "class": "numericRangeSelector",
       "guiOptions": {
         "displayName": "Age",
         "displayGroup": "Demographics",

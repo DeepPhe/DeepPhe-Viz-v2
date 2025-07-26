@@ -1106,6 +1106,7 @@ const PatientEpisodeTimeline = ({
       try {
         const response = await fetchData(url);
         const jsonResponse = await response.json();
+        debugger;
         processTimelineResponse(jsonResponse);
       } catch (error) {
         console.error("PatientEpisodeTimeline fetch error:", error);

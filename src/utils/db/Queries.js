@@ -61,7 +61,7 @@ const getPatientIdsWithAllAttributes = (db) => {
         const combinedResults = {};
         // Process DeepPhe data
         cancerAttributeItems.forEach((item) => {
-          console.log("cancerAttributeItems", item);
+          // console.log("cancerAttributeItems", item);
           const rowName = `${item.attribid}.${item.attribval}`;
           if (!combinedResults[rowName]) {
             combinedResults[rowName] = [];

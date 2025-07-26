@@ -73,15 +73,17 @@ const CohortFilter = (props) => {
   }, [db]);
 
   useEffect(() => {
-    if (patientArrays) {
+    if (patientArrays && uniquePatientIds) {
       console.log("useEffect patientArrays");
       fetchFilterDefinitions().then((filterDefinitions) => {
-        initializeFilterDefinitions(filterDefinitions, patientArrays).then((arr) => {
-          setFilterDefinitions(arr[0]);
-          setNumFilters(arr[0].length);
-          setFilterGuiInfo(arr[1]);
-          updateLoadingState("filterDefinition", false);
-        });
+        initializeFilterDefinitions(filterDefinitions, patientArrays, uniquePatientIds).then(
+          (arr) => {
+            setFilterDefinitions(arr[0]);
+            setNumFilters(arr[0].length);
+            setFilterGuiInfo(arr[1]);
+            updateLoadingState("filterDefinition", false);
+          }
+        );
       });
     }
   }, [patientArrays]);
@@ -263,6 +265,7 @@ const CohortFilter = (props) => {
             <Typography sx={{ gridColumn: "span 10" }}>No matching patients</Typography>
           )}
         </Box>
+        {/*<UpsetFilter uniquePatientIds={uniquePatientIds} patientArrays={patientArrays} />*/}
         <Box sx={{ mt: "100px" }}>
           <Box>
             <Typography sx={{ fontSize: "24px", color: "red" }} variant="div">
