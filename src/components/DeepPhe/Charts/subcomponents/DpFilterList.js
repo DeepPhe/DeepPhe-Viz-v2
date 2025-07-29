@@ -1,39 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import DpFilterListItem from "./DpFilterListItem.js";
 import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 function DpFilterList(props) {
-  const [filterDefinitions, setFilterDefinitions] = useState(props.filterDefinitions);
-  const [filterStates, setFilterStates] = useState(props.filterStates);
-  const [newItemsReady, setNewItemsReady] = useState(false);
-  const filterInitialized = props.filterInitialized;
-  const [isRendered, setIsRendered] = useState(false);
-
-  useEffect(() => {
-    setIsRendered(true);
-  }, []);
+  const { filterDefinitions, filterStates } = props;
 
   const getFilterStateChange = (definition) => {
-    if (!isRendered) {
-      return () => {}; // Empty function as fallback
-    }
     return props.filterChangedState(definition);
   };
-
-  useEffect(() => {
-    if (props.filterDefinitions) {
-      setFilterDefinitions(props.filterDefinitions);
-      setNewItemsReady(true);
-    }
-  }, [props.filterDefinitions]);
-
-  useEffect(() => {
-    if (props.filterStates) {
-      setFilterStates(props.filterStates);
-      setNewItemsReady(true);
-    }
-  }, [props.filterStates]);
 
   const getFilters = () => {
     if (!filterDefinitions || !props.filterGuiInfo[props.guiInfo]) {
@@ -44,32 +19,55 @@ function DpFilterList(props) {
       index: index,
     }));
   };
-
+  const filters = getFilters();
   return (
     <React.Fragment key={`${props.guiInfo}-${props.filterStates}`}>
-      <Box className={props.guiInfo + "guiinfo"} sx={{ width: "100%", p: 2 }}>
-        <Grid container rowSpacing={0} className={"filter-list-container"}>
-          {getFilters().map((filter, index) => {
-            const definition = newItemsReady
-              ? filterDefinitions[filter.definitionIdx]
-              : props.oldFilterDefinitions?.[filter.definitionIdx];
-            if (!definition) {
-              return null;
-            }
+      <Grid item md={12} paddingRight={0} paddingTop={0}>
+        <Grid
+          container
+          justifyContent={"right"}
+          sx={{
+            marginBottom: "10px",
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <Grid
+            item
+            sx={{
+              display: "flex",
+              justifyContent: "right",
+            }}
+            xs={12}
+          >
+            <Typography
+              sx={{
+                fontWeight: "bold",
+                fontSize: "16px",
+                marginBottom: "10px",
+                textAlign: "right",
+              }}
+            >
+              {props.guiInfo}
+            </Typography>
+          </Grid>
+          {filters.map((filter, index) => {
+            const definition = filterDefinitions[filter.definitionIdx];
             return (
               <DpFilterListItem
+                numFiltersInSection={filters.length}
                 key={definition.fieldName || index}
                 definition={definition}
                 index={index}
                 moveListItem={props.moveListItem}
                 filterChangedState={getFilterStateChange}
-                filterStates={newItemsReady ? filterStates : props.oldFilterStates}
-                filterInitialized={filterInitialized}
+                filterStates={filterStates}
               />
             );
           })}
         </Grid>
-      </Box>
+      </Grid>
+      {/*</Box>*/}
     </React.Fragment>
   );
 }

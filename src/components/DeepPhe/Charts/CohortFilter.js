@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState, useTransition } from "react";
 import "./CohortFilter.css";
 import "rc-slider/assets/index.css";
 import DpFilterList from "./subcomponents/DpFilterList";
@@ -8,42 +8,35 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import filterPatients from "../../../utils/FilterPatients";
 import { Link } from "react-router-dom";
-
-// Outside your component:
-const MemoizedDpFilterList = React.memo(DpFilterList);
-
-// Then in your render:
+import Grid from "@mui/material/Grid";
 
 const CohortFilter = (props) => {
   const db = props.db;
+
   const [loadingStates, setLoadingStates] = useState({
     filterDefinition: true,
     patientArrays: true,
     filterStates: true,
   });
 
-  // Update only the specific loading state
-
   const [oldFilterDefinitions, setOldFilterDefinitions] = useState(undefined);
-
   const [filterGuiInfo, setFilterGuiInfo] = useState({});
   const [filterDefinitions, setFilterDefinitions] = useState(undefined);
   const [patientArrays, setPatientArrays] = useState(undefined);
   const [filterStates, setFilterStates] = useState(undefined);
-  const [numFilters, setNumFilters] = useState(-1);
-  const [filtersLoaded, setFiltersLoaded] = useState(new Set());
-
   const [uniquePatientIds, setUniquePatientIds] = useState([]);
-  const [patientsMatchingAllFiltersUpToDate, setPatientsMatchingAllFiltersUpToDate] =
-    useState(false);
   const [patientsMatchingAllFilters, setPatientsMatchingAllFilters] = useState([]);
-  const [filterListKey, setFilterListKey] = useState(0);
-  const [loadingFilters, setLoadingFilters] = useState(true);
-  const stillLoading = () => {
-    return (
-      loadingStates.filterDefinition || loadingStates.patientArrays || loadingStates.filterStates
-    );
-  };
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  useEffect(() => {
+    if (
+      !loadingStates.filterDefinition &&
+      !loadingStates.patientArrays &&
+      !loadingStates.filterStates
+    ) {
+      setInitialLoading(false);
+    }
+  }, [loadingStates]);
 
   const copyFilterDefinitions = (definitions) => {
     const newDefinitions = definitions.map((definition) => {
@@ -79,7 +72,6 @@ const CohortFilter = (props) => {
         initializeFilterDefinitions(filterDefinitions, patientArrays, uniquePatientIds).then(
           (arr) => {
             setFilterDefinitions(arr[0]);
-            setNumFilters(arr[0].length);
             setFilterGuiInfo(arr[1]);
             updateLoadingState("filterDefinition", false);
           }
@@ -101,14 +93,7 @@ const CohortFilter = (props) => {
     }
   }, [filterDefinitions]);
 
-  useEffect(() => {
-    if (numFilters === filtersLoaded.size) {
-      setLoadingFilters(false);
-      console.log("useEffect filtersLoaded");
-    }
-  }, [filtersLoaded, numFilters]);
-
-  const runFilters = () => {
+  const runFilters = useCallback(() => {
     return new Promise((resolve, reject) => {
       filterPatients(patientArrays, uniquePatientIds, filterDefinitions, false).then(
         (filterResults) => {
@@ -117,48 +102,29 @@ const CohortFilter = (props) => {
         }
       );
     });
-  };
+  }, [patientArrays, uniquePatientIds, filterDefinitions]);
 
-  const filterChangedState = (definition) => {
-    if (!stillLoading()) {
-      console.log("filter changed state");
-      updateLoadingState("filterDefinition", true);
-      runFilters().then((newFilterState) => {
-        setFilterStates(newFilterState);
-        updateLoadingState("filterDefinition", false);
-      });
-    }
-  };
+  const [isPending, startTransition] = useTransition();
+  const filterChangedState = useCallback(
+    (definition) => {
+      if (!initialLoading) {
+        console.log("filter changed state");
+        updateLoadingState("filterStates", true);
+        runFilters().then((newFilterState) => {
+          setFilterStates(newFilterState);
+          setFilterDefinitions(filterDefinitions);
+          updateLoadingState("filterStates", false);
+        });
+      }
+    },
+    [initialLoading, runFilters]
+  );
 
-  const filterInitialized = (definition) => {};
+  useEffect(() => {
+    console.log("useEffect filterStates", filterStates);
+  }, [filterStates]);
 
-  const getMemoizedFilterList = useMemo(() => {
-    if (!stillLoading()) {
-      return Object.keys(filterGuiInfo).map((guiInfo, index) => (
-        <MemoizedDpFilterList
-          key={`${filterListKey}-${index}`} // Use unique key to force re-render
-          guiInfo={guiInfo}
-          filterGuiInfo={filterGuiInfo}
-          filterDefinitions={filterDefinitions}
-          filterChangedState={filterChangedState}
-          filterStates={filterStates}
-          filterInitialized={filterInitialized}
-        />
-      ));
-    } else {
-      return "";
-    }
-  }, [
-    filterDefinitions,
-    filterStates,
-    filterGuiInfo,
-    filterListKey,
-    filterChangedState,
-    filterInitialized,
-    loadingStates,
-  ]);
-
-  if (stillLoading()) return <div>Data is coming soon...</div>;
+  if (initialLoading) return <div>Data is coming soon...</div>;
   else {
     // Build a patientId-to-gender, patientId-to-age, and patientId-to-cancer map
     const patientIdToGender = {};
@@ -205,86 +171,90 @@ const CohortFilter = (props) => {
     console.log("loading again");
     return (
       <React.Fragment>
-        <div id={"NewBasicControl"}></div>
-
-        <div id="NewControl">{getMemoizedFilterList}</div>
-
-        <Box id="patientsMatchingAllFilters" sx={{ mt: "1px" }}>
-          {patientsMatchingAllFilters.size > 0 ? (
+        {isPending && <div className="overlay-spinner" />}
+        <Grid item md={8}>
+          {Object.keys(filterGuiInfo).map((guiInfo, index) => (
+            <DpFilterList
+              key={`${index}`}
+              guiInfo={guiInfo}
+              filterGuiInfo={filterGuiInfo}
+              filterDefinitions={filterDefinitions}
+              filterChangedState={filterChangedState}
+              filterStates={filterStates}
+              isLoading={loadingStates.filterStates}
+            />
+          ))}
+        </Grid>
+        <Grid item md={4}>
+          <Typography sx={{ fontWeight: "bold", fontSize: "19px" }} variant="div">
+            Patients Matching Filters: {patientsMatchingAllFilters.size}
+          </Typography>
+          <Box id="patientsMatchingAllFilters" sx={{ mt: "1px" }}>
+            {patientsMatchingAllFilters.size > 0 ? (
+              <Box
+                sx={{
+                  display: "grid",
+                  fontSize: "14px",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "10px",
+                  marginTop: "10px",
+                  padding: "10px",
+                  border: "1px solid #eee",
+                  borderRadius: "4px",
+                }}
+              >
+                {Array.from(patientsMatchingAllFilters).map((patientId, index) => (
+                  <Link
+                    key={index}
+                    to={{
+                      pathname: `/patient/${patientId}`,
+                      state: { db: db },
+                    }}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <Typography
+                      component="div"
+                      sx={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        cursor: "pointer",
+                        color: "primary.main",
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
+                      {patientId}
+                      {patientIdToGender[patientId] ||
+                      patientIdToAge[patientId] ||
+                      patientIdToCancer[patientId] ||
+                      patientIdToStage[patientId]
+                        ? ` (${patientIdToGender[patientId] || "?"}, Age at Dx: ${
+                            patientIdToAge[patientId] || "?"
+                          }, Cancer: ${patientIdToCancer[patientId] || "?"})`
+                        : ""}
+                    </Typography>
+                  </Link>
+                ))}
+              </Box>
+            ) : (
+              <Typography sx={{ gridColumn: "span 10" }}>No matching patients</Typography>
+            )}
+          </Box>
+          {/*<UpsetFilter uniquePatientIds={uniquePatientIds} patientArrays={patientArrays} />*/}
+          <Box sx={{ mt: "100px" }}>
+            <Box></Box>
             <Box
               sx={{
                 display: "grid",
                 fontSize: "14px",
-                gridTemplateColumns: "repeat(5, 1fr)",
+                gridTemplateColumns: "repeat(10, 1fr)",
                 gap: "10px",
                 marginTop: "10px",
-                maxHeight: "200px",
-                overflowY: "auto",
-                padding: "10px",
-                border: "1px solid #eee",
-                borderRadius: "4px",
               }}
-            >
-              {Array.from(patientsMatchingAllFilters).map((patientId, index) => (
-                <Link
-                  key={index}
-                  to={{
-                    pathname: `/patient/${patientId}`,
-                    state: { db: db },
-                  }}
-                  style={{ textDecoration: "none" }}
-                >
-                  <Typography
-                    component="div"
-                    sx={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      cursor: "pointer",
-                      color: "primary.main",
-                      "&:hover": {
-                        textDecoration: "underline",
-                      },
-                    }}
-                  >
-                    {patientId}
-                    {patientIdToGender[patientId] ||
-                    patientIdToAge[patientId] ||
-                    patientIdToCancer[patientId] ||
-                    patientIdToStage[patientId]
-                      ? ` (${patientIdToGender[patientId] || "?"}, Age at Dx: ${
-                          patientIdToAge[patientId] || "?"
-                        }, Cancer: ${patientIdToCancer[patientId] || "?"}, Stage: ${
-                          patientIdToStage[patientId] || "?"
-                        })`
-                      : ""}
-                  </Typography>
-                </Link>
-              ))}
-            </Box>
-          ) : (
-            <Typography sx={{ gridColumn: "span 10" }}>No matching patients</Typography>
-          )}
-        </Box>
-        {/*<UpsetFilter uniquePatientIds={uniquePatientIds} patientArrays={patientArrays} />*/}
-        <Box sx={{ mt: "100px" }}>
-          <Box>
-            <Typography sx={{ fontSize: "24px", color: "red" }} variant="div">
-              Debugging Information
-            </Typography>
+            ></Box>
           </Box>
-          <Typography sx={{ fontSize: "19px" }} variant="div">
-            Patients Matching Filters: {patientsMatchingAllFilters.size}
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              fontSize: "14px",
-              gridTemplateColumns: "repeat(10, 1fr)",
-              gap: "10px",
-              marginTop: "10px",
-            }}
-          ></Box>
-        </Box>
+        </Grid>
       </React.Fragment>
     );
   }

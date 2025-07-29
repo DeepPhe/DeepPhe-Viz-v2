@@ -1,45 +1,37 @@
 import DpFilterComponent from "./DpFilterComponent";
 import DpCategoricalRangeSelector from "./DpCategoricalRangeSelector";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Grid from "@mui/material/Grid";
 
 function DpFilterListItem(props) {
-  const [definition, setDefinition] = useState(props.definition);
-  const [filterStates, setFilterStates] = useState(props.filterStates);
-  const filterInitialized = props.filterInitialized;
-  const fullWidth = definition.fieldName.toLowerCase() === "clockface";
-  const EXPANSION_LEVEL_NONE = 0;
-  const EXPANSION_LEVEL_3 = 3;
+  const { definition, filterStates } = props;
   const EXPANSION_LEVEL_6 = 6;
-  const EXPANSION_LEVEL_9 = 9;
-  const EXPANSION_LEVEL_12 = 12;
-  const [expandedLevel, setExpandedLevel] = useState(2);
-
-  useEffect(() => {
-    setDefinition(props.definition);
-  }, [props.definition]);
-
-  useEffect(() => {
-    setFilterStates(props.filterStates);
-  }, [props.filterStates]);
+  const [expandedLevel, setExpandedLevel] = useState(3);
 
   const getFilter = () => {
+    let lvl = expandedLevel;
+    if (definition.fieldName && definition.fieldName.toLowerCase() === "location") {
+      lvl = 8;
+    }
+
     const filterChangedState = props.filterChangedState;
     return (
       <DpCategoricalRangeSelector
-        expandedLevel={expandedLevel}
-        fullWidth={fullWidth}
+        expandedLevel={lvl}
+        fullWidth={true}
         key={props.index}
         definition={definition}
         broadcastUpdate={filterChangedState}
         filterStates={filterStates}
-        filterInitialized={filterInitialized}
       />
     );
   };
-
+  let lvl = expandedLevel;
+  if (definition.fieldName && definition.fieldName.toLowerCase() === "location") {
+    lvl = 12;
+  }
   return (
-    <Grid item md={expandedLevel} className={"outer-filter-container"}>
+    <Grid item xs={lvl} sx={{ flexGrow: 0 }} className={"outer-filter-container"}>
       <DpFilterComponent fullWidth={false} definition={definition} filterControl={getFilter()} />
     </Grid>
   );

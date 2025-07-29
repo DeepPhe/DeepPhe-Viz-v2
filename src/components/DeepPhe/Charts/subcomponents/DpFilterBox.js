@@ -31,7 +31,7 @@ function DpFilterBox(props) {
 
   return (
     <React.Fragment>
-      <Grid size={12} sx={{ width: "100%" }}>
+      <Grid item>
         <Box
           sx={{
             top: 0,
@@ -43,21 +43,18 @@ function DpFilterBox(props) {
           <label>{definition.fieldName}</label>
         </Box>
       </Grid>
-      <Grid size={12} className={"filter-item"} sx={{ width: "100%" }}>
+      <Grid className={"filter-item"}>
         <Box
           align={"bottom"}
           bgcolor={theme.palette.background.default}
           sx={{
             marginBottom: 0,
-            width: "100%",
             zIndex: 0,
             overflow: "visible",
           }}
         >
           {props.chart && props.chart}
-          {props.slider && props.slider}
           {filterObject && filterObject}
-          {props.list && props.list}
         </Box>
       </Grid>
     </React.Fragment>

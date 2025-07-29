@@ -86,9 +86,9 @@ const setPatientCountsByCategory = (definitions, patientArrays, uniquePatientIds
       });
 
       if (patientsWithUnknownValues.length > 0) {
-        definition.categoricalRange.push("U");
+        definition.categoricalRange.push("?");
         definition.patientCountsByCategory.push({
-          category: "U",
+          category: "?",
           count: patientsWithUnknownValues.length,
           patients: patientsWithUnknownValues,
         });
@@ -259,6 +259,7 @@ const getAbbrevCategories = (categories) => {
       "Metastatic Site.Thoracic Spine": "T.Spine", // Remove the "T Stage." prefix
       "Location.": "N/S", // Remove the "Location." prefix
       "Location.Breast": "Breast",
+      "Location.Duct": "Duct",
       "Location.Lung": "Lung",
       "Location.Ovary": "Ov",
       "Location.Bone": "Bone",
@@ -270,7 +271,7 @@ const getAbbrevCategories = (categories) => {
       "Location.Brainstem": "Brainstem",
       "Location.Central Nervous System": "CNS",
       "Location.Gastrointestinal Tract": "GI",
-      "Location.Axillary Lymph Node": "Axillary LN",
+      "Location.Axillary Lymph Node": "Ax. LN",
       "Location.Upper Inner Quadrant": "UIQ",
       "Location.Upper Outer Quadrant": "UOQ",
       "Location.Lower Inner Quadrant": "LIQ",
@@ -287,6 +288,10 @@ const getAbbrevCategories = (categories) => {
       "Location.Lumbar Vertebra": "LV",
       "Location.Axilla": "Axilla",
       "Location.Thoracic Spine": "T.Spine",
+      "ETHNICITY.Not Hispanic or Latino": "Not HorL",
+      "RACE.Asian": "Asian",
+      "RACE.Black": "Black",
+      "RACE.White": "White",
     };
     //Add the stage mappings
     mapping;
@@ -344,7 +349,6 @@ const initFilterDefinitions = (filterDefinitions, patientArrays, uniquePatientId
       "Histology",
       "Gender", // Add your new attribute here
       "Ethnicity",
-
       "Race",
     ]);
     setPatientCountsByCategory(definitions, patientArrays, uniquePatientIds).then((definitions) => {

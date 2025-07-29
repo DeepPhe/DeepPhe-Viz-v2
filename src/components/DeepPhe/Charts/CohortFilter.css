@@ -1,8 +1,4 @@
 
-#NewControl {
-    /*background: black;*/
-}
-
 svg[id$="-hs"] {
     flex: 3 0 30%;
 
@@ -81,9 +77,6 @@ svg[id$="-hs"] {
     margin-right: 2px;
 }
 
-#NewControl > div.rtl-rbklcn-MuiResponsiveChart-container > svg > g.MuiChartsAxis-root.MuiChartsAxis-directionY.MuiChartsAxis-left.rtl-1k2u9zb-MuiChartsAxis-root > g.MuiChartsAxis-label > text {
-    font-size: 25px !important;
-}
 
 .switch-box {
     flex: 2 2 150px;
@@ -244,10 +237,7 @@ svg[id$="-hs"] {
     margin-right: 50px;
 }
 
-#NewControl > div.rtl-rbklcn-MuiResponsiveChart-container > svg {
-    width: 80%;
-}
-
-#NewControl > div, #NewControl > div > .MuiGrid-item {
-    padding: 0px !important;
+.MuiGrid-item {
+    padding-top: 0px !important;
+    padding-left: 10px !important;
 }

@@ -1,58 +1,18 @@
 {
   "searchFilterDefinition": [
     {
-      "fieldName": "Topography, major",
+      "fieldName": "Gender",
       "guiOptions": {
-        "displayName": "Topography, major",
-        "displayGroup": "Topography",
-        "displayPriority": 0
-      }
-    },
-    {
-      "fieldName": "Topography, minor",
-      "guiOptions": {
-        "displayName": "Topography, minor",
-        "displayGroup": "Topography",
-        "displayPriority": 0
-      }
-    },
-    {
-      "fieldName": "Metastatic Site",
-      "guiOptions": {
-        "displayName": "Metastatic Site",
-        "displayGroup": "LNI",
-        "displayPriority": 0
-      }
-    },
-    {
-      "fieldName": "Lymph Involvement",
-      "guiOptions": {
-        "displayName": "Lymph Involvement",
-        "displayGroup": "LNI",
-        "displayPriority": 1
-      }
-    },
-    {
-      "fieldName": "Course",
-      "guiOptions": {
-        "displayName": "Course",
-        "displayGroup": "LNI",
+        "displayName": "Gender",
+        "displayGroup": "Demographics",
         "displayPriority": 2
       }
     },
     {
-      "fieldName": "Genes",
+      "fieldName": "Cancer",
       "guiOptions": {
-        "displayName": "Genes",
-        "displayGroup": "LNI",
-        "displayPriority": 3
-      }
-    },
-    {
-      "fieldName": "Age_at_DX",
-      "guiOptions": {
-        "displayName": "AGE_at_dx",
-        "displayGroup": "Demo",
+        "displayName": "Cancer",
+        "displayGroup": "Diagnosis & Disease Characteristics",
         "displayPriority": 1
       }
     },
@@ -60,7 +20,7 @@
       "fieldName": "Stage",
       "guiOptions": {
         "displayName": "Stage",
-        "displayGroup": "john",
+        "displayGroup": "Staging",
         "displayPriority": 1
       },
       "selectedCategoricalRange": [
@@ -77,10 +37,66 @@
       ]
     },
     {
+      "fieldName": "Course",
+      "guiOptions": {
+        "displayName": "Course",
+        "displayGroup": "Progression",
+        "displayPriority": 2
+      }
+    },
+    {
+      "fieldName": "Topography, major",
+      "guiOptions": {
+        "displayName": "Topography, major",
+        "displayGroup": "Anatomical Details",
+        "displayPriority": 0
+      }
+    },
+    {
+      "fieldName": "Topography, minor",
+      "guiOptions": {
+        "displayName": "Topography, minor",
+        "displayGroup": "Anatomical Details",
+        "displayPriority": 0
+      }
+    },
+    {
+      "fieldName": "Metastatic Site",
+      "guiOptions": {
+        "displayName": "Metastatic Site",
+        "displayGroup": "Progression",
+        "displayPriority": 0
+      }
+    },
+    {
+      "fieldName": "Lymph Involvement",
+      "guiOptions": {
+        "displayName": "Lymph Involvement",
+        "displayGroup": "Progression",
+        "displayPriority": 1
+      }
+    },
+    {
+      "fieldName": "Genes",
+      "guiOptions": {
+        "displayName": "Genes",
+        "displayGroup": "Diagnosis & Disease Characteristics",
+        "displayPriority": 3
+      }
+    },
+    {
+      "fieldName": "Age_at_DX",
+      "guiOptions": {
+        "displayName": "AGE at dx",
+        "displayGroup": "Diagnosis & Disease Characteristics",
+        "displayPriority": 1
+      }
+    },
+    {
       "fieldName": "Grade",
       "guiOptions": {
         "displayName": "Grade",
-        "displayGroup": "john",
+        "displayGroup": "Progression",
         "displayPriority": 2
       },
       "selectedCategoricalRange": [
@@ -97,7 +113,7 @@
       "fieldName": "T Stage",
       "guiOptions": {
         "displayName": "T",
-        "displayGroup": "john1",
+        "displayGroup": "Staging",
         "displayPriority": 4
       },
       "selectedCategoricalRange": [
@@ -112,7 +128,7 @@
       "fieldName": "N Stage",
       "guiOptions": {
         "displayName": "N",
-        "displayGroup": "john1",
+        "displayGroup": "Staging",
         "displayPriority": 5
       },
       "selectedCategoricalRange": [
@@ -130,7 +146,7 @@
       "fieldName": "M Stage",
       "guiOptions": {
         "displayName": "M",
-        "displayGroup": "john1",
+        "displayGroup": "Staging",
         "displayPriority": 6
       },
       "selectedCategoricalRange": [
@@ -175,7 +191,7 @@
       "fieldName": "Laterality",
       "guiOptions": {
         "displayName": "Stage",
-        "displayGroup": "ql",
+        "displayGroup": "Anatomical Details",
         "displayPriority": 1
       }
     },
@@ -183,16 +199,8 @@
       "fieldName": "Location",
       "guiOptions": {
         "displayName": "Stage",
-        "displayGroup": "ql",
+        "displayGroup": "Location",
         "displayPriority": 1
-      }
-    },
-    {
-      "fieldName": "Gender",
-      "guiOptions": {
-        "displayName": "Gender",
-        "displayGroup": "Demographics",
-        "displayPriority": 2
       }
     },
     {
@@ -209,14 +217,6 @@
         "displayName": "Race",
         "displayGroup": "Demographics",
         "displayPriority": 2
-      }
-    },
-    {
-      "fieldName": "Cancer",
-      "guiOptions": {
-        "displayName": "Cancer",
-        "displayGroup": "Demo",
-        "displayPriority": 1
       }
     },
     {

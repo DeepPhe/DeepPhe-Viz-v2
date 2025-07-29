@@ -3,7 +3,7 @@ import DpFilterBox from "./DpFilterBox.js";
 import { getDataset, getSeries } from "../../../../utils/Filter";
 
 function DpCategoricalRangeSelector(props) {
-  const filterInitialized = props.filterInitialized;
+  const [expandedLevel, setExpandedLevel] = useState(props.expandedLevel || 2);
   const [series, setSeries] = useState(undefined);
   const [dataset, setDataset] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,24 +37,14 @@ function DpCategoricalRangeSelector(props) {
   } else {
     return (
       <React.Fragment>
-        <span
-          className={
-            "dp-filter-box-" +
-            definition.fieldName.replace(" ", "_") +
-            " dp-filter-box col-md-3 col-sm-4"
-            // props.expandedLevel
-          }
-        >
-          <DpFilterBox
-            series={newChartReady ? series : props.oldSeries}
-            dataset={newChartReady ? dataset : props.oldDataset}
-            definition={definition}
-            type={"BarChartWithSlider"}
-            fullWidth={props.fullWidth}
-            broadcastUpdate={broadcastUpdate}
-            filterInitialized={filterInitialized}
-          />
-        </span>
+        <DpFilterBox
+          series={newChartReady ? series : props.oldSeries}
+          dataset={newChartReady ? dataset : props.oldDataset}
+          definition={definition}
+          type={"BarChartWithSlider"}
+          fullWidth={props.fullWidth}
+          broadcastUpdate={broadcastUpdate}
+        />
       </React.Fragment>
     );
   }

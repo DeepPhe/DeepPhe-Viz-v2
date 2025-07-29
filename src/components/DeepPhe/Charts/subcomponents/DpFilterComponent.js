@@ -4,7 +4,7 @@ import { ToggleButton } from "@mui/material";
 import Typography from "@mui/material/Typography";
 
 function DpFilterComponent(props) {
-  const [definition, setDefinition] = useState(props.definition);
+  const { definition } = props;
   const filterControl = props.filterControl;
   const [enabled, setEnabled] = useState(true);
   const fullWidth = definition.fullWidth;

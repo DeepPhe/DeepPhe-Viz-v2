@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import Grid from "@mui/material/Grid";
 import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import CssBaseline from "@mui/material/CssBaseline";
 import CohortFilter from "./CohortFilter";
 import { fetchPatientDatabase } from "../../../utils/db/DeepPheDb";
+import Grid from "@mui/material/Grid";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Box from "@mui/material/Box";
 
 const TopCharts = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -36,13 +39,35 @@ const TopCharts = () => {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Typography align={"center"} variant={"h6"}>
-          Cohort Filter
-        </Typography>
-        <Grid container direction="row" justifyContent="center" align="center" spacing={10}>
-          <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-            <CohortFilter db={db}></CohortFilter>
-          </Grid>
+        <Box sx={{ flexGrow: 1, mb: 4 }}>
+          <AppBar position="static" elevation={4}>
+            <Toolbar>
+              <Typography
+                variant="h5"
+                component="div"
+                sx={{
+                  flexGrow: 1,
+                  fontWeight: 600,
+                  letterSpacing: 0.5,
+                  py: 1.5,
+                }}
+              >
+                DeepPhe Cohort Visualizer v2.1
+              </Typography>
+            </Toolbar>
+          </AppBar>
+        </Box>
+        <Grid
+          container
+          direction="row"
+          justifyContent="center"
+          wrap="wrap"
+          align="center"
+          spacing={5}
+          marginTop={2}
+          sx={{ width: "100%" }}
+        >
+          <CohortFilter db={db}></CohortFilter>
         </Grid>
       </ThemeProvider>
     );

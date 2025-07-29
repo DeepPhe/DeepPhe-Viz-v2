@@ -157,7 +157,6 @@ function DpBarChart(props) {
             xAxis={[
               {
                 tickLabelInterval: () => true,
-                tickLabelStyle: { angle: 10, textAnchor: "start" },
                 tickPlacement: "middle",
                 valueFormatter: valueFormatter,
                 scaleType: "band",
@@ -173,7 +172,7 @@ function DpBarChart(props) {
               },
             ]}
             skipAnimation={true}
-            height={150}
+            height={100}
             tooltip={{ content: <CustomTooltip />, trigger: "axis" }}
             onItemClick={(event, d) => setItemData(d)}
           ></BarChart>

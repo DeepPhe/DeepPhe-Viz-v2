@@ -20,7 +20,6 @@ const getPatientIdsWithAllAttributes = (db) => {
             //const patientIdSet = new Set();
 
             items.forEach((item) => {
-              console.log(item);
               if (item.patientid || item.patientids) {
                 // For objects with patientid property
                 if (item.patientid) {
