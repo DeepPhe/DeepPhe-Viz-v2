@@ -11,7 +11,6 @@ function DpFilterBox(props) {
   const [isChecked, setIsChecked] = useState(definition.enabled);
 
   const handleCheckboxChange = (event, definition) => {
-    console.log("Checkbox changed:", event.target.checked);
     setIsChecked(event.target.checked);
     definition.enabled = event.target.checked;
     broadcastUpdate(definition);

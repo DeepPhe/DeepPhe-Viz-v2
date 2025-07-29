@@ -177,7 +177,7 @@ const setpatientCountsByCategory2 = (definitions, patientArrays) => {
     }
     definition.selectedCategoricalRange = definition.categoricalRange;
   });
-  console.log(definitions);
+  //console.log(definitions);
 };
 
 export { fetchPatientArrays, fetchPatientCancers };

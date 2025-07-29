@@ -148,7 +148,7 @@ const updateFilterCountsAndGetMatches = (filterDefinitions, patientArrays) => {
     //
     // matchesArray.push(allArray);
     filterPatients(filterDefinitions, patientArrays).then((matchesArray) => {
-      console.log("filterDefinitions", filterDefinitions);
+      //console.log("filterDefinitions", filterDefinitions);
     });
   });
 };

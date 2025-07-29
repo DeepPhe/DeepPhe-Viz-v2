@@ -6,7 +6,7 @@ const logFirstTenLines = async (db) => {
   const allItems = await store.getAll();
   const firstTenItems = allItems.slice(0, 10);
   firstTenItems.forEach((item, index) => {
-    console.log(`Line ${index + 1}:`, item);
+    //console.log(`Line ${index + 1}:`, item);
   });
 };
 

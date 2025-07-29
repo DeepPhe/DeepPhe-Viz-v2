@@ -40,7 +40,7 @@ export function ConceptListPanel(props) {
     if (!semanticGroups || Object.keys(semanticGroups).length === 0) return;
 
     const sortedConcepts = filterConceptsByConfidenceAndSemanticGroup(concepts);
-    console.log("SORTED CONCEPTS", sortedConcepts);
+    // console.log("SORTED CONCEPTS", sortedConcepts);
 
     if (sortedConcepts.length === 0) {
       setFilteredConcepts([-1]);

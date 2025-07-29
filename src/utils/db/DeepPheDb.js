@@ -51,7 +51,7 @@ const loadFileData = (filePath) => {
     fetch(fullPath)
       .then((res) => resolve(res.text()))
       .catch((e) => {
-        console.log(e);
+        //console.log(e);
         reject(e);
       });
   });
@@ -61,24 +61,24 @@ const storeData = (db, storeName, data) => {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
-    console.log("Storing {} of items in data store:", storeName, data.length);
+    //console.log("Storing {} of items in data store:", storeName, data.length);
     for (const item of data) {
       store.add(item);
     }
     tx.done
       .then(() => {
-        console.log(`Data loaded into ${storeName} store`);
+        //console.log(`Data loaded into ${storeName} store`);
         resolve();
       })
       .catch((error) => {
-        console.error(`Error storing data in ${storeName}:`, error);
+        //console.error(`Error storing data in ${storeName}:`, error);
         reject(error);
       });
   });
 };
 
 const loadDataForStore = (db, storeName, filePath) => {
-  console.log("Loading data for store:", storeName);
+  //console.log("Loading data for store:", storeName);
   return loadFileData(filePath).then((content) => {
     if (!content) {
       console.error(`Error loading file: ${filePath}`);
@@ -143,7 +143,7 @@ const parseOmapData = (fileContent) => {
 //   // dataArrays contains the parsed contents of each CSV file
 // });
 const loadData = (db) => {
-  console.log("Loading data for all stores");
+  //console.log("Loading data for all stores");
   // const csvData = loadCsvFilesFromPublicDb(CSV_FILE_NAMES);
   return new Promise((resolve, reject) => {
     Promise.all([
@@ -152,7 +152,7 @@ const loadData = (db) => {
       loadDataForStore(db, CANCER_ATTRIBUTES_STORE, CANCER_ATTRIBUTES_TEXT_FILE),
       loadDataForStore(db, TUMOR_ATTRIBUTES_STORE, TUMOR_ATTRIBUTES_TEXT_FILE),
     ]).then((data) => {
-      console.log("All data loaded successfully");
+      //console.log("All data loaded successfully");
       resolve(data);
     });
   });
@@ -163,10 +163,10 @@ const fetchPatientDatabase = () => {
     if (false) {
       openDB(DEEPPHE_DB, 1, {}).then((db) => {
         if (db) {
-          console.log("Database opened successfully");
+          //console.log("Database opened successfully");
           resolve(db);
         } else {
-          console.error("Failed to open database");
+          //console.error("Failed to open database");
           reject(new Error("Failed to open database"));
         }
       });
@@ -185,7 +185,7 @@ const fetchPatientDatabase = () => {
           reject(error);
         })
         .finally(() => {
-          console.log("Database initialized and data loaded");
+          //console.log("Database initialized and data loaded");
         });
     }
   });

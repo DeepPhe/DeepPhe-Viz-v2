@@ -57,7 +57,7 @@ const CohortFilter = (props) => {
   };
 
   useEffect(() => {
-    console.log("useEffect db");
+    //console.log("useEffect db");
     fetchPatientArrays(db).then((patientArraysObj) => {
       setPatientArrays(patientArraysObj.patientArrays);
       setUniquePatientIds(patientArraysObj.uniquePatientIds);
@@ -67,7 +67,7 @@ const CohortFilter = (props) => {
 
   useEffect(() => {
     if (patientArrays && uniquePatientIds) {
-      console.log("useEffect patientArrays");
+      //console.log("useEffect patientArrays");
       fetchFilterDefinitions().then((filterDefinitions) => {
         initializeFilterDefinitions(filterDefinitions, patientArrays, uniquePatientIds).then(
           (arr) => {
@@ -82,7 +82,7 @@ const CohortFilter = (props) => {
 
   useEffect(() => {
     if (filterDefinitions && patientArrays) {
-      console.log("useEffect filterDefinitions & patientArrays");
+      //console.log("useEffect filterDefinitions & patientArrays");
       if (!compareFilterDefinitions(oldFilterDefinitions, filterDefinitions)) {
         runFilters().then((newFilterState) => {
           setFilterStates(newFilterState);
@@ -108,7 +108,7 @@ const CohortFilter = (props) => {
   const filterChangedState = useCallback(
     (definition) => {
       if (!initialLoading) {
-        console.log("filter changed state");
+        //console.log("filter changed state");
         updateLoadingState("filterStates", true);
         runFilters().then((newFilterState) => {
           setFilterStates(newFilterState);
@@ -121,7 +121,7 @@ const CohortFilter = (props) => {
   );
 
   useEffect(() => {
-    console.log("useEffect filterStates", filterStates);
+    //console.log("useEffect filterStates", filterStates);
   }, [filterStates]);
 
   if (initialLoading) return <div>Data is coming soon...</div>;
@@ -168,7 +168,7 @@ const CohortFilter = (props) => {
         }
       });
     }
-    console.log("loading again");
+    //console.log("loading again");
     return (
       <React.Fragment>
         {isPending && <div className="overlay-spinner" />}

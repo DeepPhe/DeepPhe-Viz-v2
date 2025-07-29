@@ -113,13 +113,13 @@ export default class CohortFilter extends React.Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevState.filterDefinitions !== this.state.filterDefinitions) {
       this.state.filterDefinitions.searchFilterDefinition.forEach((e) => {
-        console.log(e.fieldName);
+        //console.log(e.fieldName);
       });
     }
   }
 
   show = (svgContainerId) => {
-    console.log("calling reset");
+    //console.log("calling reset");
     this.reset();
     if (!d3.select("#" + svgContainerId).empty()) {
       d3.select("#" + svgContainerId)._groups[0][0].remove();
@@ -159,7 +159,7 @@ export default class CohortFilter extends React.Component {
       />
     );
   };
-  
+
   render() {
     if (this.state.loading) return <div>Data is coming soon...</div>;
     else

@@ -88,7 +88,7 @@ export function DocumentPanel(props) {
       if (result) {
         mentionConfidence = Math.round(result.confidence);
       } else {
-        console.log(result.preferredText, "has no confidence");
+        //console.log(result.preferredText, "has no confidence");
       }
     } else {
       mentionConfidence = Math.round(obj.confidence);

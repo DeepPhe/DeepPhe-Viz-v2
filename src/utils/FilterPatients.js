@@ -47,15 +47,15 @@ const filterPatients = (patients, uniquePatientIds, definitions, wantLogs) => {
     let timerStart = performance.now();
     const filterArrays = Promise.all(getFilterArrayPromises());
     let timerEnd = performance.now();
-    console.log("Filter arrays created in", timerEnd - timerStart, "ms");
+    //console.log("Filter arrays created in", timerEnd - timerStart, "ms");
     const patientsMatchingAllFilters = new Set();
     filterArrays.then((filterArrays) => {
-      console.log(filterArrays);
+      //console.log(filterArrays);
       timerStart = performance.now();
       Promise.all(getFilterArrayLookupObjectPromises(filterArrays)).then(
         (filterArrayLookupObjects) => {
           timerEnd = performance.now();
-          console.log("Filter lookup objects created in", timerEnd - timerStart, "ms");
+          //console.log("Filter lookup objects created in", timerEnd - timerStart, "ms");
           // Check if each patient is in ALL filter arrays
           uniquePatientIds.forEach((patientId) => {
             let inAllFilters = true;

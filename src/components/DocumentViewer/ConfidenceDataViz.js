@@ -88,7 +88,7 @@ export function ConfidenceDataViz(props) {
       // console.log(getDpheGroupOfMention());
       mentions.forEach(function (obj) {
         const dpheGroupByMention = getDpheGroupOfMention(obj.id);
-        console.log("NAME:", name, "DPHE", dpheGroupByMention);
+        // console.log("NAME:", name, "DPHE", dpheGroupByMention);
 
         if (name === dpheGroupByMention) {
           confidenceList.push(obj.confidence / 100);
@@ -99,7 +99,7 @@ export function ConfidenceDataViz(props) {
   }
 
   function percentCounter(confidenceList) {
-    console.log("CONFIDENCE LIST:", confidenceList);
+    // console.log("CONFIDENCE LIST:", confidenceList);
     const buckets = Array(10).fill(0); //fill all buckets as 0 init
     confidenceList.forEach((item) => {
       if (item >= 0 && item <= 1) {

@@ -22,8 +22,8 @@ function DpBarChart(props) {
   const [oldDefinition, setOldDefinition] = useState(JSON.parse(JSON.stringify(definition)));
 
   const setItemData = (d) => {
-    console.log(d);
-    console.log(dataset[d.dataIndex].category);
+    //console.log(d);
+    //console.log(dataset[d.dataIndex].category);
     if (checkedItems.includes(d.dataIndex)) {
       setCheckedItems((prev) => prev.filter((item) => item !== d.dataIndex));
     } else {
@@ -38,9 +38,9 @@ function DpBarChart(props) {
 
       for (let i = 0; i < Math.max(str1.length, str2.length); i++) {
         if (str1[i] !== str2[i]) {
-          console.log(`Difference at index ${i}:`);
-          console.log(`str1[${i}]:`, str1.toString().substring(i - 40, i + 40));
-          console.log(`str2[${i}]:`, str2.toString().substring(i - 40, i + 40));
+          //console.log(`Difference at index ${i}:`);
+          //console.log(`str1[${i}]:`, str1.toString().substring(i - 40, i + 40));
+          //console.log(`str2[${i}]:`, str2.toString().substring(i - 40, i + 40));
           break;
         }
       }
@@ -75,9 +75,9 @@ function DpBarChart(props) {
       getSelectedCategoricalRange().then((selectedCategoricalRange) => {
         definition.selectedCategoricalRange = selectedCategoricalRange;
         if (wantLogs) {
-          console.log(definition.fieldName + ":getSelectedCategoricalRange");
-          console.log("oldDefinition", oldDefinition);
-          console.log("definition", definition);
+          //console.log(definition.fieldName + ":getSelectedCategoricalRange");
+          //console.log("oldDefinition", oldDefinition);
+          //console.log("definition", definition);
         }
         if (!definitionIsEqual(oldDefinition, definition)) {
           broadcastUpdate(definition);

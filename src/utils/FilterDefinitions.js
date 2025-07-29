@@ -356,8 +356,7 @@ const initFilterDefinitions = (filterDefinitions, patientArrays, uniquePatientId
         definition.enabled = true;
         if (definition.fieldName.startsWith("Stage")) {
           const newStages = rollupStage(definition);
-
-          console.log(newStages);
+          //console.log(newStages);
         }
         definition.abbrevCategories = getAbbrevCategories(definition.categoricalRange);
         definition.patientsMeetingThisFilterOnly = [];

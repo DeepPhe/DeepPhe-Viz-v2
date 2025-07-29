@@ -28,7 +28,6 @@ import MDBox from "components/MDBox";
 
 // Material Dashboard 2 React example components
 // Material Dashboard 2 React themes
-import theme from "assets/theme";
 import themeRTL from "assets/theme/theme-rtl";
 
 // Material Dashboard 2 React Dark Mode themes
@@ -145,7 +144,6 @@ export default function App() {
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
         <Routes>
-          {console.log(theme)}
           {getRoutes(routes)}
           <Route path="/deepphe" element={<Navigate to="/deepphe" />} />
           <Route path="/test" element={<Navigate to="/test" />} />

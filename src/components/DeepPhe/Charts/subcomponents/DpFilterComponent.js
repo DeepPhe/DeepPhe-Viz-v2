@@ -50,7 +50,6 @@ function DpFilterComponent(props) {
   };
 
   const getBar = (definition) => {
-    console.log(definition.fieldName, definition.patientsMeetingThisFilterOnly);
     if (!definition.patientsMeetingThisFilterOnly) {
       return null;
     }
@@ -60,13 +59,13 @@ function DpFilterComponent(props) {
       definition.numberOfPossiblePatientsForThisFilter -
       definition.patientsMeetingEntireSetOfFilters -
       definition.patientsMeetingThisFilterOnly;
-    console.log(
-      definition.fieldName,
-      patientsMeetingEntireSetOfFilters,
-      patientsMeetingThisFilterOnly,
-      definition.numberOfPossiblePatientsForThisFilter,
-      remainder
-    );
+    // console.log(
+    //   definition.fieldName,
+    //   patientsMeetingEntireSetOfFilters,
+    //   patientsMeetingThisFilterOnly,
+    //   definition.numberOfPossiblePatientsForThisFilter,
+    //   remainder
+    // );
     const patientsMeetingEntireSetOfFiltersGreaterThanZero = patientsMeetingEntireSetOfFilters > 0;
     const patientsMeetingThisFilterOnlyGreaterThanZero = patientsMeetingThisFilterOnly > 0;
     const remainderGreaterThanZero = remainder > 0;
