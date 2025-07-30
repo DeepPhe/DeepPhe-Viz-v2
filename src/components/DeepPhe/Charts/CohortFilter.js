@@ -7,7 +7,7 @@ import { fetchPatientArrays } from "../../../utils/db/Patient";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import filterPatients from "../../../utils/FilterPatients";
-import { Link } from "react-router-dom";
+import { Link } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
 const CohortFilter = (props) => {
@@ -206,34 +206,29 @@ const CohortFilter = (props) => {
                 {Array.from(patientsMatchingAllFilters).map((patientId, index) => (
                   <Link
                     key={index}
-                    to={{
-                      pathname: `/patient/${patientId}`,
-                      state: { db: db },
+                    href={`http://localhost:3001/deepphe/patient/${patientId}`}
+                    target="_blank" // Optional: opens the link in a new tab
+                    rel="noopener noreferrer" // Optional: security best practice for new tabs
+                    sx={{
+                      textDecoration: "none",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      cursor: "pointer",
+                      color: "primary.main",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
                     }}
-                    style={{ textDecoration: "none" }}
                   >
-                    <Typography
-                      component="div"
-                      sx={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        cursor: "pointer",
-                        color: "primary.main",
-                        "&:hover": {
-                          textDecoration: "underline",
-                        },
-                      }}
-                    >
-                      {patientId}
-                      {patientIdToGender[patientId] ||
-                      patientIdToAge[patientId] ||
-                      patientIdToCancer[patientId] ||
-                      patientIdToStage[patientId]
-                        ? ` (${patientIdToGender[patientId] || "?"}, Age at Dx: ${
-                            patientIdToAge[patientId] || "?"
-                          }, Cancer: ${patientIdToCancer[patientId] || "?"})`
-                        : ""}
-                    </Typography>
+                    {patientId}
+                    {patientIdToGender[patientId] ||
+                    patientIdToAge[patientId] ||
+                    patientIdToCancer[patientId] ||
+                    patientIdToStage[patientId]
+                      ? ` (${patientIdToGender[patientId] || "?"}, Age at Dx: ${
+                          patientIdToAge[patientId] || "?"
+                        }, Cancer: ${patientIdToCancer[patientId] || "?"})`
+                      : ""}
                   </Link>
                 ))}
               </Box>

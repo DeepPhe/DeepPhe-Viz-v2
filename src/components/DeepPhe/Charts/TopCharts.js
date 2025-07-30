@@ -40,19 +40,19 @@ const TopCharts = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Box sx={{ flexGrow: 1, mb: 4 }}>
-          <AppBar position="static" elevation={4}>
+          <AppBar position="static" elevation={4} sx={{ backgroundColor: "#264653" }}>
             <Toolbar>
               <Typography
                 variant="h5"
                 component="div"
                 sx={{
                   flexGrow: 1,
-                  fontWeight: 600,
+                  fontWeight: 400,
                   letterSpacing: 0.5,
                   py: 1.5,
                 }}
               >
-                DeepPhe Cohort Visualizer v2.1
+                DeepPhe Visualizer v2.1
               </Typography>
             </Toolbar>
           </AppBar>

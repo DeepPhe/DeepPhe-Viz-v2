@@ -13,13 +13,13 @@ const getSeries = () => {
     {
       dataKey: "Patients Meeting This Filter Only",
       label: "Patients Meeting This Filter Only",
-      color: "#FFB81C",
+      color: "rgba(28,92,255,0.50)",
       stack: "total",
     },
     {
       dataKey: "Patients Not Meeting This Filter",
       label: "Patients Not Meeting This Filter",
-      color: "rgba(178,178,178,0.8)",
+      color: "rgba(178,178,178,0.33)",
       stack: "total",
     },
   ];

@@ -344,7 +344,7 @@ const initFilterDefinitions = (filterDefinitions, patientArrays, uniquePatientId
       "Laterality",
       "Location",
       "Topography, major",
-      "Topography, minor",
+      // "Topography, minor",
       "Metastatic Site",
       "Histology",
       "Gender", // Add your new attribute here
