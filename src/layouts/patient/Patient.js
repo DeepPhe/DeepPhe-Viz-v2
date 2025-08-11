@@ -95,10 +95,12 @@ function Patient(props) {
   // }
 
   function getSummary(patientId) {
+    debugger;
     return fetch("/patientSummaryExample.json");
   }
 
   const getPatientObject = (patientId) => {
+    debugger;
     return fetch("/patientObjectExample.json");
   };
 
