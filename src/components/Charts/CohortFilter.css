@@ -1,7 +1,4 @@
 
-#NewControl {
-    padding-top:25px
-}
 .no_padding_grid {
     padding: 0px !important;
 }
@@ -17,6 +14,7 @@
     display: table !important;
 
 }
+
 .cohort-size-label {
     font-size: 14px;
     font-weight: 400;
@@ -26,18 +24,18 @@
     vertical-align: middle;
 }
 
-#cohort-size-bar{
-    height:inherit;
+#cohort-size-bar {
+    height: inherit;
 }
 
 .cohort-size-bar-container {
-   height:45px;
+    height: 45px;
     padding-bottom: 55px !important;
 
 }
 
 .cohort-size-bar-container .MuiGrid-item {
-    height:inherit;
+    height: inherit;
 }
 
 
@@ -54,23 +52,25 @@
     margin: 0px 3px 0px 0px !important;
     margin-right: 2px;
 }
+
 #metastasis-row .switch {
-    width:20% !important;
+    width: 20% !important;
     align-items: center;
     display: inline-flex;
 }
 
 #age-at-dx-row .switch, #stage-row .switch {
-    width:15% !important;
+    width: 15% !important;
     align-items: center;
     display: inline-flex;
 }
 
 .slider-container {
-    width:80% !important;
+    width: 80% !important;
     height: 100% !important;
     margin-top: 3px !important;
 }
+
 .rc-slider {
     padding-left: 0px !important;
     padding-right: 0px !important;
@@ -82,7 +82,7 @@
 
 .rc-slider-track {
     z-index: 100;
-    background-color:#1cff002b !important;
+    background-color: #1cff002b !important;
 }
 
 .rc-slider-step {
@@ -94,27 +94,31 @@
     border-radius: 0px !important;
     margin-top: 5px;
 }
+
 .rc-slider-mark {
-    top:8px !important;
+    top: 8px !important;
     z-index: 99 !important;
 }
+
 #age-at-dx-row .rc-slider-mark-text {
     padding-left: calc(1%) !important;
 }
+
 .rc-slider-mark-text {
     padding-left: calc(5%) !important;
     font-size: 12px !important;
     margin-top: 5px !important;
-    z-index:99;
+    z-index: 99;
     transform: translateX(+60%) !important;
 
 }
+
 .rc-slider-dot {
     bottom: -8px;
 }
 
 .rc-slider-handle {
-    width:10px !important;
+    width: 10px !important;
     height: 40px !important;
     border: none !important;
     border-radius: 0px !important;
@@ -140,6 +144,7 @@
     display: flex;
     align-content: center;
 }
+
 .no-gutter {
     --bs-gutter-x: 0px !important;
     --bs-gutter-y: 0px !important;
@@ -156,7 +161,7 @@
     height: 27px !important;
     display: grid !important;
     align-items: center !important;
-    align-content:  center !important;
+    align-content: center !important;
     margin-top: 10px !important;
 }
 

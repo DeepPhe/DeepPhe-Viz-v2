@@ -1,3 +1,3 @@
-const DATASOURCE = 'JSON'
+const DATASOURCE = "JSON";
 
-export {DATASOURCE};
+export { DATASOURCE };

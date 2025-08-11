@@ -1,10 +1,8 @@
 import React from "react";
-
 import Handlebars from "handlebars";
-import ReactDOM from "react-dom";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../utils/withRouter";
 
-const { Component, createElement } = React;
+const { Component } = React;
 
 const source = `
     {{#if cancers.length}}
@@ -98,48 +96,32 @@ const source = `
     {{/if}}
 `;
 
-
-
 const template = Handlebars.compile(source);
 
 Handlebars.registerHelper("ifEquals", function (arg1, arg2, options) {
-    return arg1 === arg2 ? options.fn(this) : options.inverse(this);
+  return arg1 === arg2 ? options.fn(this) : options.inverse(this);
 });
 
 Handlebars.registerHelper("inArray", function (item, arr, opts) {
-    if (Array.isArray(arr)) {
-        if (arr.indexOf(item) > -1) {
-            return opts.fn(this);
-        } else {
-            return opts.inverse(this);
-        }
+  if (Array.isArray(arr)) {
+    if (arr.indexOf(item) > -1) {
+      return opts.fn(this);
     } else {
-        console.error("ERROR: arr is not an array!");
-        console.error("Item:" + item);
-        console.error("OptsL" + opts);
-        return false;
+      return opts.inverse(this);
     }
+  } else {
+    console.error("ERROR: arr is not an array!");
+    console.error("Item:" + item);
+    console.error("Opts:" + opts);
+    return false;
+  }
 });
 
 class CancerAndTumorSummary extends Component {
-    // constructor(props) {
-    //     super(props);
-    //
-    // };
-
-    render() {
-        return (
-            <div
-                className="container"
-                dangerouslySetInnerHTML={{ __html: template(this.props) }}
-            />
-        );
-    }
+  render() {
+    return <div className="container" dangerouslySetInnerHTML={{ __html: template(this.props) }} />;
+  }
 }
 
-ReactDOM.render(
-    createElement(CancerAndTumorSummary),
-    document.getElementById("root")
-);
-
+// Remove the direct DOM rendering code - only export the component
 export default withRouter(CancerAndTumorSummary);

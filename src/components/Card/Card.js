@@ -1,30 +1,50 @@
 import React from "react";
-// nodejs library that concatenates classes
-import classNames from "classnames";
-// nodejs library to set properties for components
 import PropTypes from "prop-types";
-// @material-ui/core components
-import {makeStyles} from "@material-ui/core/styles";
-// @material-ui/icons
-// core components
-import styles from "assets/jss/material-dashboard-react/components/cardStyle.js";
+// Update imports to MUI v5
+import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 
-const useStyles = makeStyles(styles);
+// Create styled component instead of using makeStyles
+const CardRoot = styled(Box)(({ theme, plain, profile, chart }) => ({
+  // Original styles from cardStyle.js
+  border: "0",
+  marginBottom: "30px",
+  marginTop: "30px",
+  borderRadius: "6px",
+  color: "rgba(0, 0, 0, 0.87)",
+  background: "#fff",
+  width: "100%",
+  boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.14)",
+  position: "relative",
+  display: "flex",
+  flexDirection: "column",
+  minWidth: "0",
+  wordWrap: "break-word",
+  fontSize: ".875rem",
+  // Apply conditional styles
+  ...(plain && {
+    background: "transparent",
+    boxShadow: "none",
+  }),
+  ...(profile && {
+    marginTop: "30px",
+    textAlign: "center",
+  }),
+  ...(chart && {
+    paddingTop: "0",
+    paddingRight: "0",
+    paddingBottom: "0",
+    paddingLeft: "0",
+  }),
+}));
 
 export default function Card(props) {
-  const classes = useStyles();
   const { className, children, plain, profile, chart, ...rest } = props;
-  const cardClasses = classNames({
-    [classes.card]: true,
-    [classes.cardPlain]: plain,
-    [classes.cardProfile]: profile,
-    [classes.cardChart]: chart,
-    [className]: className !== undefined
-  });
+
   return (
-    <div className={cardClasses} {...rest}>
+    <CardRoot plain={plain} profile={profile} chart={chart} className={className} {...rest}>
       {children}
-    </div>
+    </CardRoot>
   );
 }
 
@@ -33,5 +53,5 @@ Card.propTypes = {
   plain: PropTypes.bool,
   profile: PropTypes.bool,
   chart: PropTypes.bool,
-  children: PropTypes.node
+  children: PropTypes.node,
 };

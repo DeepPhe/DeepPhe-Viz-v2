@@ -14,6 +14,7 @@ export function SearchPanel(props) {
     // Loop through all list items, and hide those who don't match the search query
     for (i = 0; i < li.length; i++) {
       a = li[i];
+      //ok
       txtValue = a.textContent || a.innerText;
       if (txtValue.toUpperCase().indexOf(filter) > -1) {
         li[i].style.display = "";
@@ -23,17 +24,15 @@ export function SearchPanel(props) {
     }
   });
 
-
-
   return (
-      <GridItem id="search_label" xs={6}>
-        {/*{" "}*/}
-        {/*<b>Filter Concepts:</b>*/}
-        {/*<input*/}
-        {/*  type="search"*/}
-        {/*  id="mention_search_input"*/}
-        {/*  placeholder="Search for concepts..."*/}
-        {/*></input>*/}
-      </GridItem>
+    <GridItem id="search_label" xs={6}>
+      {/*{" "}*/}
+      {/*<b>Filter Concepts:</b>*/}
+      {/*<input*/}
+      {/*  type="search"*/}
+      {/*  id="mention_search_input"*/}
+      {/*  placeholder="Search for concepts..."*/}
+      {/*></input>*/}
+    </GridItem>
   );
 }

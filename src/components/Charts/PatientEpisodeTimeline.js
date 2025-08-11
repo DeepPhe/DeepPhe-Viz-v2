@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import * as d3 from "d3v4";
 import * as $ from "jquery";
 
@@ -8,19 +8,17 @@ let initialHighlightedDoc = "";
 let mentionedTerms = "";
 let dpheTerms = "";
 let reportTextRight = "";
-export {mentionedTerms};
-export {reportTextRight};
-
-
+export { mentionedTerms };
+export { reportTextRight };
 
 const PatientEpisodeTimeline = ({
-                      patientId,
-                      setReportId,
-                      patientJson,
-                      reportId,
-                      svgContainerId,
-                      setCurrDocId
-                  }) => {
+  patientId,
+  setReportId,
+  patientJson,
+  reportId,
+  svgContainerId,
+  setCurrDocId,
+}) => {
   const [json, setJson] = useState(null);
 
   const getUrl = () => {
@@ -30,43 +28,43 @@ const PatientEpisodeTimeline = ({
   const fetchData = async (url) => {
     return new Promise((resolve, reject) => {
       fetch(url)
-          .then((response) => {
-            if (response) {
-              resolve(response);
-            } else {
-              reject("User not logged in");
-            }
-          })
-          .catch((err) => reject(err));
+        .then((response) => {
+          if (response) {
+            resolve(response);
+          } else {
+            reject("User not logged in");
+          }
+        })
+        .catch((err) => reject(err));
     });
   };
 
   const processTimelineResponse = (response) => {
     setJson(response);
     renderTimeline(
-        svgContainerId,
-        response.patientInfo,
-        response.reportTypes,
-        response.typeCounts,
-        response.maxVerticalCountsPerType,
-        response.episodes,
-        response.episodeCounts,
-        response.episodeDates,
-        response.reportData,
-        response.reportsGroupedByDateAndTypeObj
+      svgContainerId,
+      response.patientInfo,
+      response.reportTypes,
+      response.typeCounts,
+      response.maxVerticalCountsPerType,
+      response.episodes,
+      response.episodeCounts,
+      response.episodeDates,
+      response.reportData,
+      response.reportsGroupedByDateAndTypeObj
     );
   };
   const renderTimeline = (
-      svgContainerId,
-      patientInfo,
-      reportTypes,
-      typeCounts,
-      maxVerticalCountsPerType,
-      episodes,
-      episodeCounts,
-      episodeDates,
-      reportData,
-      reportsGroupedByDateAndTypeObj
+    svgContainerId,
+    patientInfo,
+    reportTypes,
+    typeCounts,
+    maxVerticalCountsPerType,
+    episodes,
+    episodeCounts,
+    episodeDates,
+    reportData,
+    reportsGroupedByDateAndTypeObj
   ) => {
     // console.log(reportTypes)
 
@@ -187,7 +185,7 @@ const PatientEpisodeTimeline = ({
       });
     }
 
-    const margin = {top: 5, right: 20, bottom: 5, left: 200};
+    const margin = { top: 5, right: 20, bottom: 5, left: 200 };
     const mainReportTypeRowHeightPerCount = 16;
     const overviewReportTypeRowHeightPerCount = 3;
 
@@ -205,14 +203,12 @@ const PatientEpisodeTimeline = ({
     const svgWidth = containerWidth - margin.left - 25;
 
     // Dynamic height based on vertical counts
-    const height =
-        totalMaxVerticalCounts * mainReportTypeRowHeightPerCount * 2;
+    const height = totalMaxVerticalCounts * mainReportTypeRowHeightPerCount * 2;
 
     const pad = 25;
 
     // Dynamic height based on vertical counts
-    const overviewHeight =
-        totalMaxVerticalCounts * overviewReportTypeRowHeightPerCount;
+    const overviewHeight = totalMaxVerticalCounts * overviewReportTypeRowHeightPerCount;
 
     const ageAreaHeight = 16;
     const ageAreaBottomPad = 10;
@@ -295,33 +291,21 @@ const PatientEpisodeTimeline = ({
       let color = d3.scaleOrdinal().domain(allEpisodes).range(episodeColors);
 
       // Transition used by focus/defocus episode
-      let transt = d3
-          .transition()
-          .duration(transitionDuration)
-          .ease(d3.easeLinear);
+      let transt = d3.transition().duration(transitionDuration).ease(d3.easeLinear);
 
       // Main area and overview area share the same width
-      let mainX = d3
-          .scaleTime()
-          .domain([startDate, endDate])
-          .range([0, svgWidth]);
+      let mainX = d3.scaleTime().domain([startDate, endDate]).range([0, svgWidth]);
 
-      let overviewX = d3
-          .scaleTime()
-          .domain([startDate, endDate])
-          .range([0, svgWidth]);
+      let overviewX = d3.scaleTime().domain([startDate, endDate]).range([0, svgWidth]);
 
       // Y scale to handle main area
-      let mainY = d3
-          .scaleLinear()
-          .domain([0, totalMaxVerticalCounts])
-          .range([0, height]);
+      let mainY = d3.scaleLinear().domain([0, totalMaxVerticalCounts]).range([0, height]);
 
       // Y scale to handle overview area
       let overviewY = d3
-          .scaleLinear()
-          .domain([0, totalMaxVerticalCounts])
-          .range([0, overviewHeight]);
+        .scaleLinear()
+        .domain([0, totalMaxVerticalCounts])
+        .range([0, overviewHeight]);
 
       // Process episode dates
       let episodeSpansData = [];
@@ -366,25 +350,24 @@ const PatientEpisodeTimeline = ({
 
       // SVG
       const totalHeight =
-          margin.top +
-          legendHeight +
-          gapBetweenlegendAndMain +
-          height +
-          pad +
-          overviewHeight +
-          pad +
-          ageAreaHeight +
-          margin.bottom;
+        margin.top +
+        legendHeight +
+        gapBetweenlegendAndMain +
+        height +
+        pad +
+        overviewHeight +
+        pad +
+        ageAreaHeight +
+        margin.bottom;
 
       const svg = d3
-          .select("#" + svgContainerId)
-          .append("svg")
-          .attr("class", "patient_episode_timeline_svg")
-          .attr("viewBox", `0 0 ${containerWidth} ${totalHeight}`)
-          .attr("preserveAspectRatio", "xMidYMid meet") // Keeps aspect ratio on resize
-          .style("width", "100%")
-          .style("height", "auto");
-
+        .select("#" + svgContainerId)
+        .append("svg")
+        .attr("class", "patient_episode_timeline_svg")
+        .attr("viewBox", `0 0 ${containerWidth} ${totalHeight}`)
+        .attr("preserveAspectRatio", "xMidYMid meet") // Keeps aspect ratio on resize
+        .style("width", "100%")
+        .style("height", "auto");
 
       // Dynamically calculate the x posiiton of each legend rect
       let episodeLegendX = function (index) {
@@ -395,113 +378,113 @@ const PatientEpisodeTimeline = ({
           // this yeilds a better (still not perfect) calculation of the x
           let processedEpisodeStr = episodes[i].replace(/-|\s/g, "");
           x +=
-              processedEpisodeStr.length * widthPerLetter +
-              i * (reportMainRadius * 2 + legendSpacing);
+            processedEpisodeStr.length * widthPerLetter +
+            i * (reportMainRadius * 2 + legendSpacing);
         }
 
         return episodeLegendAnchorPositionX + legendSpacing + x;
       };
 
+      svg
+        .append("text")
+        .attr("x", 10) // or whatever left margin you want
+        .attr("y", margin.top + episodeLegendAnchorPositionY)
+        .attr("dy", ".5ex")
+        .attr("class", "episode_legend_text")
+        .attr("text-anchor", "start")
+        .text("Document Episode Type:");
 
-
-      svg.append("text")
-          .attr("x", 10) // or whatever left margin you want
-          .attr("y", margin.top + episodeLegendAnchorPositionY)
-          .attr("dy", ".5ex")
-          .attr("class", "episode_legend_text")
-          .attr("text-anchor", "start")
-          .text("Document Episode Type:");
-
-      svg.append("line")
-          .attr("x1", 10) // match the x of "Time Relation:"
-          .attr("y1", margin.top + legendHeight)
-          .attr("x2", margin.left + svgWidth)
-          .attr("y2", margin.top + legendHeight)
-          .attr("class", "legend_group_divider");
+      svg
+        .append("line")
+        .attr("x1", 10) // match the x of "Time Relation:"
+        .attr("y1", margin.top + legendHeight)
+        .attr("x2", margin.left + svgWidth)
+        .attr("y2", margin.top + legendHeight)
+        .attr("class", "legend_group_divider");
 
       let episodeLegendGrp = svg
-          .append("g")
-          .attr("class", "episode_legend_group")
-          .attr("transform", "translate(110, " + margin.top + ")");
+        .append("g")
+        .attr("class", "episode_legend_group")
+        .attr("transform", "translate(110, " + margin.top + ")");
 
       let episodeLegend = episodeLegendGrp
-          .selectAll(".episode_legend")
-          .data(episodes)
-          .enter()
-          .append("g")
-          .attr("class", "episode_legend");
+        .selectAll(".episode_legend")
+        .data(episodes)
+        .enter()
+        .append("g")
+        .attr("class", "episode_legend");
 
       episodeLegend
-          .append("circle")
-          .attr("class", "episode_legend_circle")
-          .attr("cx", function (d, i) {
-            return episodeLegendX(i);
-          })
-          .attr("cy", 6)
-          .attr("r", reportMainRadius)
-          .style("fill", function (d) {
-            return color(d);
-          })
-          .style("stroke", function (d) {
-            return color(d);
-          })
-          .on("click", function (d) {
-            // Toggle (hide/show reports of the clicked episode)
-            let nodes = d3.selectAll("." + episode2CssClass(d));
-            nodes.each(function () {
-              let node = d3.select(this);
-              node.classed("hide", !node.classed("hide"));
-            });
-
-            // Also toggle the episode legend look
-            let legendCircle = d3.select(this);
-            let cssClass = "selected_episode_legend_circle";
-            legendCircle.classed(cssClass, !legendCircle.classed(cssClass));
+        .append("circle")
+        .attr("class", "episode_legend_circle")
+        .attr("cx", function (d, i) {
+          return episodeLegendX(i);
+        })
+        .attr("cy", 6)
+        .attr("r", reportMainRadius)
+        .style("fill", function (d) {
+          return color(d);
+        })
+        .style("stroke", function (d) {
+          return color(d);
+        })
+        .on("click", function (d) {
+          // Toggle (hide/show reports of the clicked episode)
+          let nodes = d3.selectAll("." + episode2CssClass(d));
+          nodes.each(function () {
+            let node = d3.select(this);
+            node.classed("hide", !node.classed("hide"));
           });
+
+          // Also toggle the episode legend look
+          let legendCircle = d3.select(this);
+          let cssClass = "selected_episode_legend_circle";
+          legendCircle.classed(cssClass, !legendCircle.classed(cssClass));
+        });
 
       // Legend label text
       episodeLegend
-          .append("text")
-          .attr("x", function (d, i) {
-            return reportMainRadius * 2 + legendSpacing + episodeLegendX(i);
-          })
-          .attr("y", 10)
-          .attr("class", "episode_legend_text")
-          .text(function (d) {
-            return d + " (" + episodeCounts[d] + ")";
-          })
-          .on("click", function (d, i) {
-            // Toggle
-            let legendText = d3.select(this);
-            let cssClass = "selected_episode_legend_text";
+        .append("text")
+        .attr("x", function (d, i) {
+          return reportMainRadius * 2 + legendSpacing + episodeLegendX(i);
+        })
+        .attr("y", 10)
+        .attr("class", "episode_legend_text")
+        .text(function (d) {
+          return d + " (" + episodeCounts[d] + ")";
+        })
+        .on("click", function (d, i) {
+          // Toggle
+          let legendText = d3.select(this);
+          let cssClass = "selected_episode_legend_text";
 
-            if (legendText.classed(cssClass)) {
-              legendText.classed(cssClass, false);
+          if (legendText.classed(cssClass)) {
+            legendText.classed(cssClass, false);
 
-              // Reset to show all
-              defocusEpisode();
-            } else {
-              // Remove previously added class on other legend text
-              $(".episode_legend_text").removeClass(cssClass);
+            // Reset to show all
+            defocusEpisode();
+          } else {
+            // Remove previously added class on other legend text
+            $(".episode_legend_text").removeClass(cssClass);
 
-              legendText.classed(cssClass, true);
+            legendText.classed(cssClass, true);
 
-              // episodeSpansData maintains the same order of episodes as the episodes array
-              // so we can safely use i to get the corresponding startDate and endDate
-              let episodeSpanObj = episodeSpansData[i];
-              focusEpisode(episodeSpanObj);
-            }
-          });
+            // episodeSpansData maintains the same order of episodes as the episodes array
+            // so we can safely use i to get the corresponding startDate and endDate
+            let episodeSpanObj = episodeSpansData[i];
+            focusEpisode(episodeSpanObj);
+          }
+        });
 
       // Specify a specific region of an element to display, rather than showing the complete area
       // Any parts of the drawing that lie outside of the region bounded by the currently active clipping path are not drawn.
       svg
-          .append("defs")
-          .append("clipPath")
-          .attr("id", "main_area_clip")
-          .append("rect")
-          .attr("width", svgWidth)
-          .attr("height", height + gapBetweenlegendAndMain);
+        .append("defs")
+        .append("clipPath")
+        .attr("id", "main_area_clip")
+        .append("rect")
+        .attr("width", svgWidth)
+        .attr("height", height + gapBetweenlegendAndMain);
 
       let update = function () {
         // Update the episode bars
@@ -539,9 +522,7 @@ const PatientEpisodeTimeline = ({
         update();
 
         // Update the overview as moving
-        overview
-            .select(".brush")
-            .call(brush.move, mainX.range().map(transform.invertX, transform));
+        overview.select(".brush").call(brush.move, mainX.range().map(transform.invertX, transform));
 
         // Also need to update the position of custom brush handles
         // First we need to get the current brush selection
@@ -555,86 +536,75 @@ const PatientEpisodeTimeline = ({
 
       // Zoom rect that covers the main area
       let zoom = d3
-          .zoom()
-          .scaleExtent([1, Infinity])
-          .translateExtent([
-            [0, 0],
-            [svgWidth, height],
-          ])
-          .extent([
-            [0, 0],
-            [svgWidth, height],
-          ])
-          .on("zoom", zoomed);
+        .zoom()
+        .scaleExtent([1, Infinity])
+        .translateExtent([
+          [0, 0],
+          [svgWidth, height],
+        ])
+        .extent([
+          [0, 0],
+          [svgWidth, height],
+        ])
+        .on("zoom", zoomed);
 
       // Appending zoom rect after the main area will prevent clicking on the report circles/
       // So we need to create the zoom panel first
       svg
-          .append("rect")
-          .attr("class", "zoom_PE")
-          .attr("width", svgWidth)
-          .attr("height", height + gapBetweenlegendAndMain)
-          .attr(
-              "transform",
-              "translate(" + margin.left + "," + (margin.top + legendHeight) + ")"
-          )
-          .call(zoom);
+        .append("rect")
+        .attr("class", "zoom_PE")
+        .attr("width", svgWidth)
+        .attr("height", height + gapBetweenlegendAndMain)
+        .attr("transform", "translate(" + margin.left + "," + (margin.top + legendHeight) + ")")
+        .call(zoom);
 
       // Main area
       // Create main area after zoom panel, so we can select the report circles
       let main = svg
-          .append("g")
-          .attr("class", "main")
-          .attr(
-              "transform",
-              "translate(" +
-              margin.left +
-              "," +
-              (margin.top + legendHeight + gapBetweenlegendAndMain) +
-              ")"
-          );
+        .append("g")
+        .attr("class", "main")
+        .attr(
+          "transform",
+          "translate(" +
+            margin.left +
+            "," +
+            (margin.top + legendHeight + gapBetweenlegendAndMain) +
+            ")"
+        );
 
       // Encounter ages
       let age = svg
-          .append("g")
-          .attr("class", "age")
-          .attr(
-              "transform",
-              "translate(" +
-              margin.left +
-              "," +
-              (margin.top +
-                  legendHeight +
-                  gapBetweenlegendAndMain +
-                  height +
-                  pad) +
-              ")"
-          );
+        .append("g")
+        .attr("class", "age")
+        .attr(
+          "transform",
+          "translate(" +
+            margin.left +
+            "," +
+            (margin.top + legendHeight + gapBetweenlegendAndMain + height + pad) +
+            ")"
+        );
 
       // Mini overview
       let overview = svg
-          .append("g")
-          .attr("class", "overview")
-          .attr(
-              "transform",
-              "translate(" +
-              margin.left +
-              "," +
-              (margin.top +
-                  legendHeight +
-                  gapBetweenlegendAndMain +
-                  height +
-                  pad +
-                  ageAreaHeight +
-                  ageAreaBottomPad) +
-              ")"
-          );
+        .append("g")
+        .attr("class", "overview")
+        .attr(
+          "transform",
+          "translate(" +
+            margin.left +
+            "," +
+            (margin.top +
+              legendHeight +
+              gapBetweenlegendAndMain +
+              height +
+              pad +
+              ageAreaHeight +
+              ageAreaBottomPad) +
+            ")"
+        );
 
-      let getReportCirclePositionY = function (
-          d,
-          yScaleCallback,
-          reportTypeRowHeightPerCount
-      ) {
+      let getReportCirclePositionY = function (d, yScaleCallback, reportTypeRowHeightPerCount) {
         let arr = reportsGroupedByDateAndTypeObj[d.date][d.type];
 
         // console.log(arr, arr.length);
@@ -650,19 +620,15 @@ const PatientEpisodeTimeline = ({
           }
 
           // The height of per chunk
-          let h =
-              (maxVerticalCountsPerType[d.type] * reportTypeRowHeightPerCount) /
-              arr.length;
+          let h = (maxVerticalCountsPerType[d.type] * reportTypeRowHeightPerCount) / arr.length;
           return (
-              yScaleCallback(verticalPositions[d.type]) -
-              ((arr.length - (index + 1)) * h + h / 2)
+            yScaleCallback(verticalPositions[d.type]) - ((arr.length - (index + 1)) * h + h / 2)
           );
         } else {
           // Vertically center the dot if only one
           return (
-              yScaleCallback(verticalPositions[d.type]) -
-              (reportTypeRowHeightPerCount * maxVerticalCountsPerType[d.type]) /
-              2
+            yScaleCallback(verticalPositions[d.type]) -
+            (reportTypeRowHeightPerCount * maxVerticalCountsPerType[d.type]) / 2
           );
         }
       };
@@ -670,9 +636,7 @@ const PatientEpisodeTimeline = ({
       // Episode interval spans
       let focusEpisode = function (episode) {
         // Here we we add extra days before the start and after the end date to have a little cushion
-        let daysDiff = Math.floor(
-            (episode.endDate - episode.startDate) / (1000 * 60 * 60 * 24)
-        );
+        let daysDiff = Math.floor((episode.endDate - episode.startDate) / (1000 * 60 * 60 * 24));
         let numOfDays = daysDiff > 30 ? 3 : 1;
 
         // setDate() will change the start and end dates, and we still need the original dates to update the episode bar
@@ -687,10 +651,7 @@ const PatientEpisodeTimeline = ({
         // Span the episode coverage across the whole main area using this new domain
         mainX.domain([newStartDate, newEndDate]);
 
-        let transt = d3
-            .transition()
-            .duration(transitionDuration)
-            .ease(d3.easeLinear);
+        let transt = d3.transition().duration(transitionDuration).ease(d3.easeLinear);
 
         // Move the brush with transition
         // The brush move will cause the report circles move accordingly
@@ -698,9 +659,9 @@ const PatientEpisodeTimeline = ({
         // https://github.com/d3/d3-selection#selection_call
         //Can also use brush.move(d3.select(".brush"), [overviewX(newStartDate), overviewX(newEndDate)]);
         overview
-            .select(".brush")
-            .transition(transt)
-            .call(brush.move, [overviewX(newStartDate), overviewX(newEndDate)]);
+          .select(".brush")
+          .transition(transt)
+          .call(brush.move, [overviewX(newStartDate), overviewX(newEndDate)]);
       };
 
       let defocusEpisode = function () {
@@ -711,50 +672,45 @@ const PatientEpisodeTimeline = ({
         // https://github.com/d3/d3-selection#selection_call
         //Can also use brush.move(d3.select(".brush"), [overviewX(newStartDate), overviewX(newEndDate)]);
         overview
-            .select(".brush")
-            .transition(transt)
-            .call(brush.move, [overviewX(startDate), overviewX(endDate)]);
+          .select(".brush")
+          .transition(transt)
+          .call(brush.move, [overviewX(startDate), overviewX(endDate)]);
       };
-
 
       const reportTypesToDraw = reportTypes.slice(0, -1); // Skip the last one
       // Main report type divider lines
       // Put this before rendering the report dots so the enlarged dot on hover will cover the divider line
       main
-          .append("g")
-          .selectAll(".report_type_divider")
-          .data(reportTypesToDraw)
-          .enter()
-          .append("line")
-          .attr("x1", 0)
-          .attr("x2", svgWidth)
-          .each(function(d) {
-            const y = mainY(verticalPositions[d]);
-            d3.select(this)
-                .attr("y1", y)
-                .attr("y2", y);
-          })
-          .attr("class", "report_type_divider");
+        .append("g")
+        .selectAll(".report_type_divider")
+        .data(reportTypesToDraw)
+        .enter()
+        .append("line")
+        .attr("x1", 0)
+        .attr("x2", svgWidth)
+        .each(function (d) {
+          const y = mainY(verticalPositions[d]);
+          d3.select(this).attr("y1", y).attr("y2", y);
+        })
+        .attr("class", "report_type_divider");
 
       // Report types texts
       main
-          .append("g")
-          .selectAll(".report_type_label")
-          .data(reportTypes)
-          .enter()
-          .append("text")
-          .text(function (d) {
-            return d + " (" + typeCounts[d] + "):";
-          })
-          .attr("x", -textMargin) // textMargin on the left of main area
-          .attr("y", function (d, i) {
-            // console.log(verticalPositions[d], maxVerticalCountsPerType[d])
-            return mainY(
-                verticalPositions[d] - maxVerticalCountsPerType[d] / 2
-            );
-          })
-          .attr("dy", ".5ex")
-          .attr("class", "report_type_label");
+        .append("g")
+        .selectAll(".report_type_label")
+        .data(reportTypes)
+        .enter()
+        .append("text")
+        .text(function (d) {
+          return d + " (" + typeCounts[d] + "):";
+        })
+        .attr("x", -textMargin) // textMargin on the left of main area
+        .attr("y", function (d, i) {
+          // console.log(verticalPositions[d], maxVerticalCountsPerType[d])
+          return mainY(verticalPositions[d] - maxVerticalCountsPerType[d] / 2);
+        })
+        .attr("dy", ".5ex")
+        .attr("class", "report_type_label");
 
       // Report dots in main area
       // Reference the clipping path that shows the report dots
@@ -763,65 +719,70 @@ const PatientEpisodeTimeline = ({
       //   .attr("clip-path", "url(#main_area_clip)");
       // const that = this;
 
-
       setTimeout(() => {
         // Your code that renders the data points or calls a function
-        let mainReports = main
-            .append("g")
-            .attr("clip-path", "url(#main_area_clip)");
+        let mainReports = main.append("g").attr("clip-path", "url(#main_area_clip)");
         const that = this;
         mainReports
-            .selectAll(".main_report_PE")
-            .data(reportData)
-            .enter()
-            .append("g")
-            .append("circle")
-            .attr("class", function (d) {
-              return "main_report_PE " + episode2CssClass(d.episode);
-            })
-            .attr("id", function (d) {
-              return "main_" + d.id;
-            })
-            .attr("data-episode", function (d) {
-              return d.episode;
-            })
-            .attr("r", reportMainRadius)
-            .attr("cx", function (d) {
-              return mainX(d.formattedDate);
-            })
-            .attr("cy", function (d) {
-              return getReportCirclePositionY(
-                  d,
-                  mainY,
-                  mainReportTypeRowHeightPerCount
-              );
-            })
-            .style("fill", function (d) {
-              return color(d.episode);
-            })
-            .style("stroke", function (d) {
-              return color(d.episode);
-            })
-            .style("cursor", "pointer")
-            .on("click", function (d) {
-              $("#docs").show();
-              if (Object.keys(factBasedReports).indexOf(d.id) === -1) {
-                removeFactBasedHighlighting(d.id);
-              }
-              highlightSelectedTimelineReport(d.id);
-              $("#report_instance").show();
-              setReportId(d.id);
+          .selectAll(".main_report_PE")
+          .data(reportData)
+          .enter()
+          .append("g")
+          .append("circle")
+          .attr("class", function (d) {
+            return "main_report_PE " + episode2CssClass(d.episode);
+          })
+          .attr("id", function (d) {
+            return "main_" + d.id;
+          })
+          .attr("data-episode", function (d) {
+            return d.episode;
+          })
+          .attr("r", reportMainRadius)
+          .attr("cx", function (d) {
+            return mainX(d.formattedDate);
+          })
+          .attr("cy", function (d) {
+            return getReportCirclePositionY(d, mainY, mainReportTypeRowHeightPerCount);
+          })
+          .style("fill", function (d) {
+            return color(d.episode);
+          })
+          .style("stroke", function (d) {
+            return color(d.episode);
+          })
+          .style("cursor", "pointer")
+          .on("click", function (d) {
+            const $circle = $("#main_" + d.id);
+            const isSelected = $circle.hasClass("selected_report");
 
-              const docIndex = patientJson?.documents?.findIndex(
-                  (doc) => d.id.startsWith(doc.name)
-              );
-              console.log("FIND ME HERE", docIndex);
-              if (docIndex !== -1) {
-                setCurrDocId(docIndex);
-              } else {
-                console.warn("❗Could not find document for reportId:", d.id);
-              }
-            });
+            if (isSelected) {
+              // UNHIGHLIGHT
+              removeFactBasedHighlighting(d.id);
+              $(".main_report_PE").removeClass("selected_report");
+              $(".overview_report").removeClass("selected_report");
+              $(".selected_report_icon").remove();
+              $("#docs").hide();
+              $("#report_instance").hide();
+              return; // stop further processing
+            }
+
+            $("#docs").show();
+            if (Object.keys(factBasedReports).indexOf(d.id) === -1) {
+              removeFactBasedHighlighting(d.id);
+            }
+            highlightSelectedTimelineReport(d.id);
+            $("#report_instance").show();
+            setReportId(d.id);
+
+            const docIndex = patientJson?.documents?.findIndex((doc) => d.id.startsWith(doc.name));
+            console.log("FIND ME HERE", docIndex);
+            if (docIndex !== -1) {
+              setCurrDocId(docIndex);
+            } else {
+              console.warn("❗Could not find document for reportId:", d.id);
+            }
+          });
       }, 100); // Delay execution for 200ms
       // Report circles in main area
       // mainReports
@@ -884,203 +845,190 @@ const PatientEpisodeTimeline = ({
       // console.log("Width:", bbox.width);
       // console.log("Height:", bbox.height);
 
-
       // Main area x axis
       // https://github.com/d3/d3-axis#axisBottom
-      let xAxis = d3.axisBottom(mainX)
-          .tickSizeInner(5)
-          .tickSizeOuter(0)
-          .tickFormat(function (d) {
-            const diff = mainX.domain()[1] - mainX.domain()[0]; // time range in ms
-
-            if (diff < 1000 * 60 * 60 * 24 * 31 * 4.5) {
-              // Less than ~2 months: show day + month
-              return d3.timeFormat("%b %d")(d); // e.g., "Jan 12"
-            } else {
-              // Show month only
-              return d3.timeFormat("%b")(d); // e.g., "Jan"
-            }
-          });
+      let xAxis = d3.axisBottom(mainX).tickSizeInner(5).tickSizeOuter(0);
+      // .tickFormat(function (d) {
+      //   const diff = mainX.domain()[1] - mainX.domain()[0]; // time range in ms
+      //
+      //   if (diff < 1000 * 60 * 60 * 24 * 31 * 4.5) {
+      //     // Less than ~2 months: show day + month
+      //     return d3.timeFormat("%b %d")(d); // e.g., "Jan 12"
+      //   } else {
+      //     // Show month only
+      //     return d3.timeFormat("%b")(d); // e.g., "Jan"
+      //   }
+      // });
 
       // Append x axis to the bottom of main area
       main
-          .append("g")
-          .attr("class", "main-PE-x-axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
+        .append("g")
+        .attr("class", "main-PE-x-axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
 
       // Encounter ages
       age
-          .append("text")
-          .attr("x", -textMargin)
-          .attr("y", ageAreaHeight / 2) // Relative to the overview area
-          .attr("dy", ".5ex")
-          .attr("class", "age_label")
-          .text("Patient Age");
+        .append("text")
+        .attr("x", -textMargin)
+        .attr("y", ageAreaHeight / 2) // Relative to the overview area
+        .attr("dy", ".5ex")
+        .attr("class", "age_label")
+        .text("Patient Age");
 
       // Patient's first and last encounter dates and corresponding ages
       // We use the dates to render x position
       let encounterDates = [xMinDate, xMaxDate];
       // We use the calculated ages to render the text of age
-      let encounterAges = [
-        patientInfo.firstEncounterAge,
-        patientInfo.lastEncounterAge,
-      ];
+      let encounterAges = [patientInfo.firstEncounterAge, patientInfo.lastEncounterAge];
 
       age
-          .selectAll(".encounter_age")
-          .data(encounterDates)
-          .enter()
-          .append("text")
-          .attr("x", function (d) {
-            return mainX(d);
-          })
-          .attr("y", ageAreaHeight / 2)
-          .attr("dy", ".5ex")
-          .attr("class", "encounter_age")
-          .text(function (d, i) {
-            return encounterAges[i];
-          });
+        .selectAll(".encounter_age")
+        .data(encounterDates)
+        .enter()
+        .append("text")
+        .attr("x", function (d) {
+          return mainX(d);
+        })
+        .attr("y", ageAreaHeight / 2)
+        .attr("dy", ".5ex")
+        .attr("class", "encounter_age")
+        .text(function (d, i) {
+          return encounterAges[i];
+        });
 
       // Vertical guidelines based on min and max dates (date objects)
       age
-          .selectAll(".encounter_age_guideline")
-          .data(encounterDates)
-          .enter()
-          .append("line")
-          .attr("x1", function (d) {
-            return mainX(d);
-          })
-          .attr("y1", 12)
-          .attr("x2", function (d) {
-            return mainX(d);
-          })
-          .attr("y2", 25)
-          .attr("class", "encounter_age_guideline");
+        .selectAll(".encounter_age_guideline")
+        .data(encounterDates)
+        .enter()
+        .append("line")
+        .attr("x1", function (d) {
+          return mainX(d);
+        })
+        .attr("y1", 12)
+        .attr("x2", function (d) {
+          return mainX(d);
+        })
+        .attr("y2", 25)
+        .attr("class", "encounter_age_guideline");
 
       // Overview label text
       overview
-          .append("text")
-          .attr("x", -textMargin)
-          .attr("y", overviewHeight + 10) // Relative to the overview area
-          .attr("dy", ".5ex")
-          .attr("class", "overview_label")
-          .text("Date");
+        .append("text")
+        .attr("x", -textMargin)
+        .attr("y", overviewHeight + 10) // Relative to the overview area
+        .attr("dy", ".5ex")
+        .attr("class", "overview_label")
+        .text("Date");
 
       // Report dots in overview area
       // No need to use clipping path since the overview area contains all the report dots
       overview
-          .append("g")
-          .selectAll(".overview_report")
-          .data(reportData)
-          .enter()
-          .append("g")
-          .append("circle")
-          .attr("id", function (d) {
-            // Prefix with "overview_"
-            return "overview_" + d.id;
-          })
-          .attr("class", "overview_report")
-          .attr("r", reportOverviewRadius)
-          .attr("cx", function (d) {
-            return overviewX(d.formattedDate);
-          })
-          .attr("cy", function (d) {
-            return getReportCirclePositionY(
-                d,
-                overviewY,
-                overviewReportTypeRowHeightPerCount
-            );
-          })
-          .style("fill", function (d) {
-            return color(d.episode);
-          });
+        .append("g")
+        .selectAll(".overview_report")
+        .data(reportData)
+        .enter()
+        .append("g")
+        .append("circle")
+        .attr("id", function (d) {
+          // Prefix with "overview_"
+          return "overview_" + d.id;
+        })
+        .attr("class", "overview_report")
+        .attr("r", reportOverviewRadius)
+        .attr("cx", function (d) {
+          return overviewX(d.formattedDate);
+        })
+        .attr("cy", function (d) {
+          return getReportCirclePositionY(d, overviewY, overviewReportTypeRowHeightPerCount);
+        })
+        .style("fill", function (d) {
+          return color(d.episode);
+        });
 
       // Overview x axis
-      let overviewXAxis = d3
-          .axisBottom(overviewX)
-          .tickSizeInner(5)
-          .tickSizeOuter(0)
-          // Abbreviated month format
-          .tickFormat(d3.timeFormat("%b"));
+      let overviewXAxis = d3.axisBottom(overviewX).tickSizeInner(5).tickSizeOuter(0);
+      // Abbreviated month format
+      // .tickFormat(d3.timeFormat("%b"));
 
       // Append x axis to the bottom of overview area
       overview
-          .append("g")
-          .attr("class", "overview-x-axis")
-          .attr("transform", "translate(0, " + overviewHeight + ")")
-          .call(overviewXAxis);
+        .append("g")
+        .attr("class", "overview-x-axis")
+        .attr("transform", "translate(0, " + overviewHeight + ")")
+        .call(overviewXAxis);
 
       // Add brush to overview
       let overviewBrush = overview.append("g").attr("class", "brush");
 
       // Add custom brush handles
-      let customBrushHandlesData = [{type: "w"}, {type: "e"}];
+      let customBrushHandlesData = [{ type: "w" }, { type: "e" }];
 
       // Function expression to create custom brush handle path
       let createCustomBrushHandle = function (d) {
         let e = +(d.type === "e"),
-            x = e ? 1 : -1,
-            y = overviewHeight / 2;
+          x = e ? 1 : -1,
+          y = overviewHeight / 2;
 
         return (
-            "M" +
-            0.5 * x +
-            "," +
-            y +
-            "A6,6 0 0 " +
-            e +
-            " " +
-            6.5 * x +
-            "," +
-            (y + 6) +
-            "V" +
-            (2 * y - 6) +
-            "A6,6 0 0 " +
-            e +
-            " " +
-            0.5 * x +
-            "," +
-            2 * y +
-            "ZM" +
-            2.5 * x +
-            "," +
-            (y + 8) +
-            "V" +
-            (2 * y - 8) +
-            "M" +
-            4.5 * x +
-            "," +
-            (y + 8) +
-            "V" +
-            (2 * y - 8)
+          "M" +
+          0.5 * x +
+          "," +
+          y +
+          "A6,6 0 0 " +
+          e +
+          " " +
+          6.5 * x +
+          "," +
+          (y + 6) +
+          "V" +
+          (2 * y - 6) +
+          "A6,6 0 0 " +
+          e +
+          " " +
+          0.5 * x +
+          "," +
+          2 * y +
+          "ZM" +
+          2.5 * x +
+          "," +
+          (y + 8) +
+          "V" +
+          (2 * y - 8) +
+          "M" +
+          4.5 * x +
+          "," +
+          (y + 8) +
+          "V" +
+          (2 * y - 8)
         );
       };
 
       // Add two custom brush handles
       let customBrushHandle = overviewBrush
-          .selectAll(".handle--custom")
-          .data(customBrushHandlesData)
-          .enter()
-          .append("path")
-          .attr("class", "handle--custom")
-          .attr("cursor", "ew-resize")
-          .attr("d", createCustomBrushHandle)
-          .attr("transform", function (d, i) {
-            // Position the custom handles based on the default selection range
-            let selection = [0, svgWidth];
-            return "translate(" + [selection[i], -overviewHeight / 4] + ")";
-          });
+        .selectAll(".handle--custom")
+        .data(customBrushHandlesData)
+        .enter()
+        .append("path")
+        .attr("class", "handle--custom")
+        .attr("cursor", "ew-resize")
+        .attr("d", createCustomBrushHandle)
+        .attr("transform", function (d, i) {
+          // Position the custom handles based on the default selection range
+          let selection = [0, svgWidth];
+          return "translate(" + [selection[i], -overviewHeight / 4] + ")";
+        });
 
       // Function expression of updating custom handles positions
       let showAndMoveCustomBrushHandles = function (selection) {
         customBrushHandle
-            // First remove the "display: none" added by brushStart to show the handles
-            .style("display", null)
-            // Then move the handles to desired positions
-            .attr("transform", function (d, i) {
-              return "translate(" + [selection[i], -overviewHeight / 4] + ")";
-            });
+          // First remove the "display: none" added by brushStart to show the handles
+          .style("display", null)
+          // Then move the handles to desired positions
+          .attr("transform", function (d, i) {
+            return "translate(" + [selection[i], -overviewHeight / 4] + ")";
+          });
       };
 
       // Function expression to create brush function redraw with selection
@@ -1104,56 +1052,50 @@ const PatientEpisodeTimeline = ({
 
         // Zoom the main area
         svg
-            .select(".zoom_PE")
-            .call(
-                zoom.transform,
-                d3.zoomIdentity
-                    .scale(svgWidth / (selection[1] - selection[0]))
-                    .translate(-selection[0], 0)
-            );
+          .select(".zoom_PE")
+          .call(
+            zoom.transform,
+            d3.zoomIdentity
+              .scale(svgWidth / (selection[1] - selection[0]))
+              .translate(-selection[0], 0)
+          );
       };
 
       // D3 brush
       let brush = d3
-          .brushX()
-          .extent([
-            [0, 0],
-            [svgWidth, overviewHeight],
-          ])
-          // Update the UI on brush move
-          .on("brush", brushed);
+        .brushX()
+        .extent([
+          [0, 0],
+          [svgWidth, overviewHeight],
+        ])
+        // Update the UI on brush move
+        .on("brush", brushed);
 
       // Applying brush on the overviewBrush element
       // Don't merge this with the overviewBrush definition because
       // brush calls brushed which uses customBrushHandle when it gets called and
       // we can't define overviewBrush before brush if combined.
       overviewBrush
-          // For the first time of loading this page, no brush movement
-          .call(brush)
-          // We use overviewX.range() as the default selection
-          // https://github.com/d3/d3-selection#selection_call
-          // call brush.move and pass overviewX.range() as argument
-          // https://github.com/d3/d3-brush#brush_move
-          .call(brush.move, overviewX.range());
+        // For the first time of loading this page, no brush movement
+        .call(brush)
+        // We use overviewX.range() as the default selection
+        // https://github.com/d3/d3-selection#selection_call
+        // call brush.move and pass overviewX.range() as argument
+        // https://github.com/d3/d3-brush#brush_move
+        .call(brush.move, overviewX.range());
 
       // Reset button
       svg
-          .append("foreignObject")
-          .attr("id", "reset")
-          .attr(
-              "transform",
-              "translate(10, " +
-              (margin.top +
-                  pad +
-                  height +
-                  pad +
-                  ageAreaHeight +
-                  ageAreaBottomPad +
-                  overviewHeight) +
-              ")"
-          )
-          .append("xhtml:body")
-          .html("<button>Reset</button>");
+        .append("foreignObject")
+        .attr("id", "reset")
+        .attr(
+          "transform",
+          "translate(10, " +
+            (margin.top + pad + height + pad + ageAreaHeight + ageAreaBottomPad + overviewHeight) +
+            ")"
+        )
+        .append("xhtml:body")
+        .html("<button>Reset</button>");
     }
   };
 
@@ -1164,6 +1106,7 @@ const PatientEpisodeTimeline = ({
       try {
         const response = await fetchData(url);
         const jsonResponse = await response.json();
+        debugger;
         processTimelineResponse(jsonResponse);
       } catch (error) {
         console.error("PatientEpisodeTimeline fetch error:", error);
@@ -1173,8 +1116,7 @@ const PatientEpisodeTimeline = ({
     fetchAndProcess();
   }, [patientId]);
 
-
-  return <div className="Timeline" id={svgContainerId}></div>
-}
+  return <div className="Timeline" id={svgContainerId}></div>;
+};
 
 export default PatientEpisodeTimeline;

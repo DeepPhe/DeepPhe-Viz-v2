@@ -1,35 +1,28 @@
 import React from "react";
-// nodejs library that concatenates classes
-import classNames from "classnames";
-// nodejs library to set properties for components
 import PropTypes from "prop-types";
-// @material-ui/core components
-import {makeStyles} from "@material-ui/core/styles";
-// @material-ui/icons
-// core components
-import styles from "assets/jss/material-dashboard-react/components/cardBodyStyle.js";
+// Update imports to MUI v5
+import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 
-const useStyles = makeStyles(styles);
+// Create styled component instead of using makeStyles
+const CardBodyRoot = styled(Box)({
+  padding: "0.9375rem 20px",
+  flex: "1 1 auto",
+  WebkitFlex: "1",
+  position: "relative",
+});
 
 export default function CardBody(props) {
-  const classes = useStyles();
-  const { className, children, plain, profile, ...rest } = props;
-  const cardBodyClasses = classNames({
-    [classes.cardBody]: true,
-    [classes.cardBodyPlain]: plain,
-    [classes.cardBodyProfile]: profile,
-    [className]: className !== undefined
-  });
+  const { className, children, ...rest } = props;
+
   return (
-    <div className={cardBodyClasses} {...rest}>
+    <CardBodyRoot className={className} {...rest}>
       {children}
-    </div>
+    </CardBodyRoot>
   );
 }
 
 CardBody.propTypes = {
   className: PropTypes.string,
-  plain: PropTypes.bool,
-  profile: PropTypes.bool,
-  children: PropTypes.node
+  children: PropTypes.node,
 };

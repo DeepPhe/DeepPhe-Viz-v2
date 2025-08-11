@@ -1,0 +1,8 @@
+COL|VAL|PERSON_IDS
+CANCER|B|fake_patient1,fake_patient1,fake_patient2,fake_patient3,fake_patient4,fake_patient4,fake_patient5,fake_patient5,fake_patient6,fake_patient7,patient_X
+CANCER|L|fake_patient7
+CANCER|O|fake_patient4
+AGE_AT_DX|30-39|fake_patient3,fake_patient5
+AGE_AT_DX|50-59|fake_patient1,patient_X,fake_patient2
+AGE_AT_DX|60-69|fake_patient4,fake_patient6
+AGE_AT_DX|70-79|fake_patient7

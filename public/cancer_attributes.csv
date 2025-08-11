@@ -1,4 +1,4 @@
-patientid|cancerid|cancer_type|attribid|attribval|CONFIDENCE
+patientid|cancerid|cancer_type|attribid|attribval|confidence
 fake_patient1|fake_patient1_07072025191757_C_106_C|BreastLobularCarcinomaInSitu|Laterality|Left|1
 fake_patient1|fake_patient1_07072025191757_C_106_C|BreastLobularCarcinomaInSitu|Laterality|Right|1
 fake_patient1|fake_patient1_07072025191757_C_106_C|BreastLobularCarcinomaInSitu|Location||1
