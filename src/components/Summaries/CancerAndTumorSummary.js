@@ -1,13 +1,14 @@
 import React from "react";
 import Handlebars from "handlebars";
 import { withRouter } from "../../utils/withRouter";
+import "./CancerAndTumorSummary.css";
 
 const { Component } = React;
 
 const source = `
     {{#if cancers.length}}
         {{#each cancers}}
-        <div class="cancer_and_tumor_summary clearfix">
+        <div class="cancer_and_tumor_summary">
         
             <div class="cancer_id">Cancer ID: {{title}}</div>
             
@@ -26,7 +27,7 @@ const source = `
                 </ul>
 
                 {{#if tnm.length}}
-                    <div class="tnm clearfix">
+                    <div class="tnm">
                         {{#each tnm}}
                         <div class="tnm_by_type">
                             <span class="tnm_type">{{type}} TNM: </span>
@@ -67,10 +68,10 @@ const source = `
                 <!-- List View Only -->
                 <div id="list_view_{{cancerId}}" class="list_view">
                     {{#each tumors.listViewData}}
-                    <div class="list_view_tumor clearfix">
+                    <div class="list_view_tumor">
                         <div class="list_view_tumor_type">
                         {{type}}
-                            <ul class="list_view_tumor_list clearfix">
+                            <ul class="list_view_tumor_list">
                                 {{#each data}}
                                     {{#if facts}}
                                     <li class="list_view_tumor_list_item">

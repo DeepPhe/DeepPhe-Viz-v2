@@ -18,6 +18,7 @@ const PatientEpisodeTimeline = ({
   reportId,
   svgContainerId,
   setCurrDocId,
+  timeline,
 }) => {
   const [json, setJson] = useState(null);
 
@@ -775,7 +776,7 @@ const PatientEpisodeTimeline = ({
             $("#report_instance").show();
             setReportId(d.id);
 
-            const docIndex = patientJson?.documents?.findIndex((doc) => d.id.startsWith(doc.name));
+            const docIndex = patientJson?.documents?.findIndex((doc) => d.id === doc.id);
             console.log("FIND ME HERE", docIndex);
             if (docIndex !== -1) {
               setCurrDocId(docIndex);
@@ -1104,10 +1105,9 @@ const PatientEpisodeTimeline = ({
 
     const fetchAndProcess = async () => {
       try {
-        const response = await fetchData(url);
-        const jsonResponse = await response.json();
-        debugger;
-        processTimelineResponse(jsonResponse);
+        // const response = await fetchData(url);
+        // const jsonResponse = await response.json();
+        processTimelineResponse(timeline);
       } catch (error) {
         console.error("PatientEpisodeTimeline fetch error:", error);
       }

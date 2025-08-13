@@ -1,37 +1,57 @@
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter } from "../../utils/withRouter";
+import "./CustomTable.css";
 
+/***
+ "PatientID": "fake_patient1",
+ "Race": "white",
+ "Gender": "female",
+ "DateOfBirth": "04-01-1960",
+ "CancerType": "BreastCancer",
+ "AgeAtDiagnosis": 50,
+ "AgeOfFirstEncounter": "04-01-2010"
+ ***/
 class CustomTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      ptId: null,
-      ptName: null,
-      ptAgeB: null,
-      ptAgeE: null,
+      patientData: undefined,
+      patientId: this.props.patientId,
     };
   }
 
   processResponse = (response) => {
-    let arr = response.patients;
+    let arr = response;
+    let patientData = [];
     for (let i = 0; i < arr.length; i++) {
-      if (arr[i]["patientId"] === this.props.match.params.patientId) {
+      if (arr[i]["PatientID"] === this.state.patientId) {
         let item = arr[i];
-        this.setState({
-          ptId: item["patientId"],
-          ptName: item["patientName"],
-          ptAgeB: item["firstEncounterAge"],
-          ptAgeE: item["lastEncounterAge"],
-        });
-        break;
+        if (!patientData["PatientID"]) {
+          patientData["PatientID"] = {
+            PatientID: item["PatientID"],
+            ptGender: item["Gender"],
+            ptRace: item["Race"],
+            ptDob: item["DateOfBirth"],
+            Cancers: {},
+          };
+        }
+        patientData["PatientID"]["Cancers"][i] = {
+          ptCancerType: item["CancerType"],
+          ptAgeAtDiagnosis: item["AgeAtDiagnosis"],
+          ptAgeOfFirstEncounter: item["AgeOfFirstEncounter"],
+          ptAgeOfLastEncounter: item["AgeOfLastEncounter"],
+        };
       }
     }
+    this.setState({
+      patientData: patientData,
+    });
   };
 
   componentDidMount() {
     const fetchData = async () => {
       return new Promise(function (resolve, reject) {
-        fetch("http://localhost:3001/api/cohortData").then(function (response) {
+        fetch("/patient_demographics.json").then(function (response) {
           if (response) {
             resolve(response);
           } else {
@@ -46,29 +66,65 @@ class CustomTable extends React.Component {
   }
 
   render() {
-    return (
-      <div className="Table" id="table">
-        <table className="table">
-          <thead>
-            <tr>
-              <th className="th">{"ID"}</th>
-              <th className="th">{"Name"}</th>
-              <th className="th">{"Age of first encounter"}</th>
-              <th className="th">{"Age of last encounter"}</th>
-            </tr>
-          </thead>
+    if (this.state.patientData === undefined) {
+      return <div className="loading">Loading...</div>;
+    } else {
+      return (
+        <div className="Table" id="table">
+          <table className="table">
+            <thead>
+              <tr>
+                <th className="th">{"ID"}</th>
+                <th className="th">{"Gender"}</th>
+                <th className="th">{"DOB"}</th>
+                <th className="th">{"Cancer Type"}</th>
+                <th className="th">{"Age at Dx"}</th>
+                <th className="th">{"Age at First Encounter"}</th>
+                <th className="th">{"Age at Last Encounter"}</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            <tr>
-              <td>{this.state.ptId}</td>
-              <td>{this.state.ptName}</td>
-              <td>{this.state.ptAgeB}</td>
-              <td>{this.state.ptAgeE}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    );
+            <tbody>
+              {Object.keys(this.state.patientData.PatientID.Cancers).map((item, index) => {
+                if (index > 0) {
+                  // This will render a new row for each subsequent cancer.
+                  // The first 3 columns are empty to align with the patient info columns.
+                  return (
+                    <tr key={item}>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td>{this.state.patientData.PatientID.Cancers[item].ptCancerType}</td>
+                      <td>{this.state.patientData.PatientID.Cancers[item].ptAgeAtDiagnosis}</td>
+                      <td>
+                        {this.state.patientData.PatientID.Cancers[item].ptAgeOfFirstEncounter}
+                      </td>
+                      <td>{this.state.patientData.PatientID.Cancers[item].ptAgeOfLastEncounter}</td>
+                    </tr>
+                  );
+                }
+                // For the first cancer, render the cells in the same row as patient info.
+                return (
+                  <React.Fragment key={item}>
+                    <tr key={item}>
+                      <td>{this.state.patientData.PatientID.PatientID}</td>
+                      <td>{this.state.patientData.PatientID.ptGender}</td>
+                      <td>{this.state.patientData.PatientID.ptDob}</td>
+                      <td>{this.state.patientData.PatientID.Cancers[item].ptCancerType}</td>
+                      <td>{this.state.patientData.PatientID.Cancers[item].ptAgeAtDiagnosis}</td>
+                      <td>
+                        {this.state.patientData.PatientID.Cancers[item].ptAgeOfFirstEncounter}
+                      </td>
+                      <td>{this.state.patientData.PatientID.Cancers[item].ptAgeOfLastEncounter}</td>
+                    </tr>
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
   }
 }
 

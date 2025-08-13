@@ -4,7 +4,8 @@ import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
-// import CustomTable from "../../components/CustomTables/CustomTable";
+import CustomTable from "../../components/CustomTables/CustomTable";
+import CancerAndTumorSummary from "../../components/Summaries/CancerAndTumorSummary";
 import PatientEpisodeTimeline from "../../components/Charts/PatientEpisodeTimeline";
 import EventRelationTimeline from "../../components/Charts/EventRelationTimeline";
 import CardHeader from "../../components/Card/CardHeader";
@@ -13,23 +14,19 @@ import { DocumentViewer } from "../../components/DocumentViewer/DocumentViewer";
 import { isEmpty } from "../../utils/JsObjectHelper";
 import { setEventHandlers } from "./patientEventHandlers";
 import { factBasedReports } from "./FactUtils";
-
+import IconButton from "@mui/material/IconButton";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import { getConceptsPerDocumentRef, hasDocuments } from "../../utils/PersonObjectHelper";
+import { getNewPatientObject } from "../../utils/PersonObjectGetter";
 import { getPatientDocument } from "../../utils/PatientDocumentGetter";
-import IconButton from "@mui/material/IconButton";
-import PatientDemographics from "../../components/PatientDemographics/patientDemographics";
-import CancerDataTables from "../../components/DeepPhe/CancerDataTables/CancerDataTables";
-import { fetchPatientDatabase } from "../../utils/db/DeepPheDb";
-import { fetchPatientCancers } from "../../utils/db/Patient";
+import createEpisodeTimeline from "../../utils/CreateEpisodeTimeline";
+import createCancerAndTumorSummary from "../../utils/CreateCancerAndTumorSummary";
 
 function Patient(props) {
   const { patientId } = useParams();
   const [summary, setSummary] = useState({});
-  const [db, setDb] = useState(undefined);
   const [patientDocument, setPatientDocument] = useState({});
-  const [demogaphics, setDemographics] = useState({});
   const [patientObject, setPatientObject] = useState(undefined);
   const [reportId, setReportId] = useState("");
   const [factId, setFactId] = useState({});
@@ -43,37 +40,20 @@ function Patient(props) {
   const [expandedCancerDetail, setExpandedCancerDetail] = useState(true); // initially open
   const conceptsPerDocumentRef = useRef({});
   const mentionIdsInDocumentRef = useRef({});
-  const [cancerData, setCancerData] = useState(undefined);
+  const [fullJson, setFullJson] = useState(undefined);
 
   useEffect(() => {
-    fetchPatientDatabase().then((db) => {
-      setDb(db);
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log("useEffect db");
-    if (db !== undefined) {
-      fetchPatientCancers(db, patientId).then((cancerDataObj) => {
-        if (cancerDataObj !== undefined) {
-          setCancerData(cancerDataObj);
-        }
-      });
-    }
-  }, [db]);
-
-  useEffect(() => {
-    if (hasDocuments(patientObject)) {
-      conceptsPerDocumentRef.current = getConceptsPerDocumentRef(patientObject);
+    if (hasDocuments(fullJson)) {
+      conceptsPerDocumentRef.current = getConceptsPerDocumentRef(fullJson);
       setProcessingDone(true);
     }
-  }, [patientObject]);
+  }, [fullJson]);
 
   useEffect(() => {
-    if (hasDocuments(patientObject)) {
-      setPatientDocument(getPatientDocument(currDocId, patientObject));
+    if (hasDocuments(fullJson)) {
+      setPatientDocument(getPatientDocument(currDocId, fullJson));
     }
-  }, [currDocId, patientObject]);
+  }, [currDocId, fullJson]);
 
   useEffect(() => {
     if (!isLoading()) {
@@ -85,35 +65,20 @@ function Patient(props) {
     return (
       patientDocument === undefined ||
       patientObject === undefined ||
-      cancerData === undefined ||
+      fullJson === undefined ||
       !processingDone
     );
   };
 
-  // function getSummary(patientId) {
-  //   return fetch("http://localhost:3001/api/patient/" + patientId + "/cancerAndTumorSummary");
-  // }
-
   function getSummary(patientId) {
-    debugger;
-    return fetch("/patientSummaryExample.json");
+    return fetch("http://localhost:3001/api/patient/" + patientId + "/cancerAndTumorSummary");
   }
-
-  const getPatientObject = (patientId) => {
-    debugger;
-    return fetch("/patientObjectExample.json");
-  };
 
   const getComponentPatientEpisodeTimeline = () => {
     return (
       <Card>
         <CardHeader className={"basicCardHeader"}>
-          <Box
-            // display="flex"
-            alignItems="center"
-            // justifyContent="space-between"
-            // width="100%"
-          >
+          <Box alignItems="center">
             <span style={{ paddingLeft: "14px" }}>
               <b>Patient Episode Timeline</b>
             </span>
@@ -129,7 +94,8 @@ function Patient(props) {
               <PatientEpisodeTimeline
                 svgContainerId="PatientEpisodeTimelineSvg"
                 reportId={reportId}
-                patientJson={patientObject}
+                patientJson={fullJson}
+                timeline={patientObject}
                 patientId={patientId}
                 setReportId={setReportId}
                 setCurrDocId={setCurrDocId}
@@ -148,7 +114,7 @@ function Patient(props) {
     if (isLoading()) {
       return <div>Loading Event Relation Table...</div>;
     }
-    const conceptsInDocument = patientDocument.getConceptsInDocument(patientObject.concepts);
+    const conceptsInDocument = patientDocument.getConceptsInDocument(fullJson.concepts);
 
     return (
       <Card>
@@ -170,11 +136,12 @@ function Patient(props) {
               clickedTerms={clickedTerms}
               svgContainerId="EventRelationTimelineSvg"
               reportId={reportId}
-              patientJson={patientObject}
+              patientJson={fullJson}
               concepts={conceptsInDocument}
               patientId={patientId}
               setReportId={setReportId}
               conceptsPerDocument={conceptsPerDocumentRef.current}
+              expandedPatientID={expandedPatientID}
             />
           </CardBody>
         )}
@@ -183,8 +150,28 @@ function Patient(props) {
   };
 
   const getComponentPatientIdAndDemographics = () => {
-    return <PatientDemographics patientId={patientId} />;
+    return (
+      <Card>
+        <CardHeader className={"basicCardHeader"}>
+          <Box alignItems="center">
+            <span style={{ paddingLeft: "14px" }}>
+              <b>Patient ID and Demographics</b>
+            </span>
+            <IconButton onClick={() => setExpandedPatientID((prev) => !prev)} size="small">
+              {expandedPatientID ? <ExpandLess /> : <ExpandMore />}
+            </IconButton>
+          </Box>
+        </CardHeader>
+
+        {expandedPatientID && (
+          <CardBody>
+            <CustomTable patientId={patientId} />
+          </CardBody>
+        )}
+      </Card>
+    );
   };
+
   const getComponentFooter = () => {
     return (
       <React.Fragment>
@@ -200,7 +187,7 @@ function Patient(props) {
             </Col>
             <Col md={1}></Col>
             <Col md={5}>
-              ©2021 Harvard Medical School, University of Pittsburgh, and Vanderbilt University
+              ©2025 Harvard Medical School, University of Pittsburgh, and Vanderbilt University
               Medical Center.
             </Col>
             <Col md={1}></Col>
@@ -214,7 +201,7 @@ function Patient(props) {
     if (isLoading()) {
       return <div>Loading Document Viewer...</div>;
     }
-    const conceptsInDocument = patientDocument.getConceptsInDocument(patientObject.concepts);
+    const conceptsInDocument = patientDocument.getConceptsInDocument(fullJson.concepts);
     // console.log("CONCEPTS IN DOCUMENT", conceptsInDocument);
     // console.log("THSI IS PATIENT DOC", patientDocument);
     if (isEmpty(reportId) || patientDocument.getMentionIdsInDocument() === 0) {
@@ -229,6 +216,7 @@ function Patient(props) {
         factBasedReports={factBasedReports}
         patientDocument={patientDocument}
         concepts={conceptsInDocument}
+        mentions={mentionIdsInDocumentRef.current}
         clickedTerms={clickedTerms}
         setClickedTerms={setClickedTerms}
       ></DocumentViewer>
@@ -236,80 +224,30 @@ function Patient(props) {
   };
 
   const getComponentCancerAndTumorDetail = () => {
-    if (isLoading() || cancerData === undefined) {
-      return <div>Loading Cancer and Tumor Detail...</div>;
-    } else {
-      // const sampleData = [
-      //   {
-      //     cancerId: "Invasive_Lobular_Breast_Carcinoma_1751931826030",
-      //     details: {
-      //       Location: "Breast",
-      //       Laterality: "Right",
-      //       Quadrant: "Upper_inner_Quadrant",
-      //       "Histologic Type": "Ductal_Breast_Carcinoma_In_Situ",
-      //       Behavior: "3",
-      //       Stage: "IIA",
-      //       Grade: "9",
-      //       Extent: "Invasive_Lesion",
-      //       "Tumor Type": "PrimaryTumor",
-      //       ER: "positive",
-      //       PR: "positive",
-      //       HER2: "negative",
-      //     },
-      //     clinicalTNM: { T: "T1", N: "N2", M: "M0" },
-      //     tumorSummaries: [
-      //       {
-      //         title: "Ductal_Breast_Carcinoma_In_Situ",
-      //         fields: {
-      //           Location: "Breast",
-      //           Laterality: "Right",
-      //           Quadrant: "Upper_inner_Quadrant",
-      //           "Histologic Type": "Ductal_Breast_Carcinoma_In_Situ",
-      //           Behavior: "3",
-      //           Stage: "IIA",
-      //           Grade: "9",
-      //           Extent: "Invasive_Lesion",
-      //           T: "T1",
-      //           N: "N2",
-      //           M: "M0",
-      //           "Tumor Type": "PrimaryTumor",
-      //           ER: "positive",
-      //           PR: "positive",
-      //           HER2: "negative",
-      //         },
-      //       }, // ...more summaries if needed
-      //     ],
-      //   }, // ...more cancer records
-      // ];
-      const sampleData = cancerData;
-      return (
-        <React.Fragment>
-          <Card>
-            <CardHeader className={"basicCardHeader"}>
-              <Box
-                // display="flex"
-                alignItems="center"
-                // justifyContent="space-between"
-                // width="100%"
-              >
-                <span style={{ paddingLeft: "14px" }}>
-                  <b>Cancer and Tumor Detail</b>
-                </span>
-                <IconButton onClick={() => setExpandedCancerDetail((prev) => !prev)} size="small">
-                  {expandedCancerDetail ? <ExpandLess /> : <ExpandMore />}
-                </IconButton>
-              </Box>
-            </CardHeader>
+    return (
+      <React.Fragment>
+        <Card>
+          <CardHeader className={"basicCardHeader"}>
+            <Box alignItems="center">
+              <span style={{ paddingLeft: "14px" }}>
+                <b>Cancer and Tumor Detail</b>
+              </span>
+              <IconButton onClick={() => setExpandedCancerDetail((prev) => !prev)} size="small">
+                {expandedCancerDetail ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            </Box>
+          </CardHeader>
 
-            {expandedCancerDetail && (
-              <CardBody>
-                <div id="summary">{<CancerDataTables cancers={sampleData} />}</div>
-              </CardBody>
-            )}
-          </Card>
-        </React.Fragment>
-      );
-    }
+          {expandedCancerDetail && (
+            <CardBody>
+              <div id="summary">
+                <CancerAndTumorSummary cancers={summary} />
+              </div>
+            </CardBody>
+          )}
+        </Card>
+      </React.Fragment>
+    );
   };
 
   const getComponentNavBar = () => {
@@ -318,7 +256,7 @@ function Patient(props) {
         <Container>
           <Navbar.Brand className={"mainNavBar"} href="/">
             DeepPhe Visualizer
-            <span style={{ fontSize: "20px" }}> v2.0.0.0</span>
+            <span style={{ fontSize: "20px" }}> v2.1</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -353,30 +291,25 @@ function Patient(props) {
   }, [patientId]);
 
   useEffect(() => {
-    if (summary.length && patientId) {
-      getPatientObject(patientId).then((patientObject) => {
-        patientObject.json().then((patientObject) => {
-          if (!patientObject || Object.keys(patientObject).length === 0) {
-            console.warn("Empty or invalid patientJson received!");
-          }
-          setPatientObject(patientObject);
-        });
+    if (patientId) {
+      createEpisodeTimeline(patientId).then((obj) => {
+        const patientObject = obj.timeline;
+        const fullJson = obj.fullJson;
+        if (!patientObject || Object.keys(patientObject).length === 0) {
+          console.warn("Empty or invalid patientJson received!");
+        }
+        setPatientObject(patientObject);
+        setFullJson(fullJson);
       });
     }
-  }, [summary, patientId]);
+  }, [patientId]);
 
-  /***
-   Patient Summary needs to look like:
-
-   ***/
   if (isEmpty(summary)) {
     if (!gettingSummary) {
       setGettingSummary(true);
-      getSummary(patientId).then((response) => {
-        response.json().then((json) => {
-          setSummary(json);
-          setGettingSummary(false); // optional, useful if you want to reset
-        });
+      createCancerAndTumorSummary(patientId).then((json) => {
+        setSummary(json);
+        setGettingSummary(false);
       });
     }
     return <div> Loading... </div>;
@@ -384,17 +317,12 @@ function Patient(props) {
 
   if (isLoading()) {
     return <div>Loading Patient Data...</div>;
-  } else {
-    console.log("Patient Object", patientObject);
-    console.log("Patient Document", patientDocument);
-    console.log("Cancer Data", cancerData);
-    console.log("Concepts Per Document Ref", conceptsPerDocumentRef.current);
   }
 
   return (
     <React.Fragment>
       {getComponentNavBar()}
-      <GridContainer>
+      <GridContainer spacing={0}>
         <GridItem xs={12} sm={12} md={1} />
         <GridItem xs={12} sm={12} md={10}>
           {getComponentPatientIdAndDemographics()}
@@ -405,7 +333,7 @@ function Patient(props) {
         </GridItem>
         <GridItem xs={12} sm={12} md={1} />
       </GridContainer>
-      {/*{getComponentFooter()}*/}
+      {getComponentFooter()}
     </React.Fragment>
   );
 }
