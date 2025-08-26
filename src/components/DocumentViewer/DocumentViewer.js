@@ -26,7 +26,6 @@ export function DocumentViewer(props) {
   const clickedTerms = props.clickedTerms; // Initial state set to empty array
   const [filterLabel, setFilterLabel] = useState("Concepts");
 
-  // console.log(filteredConcepts);
   useEffect(() => {
     if (isEmpty(semanticGroups)) {
       getSemanticGroups();
@@ -171,17 +170,6 @@ export function DocumentViewer(props) {
   const getSemanticGroups = () => {
     let groups = {};
     const uniqueConcepts = Array.from(new Set(concepts.map((c) => c.dpheGroup)));
-    console.log("concepts in docviewer", concepts);
-
-    const hasUnknown = concepts.some((concept) => concept.dpheGroup === "Unknown");
-
-    if (hasUnknown) {
-      console.log("There is at least one concept with dpheGroup 'Unknown'");
-    } else {
-      console.log("No concepts with dpheGroup 'Unknown' found");
-    }
-
-    // console.log(uniqueConcepts);
     const mappedGroups = uniqueConcepts.map((group) => {
       const conceptClump = searchTreeForClumpParent(semanticRoot, group);
       if (conceptClump === null) {
@@ -221,8 +209,6 @@ export function DocumentViewer(props) {
         id: concepts.find((c) => c.dpheGroup === group)?.id || group,
       };
     });
-
-    console.log("SEMANTIC GROUPS", groups);
     setSemanticGroups(groups);
   };
 
@@ -243,10 +229,7 @@ export function DocumentViewer(props) {
 
   const handleTermClick = (e) => {
     const clickedElement = e.currentTarget;
-    // console.log("CLICKED ELE", clickedElement);
     const clickedId = clickedElement.dataset.id;
-    // console.log("CLICKED ID", clickedId);
-
     if (clickedTerms.includes(clickedId)) {
       setClickedTerms((prev) => prev.filter((id) => id !== clickedId)); // Remove from state
     } else {

@@ -22,6 +22,7 @@ import { getNewPatientObject } from "../../utils/PersonObjectGetter";
 import { getPatientDocument } from "../../utils/PatientDocumentGetter";
 import createEpisodeTimeline from "../../utils/CreateEpisodeTimeline";
 import createCancerAndTumorSummary from "../../utils/CreateCancerAndTumorSummary";
+import "./Patient.css";
 
 function Patient(props) {
   const { patientId } = useParams();
@@ -35,7 +36,7 @@ function Patient(props) {
   const [clickedTerms, setClickedTerms] = useState([]); // Initial state set to empty array
   const [processingDone, setProcessingDone] = useState(false);
   const [expandedPatientEpisode, setExpandedPatientEpisode] = useState(true); // initially open
-  const [expandedEventRelation, setExpandedEventRelation] = useState(true); // initially open
+  const [expandedEventRelation, setExpandedEventRelation] = useState(false); // initially open
   const [expandedPatientID, setExpandedPatientID] = useState(true); // initially open
   const [expandedCancerDetail, setExpandedCancerDetail] = useState(true); // initially open
   const conceptsPerDocumentRef = useRef({});

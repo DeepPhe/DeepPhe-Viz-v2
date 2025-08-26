@@ -228,8 +228,8 @@ export function ConceptPanel(props) {
                   onFilterChange={handleFilterChange}
                   confidencePercent={confidencePercent}
                   setConfidencePercent={setConfidencePercent}
-                  sliderPostion={sliderPosition}
-                  setSliderPostion={setSliderPosition}
+                  sliderPosition={sliderPosition}
+                  setSliderPosition={setSliderPosition}
                 />
               </GridContainer>
               <GridContainer>

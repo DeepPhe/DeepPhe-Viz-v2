@@ -1,5 +1,5 @@
 import GridItem from "../Grid/GridItem";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { BarChart } from "@mui/x-charts";
 import { styled } from "@mui/material/styles";
 import { FormLabel, Tooltip } from "@mui/material";
@@ -10,6 +10,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import RadioGroup from "@mui/material/RadioGroup";
 import IconButton from "@mui/material/IconButton";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import "./ConfidenceDataViz.css";
 
 export function ConfidenceDataViz(props) {
   const handleConfidenceChange = props.handleConfidenceChange;
@@ -18,11 +19,25 @@ export function ConfidenceDataViz(props) {
   const mentions = props.mentions;
   const confidencePercent = props.confidencePercent;
   const setConfidencePercent = props.setConfidencePercent;
-  const sliderPosition = props.sliderPostion;
-  const setSliderPosition = props.setSliderPostion;
+  const sliderPosition = props.sliderPosition;
+  const setSliderPosition = props.setSliderPosition;
   const onFilterChange = props.onFilterChange;
   const filterLabel = props.filterLabel;
   const setFilterLabel = props.setFilterLabel;
+  const chartWrapperRef = useRef(null);
+
+  // useEffect(() => {
+  //   if (!sliderPosition) {
+  //     const chartWidth = chartWrapperRef.current?.getBoundingClientRect().width || 0;
+  //     const initialSlider = 0; // e.g., 50% confidence
+  //     const yAxisBuffer = 35;
+  //     const endOfGraphBuffer = 16;
+  //     const graphWidth = chartWidth - endOfGraphBuffer - yAxisBuffer;
+  //     const initialPixel = yAxisBuffer + (initialSlider / 100) * graphWidth;
+  //     setSliderPosition(initialPixel);
+  //     setConfidencePercent(initialSlider);
+  //   }
+  // }, [chartWrapperRef.current]);
 
   const handleRadioChange = (event) => {
     const value = event.target.value;
@@ -30,37 +45,6 @@ export function ConfidenceDataViz(props) {
     onFilterChange(value === "option1" ? "Concepts" : "Mentions");
     setFilterLabel(value === "option1" ? "Concepts" : "Mentions");
   };
-
-  // const getMentionsGivenMentionIds = (mentionIds) => {
-  //     return mentions.filter((m) => mentionIds.includes(m.id));
-  // };
-  // const getMentionsForConcept = (conceptId) => {
-  //     if(conceptId === ""){
-  //         return [];
-  //     }
-  //     if(conceptId !== undefined) {
-  //         const idx = concepts.findIndex((c) => c.id === conceptId);
-  //         if(idx === -1){
-  //             return [];
-  //         }
-  //         return concepts[idx].mentionIds.filter((mentionId) => {
-  //             return mentions.some((m) => m.id === mentionId);
-  //         });
-  //     }
-  //     else{
-  //         return [];
-  //     }
-  // };
-  //
-  // function getAllMentionIDs(){
-  //     let conceptIDList = [];
-  //     console.log(mentions);
-  //     for(let i = 0; i < concepts.length; i++){
-  //         const mentions = getMentionsGivenMentionIds(getMentionsForConcept(concepts[i].id));
-  //         conceptIDList.push(mentions);
-  //     }
-  //     return conceptIDList;
-  // }
 
   function getDpheGroupOfMention(mentionId) {
     for (const concept of concepts) {
@@ -84,12 +68,8 @@ export function ConfidenceDataViz(props) {
         }
       }
     } else if (filterLabel === "Mentions") {
-      // console.log(getAllMentionIDs());
-      // console.log(getDpheGroupOfMention());
       mentions.forEach(function (obj) {
         const dpheGroupByMention = getDpheGroupOfMention(obj.id);
-        // console.log("NAME:", name, "DPHE", dpheGroupByMention);
-
         if (name === dpheGroupByMention) {
           confidenceList.push(obj.confidence / 100);
         }
@@ -99,7 +79,6 @@ export function ConfidenceDataViz(props) {
   }
 
   function percentCounter(confidenceList) {
-    // console.log("CONFIDENCE LIST:", confidenceList);
     const buckets = Array(10).fill(0); //fill all buckets as 0 init
     confidenceList.forEach((item) => {
       if (item >= 0 && item <= 1) {
@@ -227,8 +206,6 @@ export function ConfidenceDataViz(props) {
     { data: groupedSemantics.greyGroup, stack: "total", color: "rgba(128, 128, 128, 0.65)" },
   ];
 
-  const chartRef = useRef(null);
-
   const throttledHandleConfidenceChange = useCallback(
     _.throttle((confidencePercent) => {
       handleConfidenceChange(confidencePercent);
@@ -239,7 +216,7 @@ export function ConfidenceDataViz(props) {
   const handleSliderChange = (event) => {
     const yAxisBuffer = 35;
     const endOfGraphBuffer = 16;
-    const chartRect = chartRef.current.getBoundingClientRect();
+    const chartRect = chartWrapperRef.current.getBoundingClientRect();
     let newValue = event.clientX - chartRect.left;
     if (newValue >= yAxisBuffer && newValue <= chartRect.width - endOfGraphBuffer) {
       const graphPercent = (chartRect.width - endOfGraphBuffer - yAxisBuffer) / 100;
@@ -260,43 +237,45 @@ export function ConfidenceDataViz(props) {
     document.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const SliderLine = styled("div")(({ theme }) => ({
-    position: "absolute",
-    top: 83,
-    bottom: 0,
-    width: "4px", // Increased thickness
-    backgroundColor: "#1565c0",
-    cursor: "ew-resize",
-    zIndex: 10, // Ensure it is above the chart
-    height: "255px",
-    "&::before": {
-      content: '""',
-      position: "absolute",
-      top: 0,
-      bottom: 0,
-      left: `${-sliderPosition + 40}px`, // Move the grey background to the left relative to the slider position
-      width: `${sliderPosition - 40}px`, // The width of the grey background changes dynamically
-      backgroundColor: "rgba(128, 128, 128, 0.5)", // Transparent grey color
-      zIndex: -1, // Ensure it appears behind the slider line
-      display: "block",
-    },
-    "&::after": {
-      content: '""',
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      width: "18px",
-      height: "20px", // Thickness of the lines
-      backgroundColor: "lightgrey",
-      borderRadius: "2px", // Optional: Rounds the edges of the lines
-      display: "block",
-    },
-  }));
+  // const SliderLine = styled("div")(({ theme }) => ({
+  //   position: "absolute",
+  //   top: 83,
+  //   bottom: 0,
+  //   width: "4px", // Increased thickness
+  //   backgroundColor: "#1565c0",
+  //   cursor: "ew-resize",
+  //   zIndex: 10, // Ensure it is above the chart
+  //   height: "255px",
+  //   "&::before": {
+  //     content: '""',
+  //     position: "absolute",
+  //     top: 0,
+  //     bottom: 0,
+  //     left: `${-sliderPosition + 40}px`, // Move the grey background to the left relative to the slider position
+  //     width: `${sliderPosition - 40}px`, // The width of the grey background changes dynamically
+  //     backgroundColor: "rgba(128, 128, 128, 0.5)", // Transparent grey color
+  //     zIndex: -1, // Ensure it appears behind the slider line
+  //     display: "block",
+  //   },
+  //   "&::after": {
+  //     content: '""',
+  //     position: "absolute",
+  //     top: "50%",
+  //     left: "50%",
+  //     transform: "translate(-50%, -50%)",
+  //     width: "18px",
+  //     height: "20px", // Thickness of the lines
+  //     backgroundColor: "lightgrey",
+  //     borderRadius: "2px", // Optional: Rounds the edges of the lines
+  //     display: "block",
+  //   },
+  // }));
 
   // Custom styled Tooltip with a lighter background
   const LightTooltip = styled(({ className, ...props }) => (
-    <Tooltip {...props} classes={{ popper: className }} />
+    <Tooltip {...props} slotProps={{ popper: { className } }}>
+      <span>{props.children}</span>
+    </Tooltip>
   ))(() => ({
     [`& .MuiTooltip-tooltip`]: {
       backgroundColor: "rgba(255, 255, 255, 0.9)", // Light background
@@ -309,7 +288,7 @@ export function ConfidenceDataViz(props) {
 
   return (
     <GridContainer justifyContent="space-between" alignItems="center" spacing={2}>
-      <GridItem xs="{true}">
+      <GridItem xs={true}>
         <RadioGroup
           row
           aria-label="options"
@@ -342,44 +321,92 @@ export function ConfidenceDataViz(props) {
         </LightTooltip>
       </GridItem>
       <GridItem xs={12} alignItems="center">
-        <BarChart
-          ref={chartRef}
-          height={300}
-          // series={emptySeries}
-          series={series}
-          margin={{ top: 20, bottom: 26, left: 40, right: 15 }}
-          yAxis={[
-            {
-              label: "Occurrences",
-              labelFontSize: 17,
-            },
-          ]}
-          animate
-          disableAxisListener={true}
-          xAxis={[
-            {
-              scaleType: "band",
-              data: ["10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"],
-              tickLabelPlacement: "tick",
-              tickPlacement: "end",
-            },
-          ]}
-          tooltip={{
-            trigger: "none",
-          }}
-          axisHighlight={{
-            x: "none",
-            y: "none",
-          }}
-        />
-        <SliderLine style={{ left: `${sliderPosition + 35}px` }} onMouseDown={handleMouseDown} />
+        <div
+          ref={chartWrapperRef}
+          style={{ position: "relative", height: "255px", marginBottom: "50px" }}
+        >
+          <BarChart
+            height={300}
+            series={series}
+            margin={{ top: 20, bottom: 26, left: 40, right: 15 }}
+            yAxis={[
+              {
+                label: "Occurrences",
+                labelFontSize: 17,
+              },
+            ]}
+            disableAxisListener={true}
+            xAxis={[
+              {
+                scaleType: "band",
+                data: ["10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%", "100%"],
+                tickLabelPlacement: "tick",
+                tickPlacement: "end",
+              },
+            ]}
+            tooltip={{
+              trigger: "none",
+            }}
+            axisHighlight={{
+              x: "none",
+              y: "none",
+            }}
+          />
+
+          {/* Grey overlay that follows the slider, only shown if sliderPosition > 0 */}
+          {sliderPosition > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: 19,
+                left: 40,
+                width: `${sliderPosition - 40}px`, // width based on sliderPosition
+                height: "255px",
+                backgroundColor: "rgba(128,128,128,0.5)",
+                zIndex: 1,
+              }}
+            />
+          )}
+
+          {/* The draggable slider line */}
+          <div
+            style={{
+              position: "absolute",
+              top: 19,
+              left: `${sliderPosition}px`,
+              width: "4px",
+              height: "255px",
+              backgroundColor: "#1565c0",
+              cursor: "ew-resize",
+              zIndex: 10,
+            }}
+            onMouseDown={handleMouseDown}
+          >
+            {/* Gray handle centered on the slider line */}
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "18px",
+                height: "20px",
+                backgroundColor: "lightgrey",
+                borderRadius: "2px",
+                zIndex: 11,
+              }}
+            />
+          </div>
+        </div>
       </GridItem>
+
       <GridItem xs={12}>
         <FormLabel
           sx={{
+            position: "relative",
+            zIndex: 20, // higher than slider/overlay
             fontWeight: "light",
             fontSize: "1em",
-            marginBottom: "-5px",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",

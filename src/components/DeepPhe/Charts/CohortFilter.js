@@ -206,7 +206,7 @@ const CohortFilter = (props) => {
                 {Array.from(patientsMatchingAllFilters).map((patientId, index) => (
                   <Link
                     key={index}
-                    href={`http://localhost:3001/deepphe/patient/${patientId}`}
+                    href={`./patient/${patientId}`}
                     target="_blank" // Optional: opens the link in a new tab
                     rel="noopener noreferrer" // Optional: security best practice for new tabs
                     sx={{

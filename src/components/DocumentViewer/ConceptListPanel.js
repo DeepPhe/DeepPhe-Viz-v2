@@ -38,10 +38,7 @@ export function ConceptListPanel(props) {
   useEffect(() => {
     // Wait until semanticGroups is populated
     if (!semanticGroups || Object.keys(semanticGroups).length === 0) return;
-
     const sortedConcepts = filterConceptsByConfidenceAndSemanticGroup(concepts);
-    // console.log("SORTED CONCEPTS", sortedConcepts);
-
     if (sortedConcepts.length === 0) {
       setFilteredConcepts([-1]);
     } else {
@@ -61,11 +58,8 @@ export function ConceptListPanel(props) {
   // based on confidence and Semantic group selection
   function filterConceptsByConfidenceAndSemanticGroup(concepts) {
     let filteredConcepts = [];
-    console.log("concepts in conceptListPanel", concepts);
     for (let i = 0; i < concepts.length; i++) {
       const concept = concepts[i];
-      // console.log(concept);
-      // console.log(concept.dpheGroup);
       if (
         parseFloat(concept.confidence) >= parseFloat(confidence) &&
         (conceptGroupIsSelected(concept) || concept.dpheGroup === "Unknown")
@@ -73,7 +67,6 @@ export function ConceptListPanel(props) {
         if (semanticGroups.hasOwnProperty(concept.dpheGroup)) {
           concept.conceptClump = semanticGroups[concept.dpheGroup].conceptClump;
         } else {
-          // console.log(concept);
           // fallback if dpheGroup not in semanticGroups for some reason
           concept.conceptClump = "Unknown";
         }

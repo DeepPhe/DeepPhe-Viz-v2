@@ -231,23 +231,15 @@ const PatientEpisodeTimeline = ({
     // Convert string to date
     if (reportData !== null) {
       reportData.forEach(function (d) {
-        // Format the date to a human-readable string first, formatTime() takes Date object instead of string
-        // d.origTime.slice(0, 19) returns the time string without the time zone part.
-        // E.g., "2012/11/28" from "11/28/2012 01:00 AM AST"
-        // console.log(d.date)
-        let formattedDateStr = formatTime(new Date(d.date));
-        // console.log(formattedDateStr)
-        // Then convert a string back to a date to be used by d3
+        let formattedDateStr = formatTime(new Date(Number(d.date)));
         d.formattedDate = parseTime(formattedDateStr);
       });
-      // console.log(reportData)
 
       // The earliest report date
       let xMinDate = d3.min(reportData, function (d) {
         return d.formattedDate;
       });
 
-      // console.log(xMinDate)
       // Set the start date of the x axis 10 days before the xMinDate
       let startDate = new Date(xMinDate);
       startDate.setDate(startDate.getDate() - numOfDays);
@@ -777,7 +769,6 @@ const PatientEpisodeTimeline = ({
             setReportId(d.id);
 
             const docIndex = patientJson?.documents?.findIndex((doc) => d.id === doc.id);
-            console.log("FIND ME HERE", docIndex);
             if (docIndex !== -1) {
               setCurrDocId(docIndex);
             } else {
@@ -785,81 +776,10 @@ const PatientEpisodeTimeline = ({
             }
           });
       }, 100); // Delay execution for 200ms
-      // Report circles in main area
-      // mainReports
-      //   .selectAll(".main_report")
-      //   .data(reportData)
-      //   .enter()
-      //   .append("g")
-      //   .append("circle")
-      //   .attr("class", function (d) {
-      //     return "main_report " + episode2CssClass(d.episode);
-      //   })
-      //   .attr("id", function (d) {
-      //     // Prefix with "main_"
-      //     return "main_" + d.id;
-      //   })
-      //   .attr("data-episode", function (d) {
-      //     // For debugging
-      //     return d.episode;
-      //   })
-      //   .attr("r", reportMainRadius)
-      //   .attr("cx", function (d) {
-      //     return mainX(d.formattedDate);
-      //   })
-      //   // Vertically spread the dots with same time
-      //   .attr("cy", function (d) {
-      //     return getReportCirclePositionY(
-      //       d,
-      //       mainY,
-      //       mainReportTypeRowHeightPerCount
-      //     );
-      //   })
-      //   .style("fill", function (d) {
-      //     return color(d.episode);
-      //   })
-      //   .style("stroke", function (d) {
-      //     return color(d.episode);
-      //   })
-      //   .on("click", function (d) {
-      //     $("#docs").show();
-      //     // Check to see if this report is one of the fact-based reports that are being highlighted
-      //     // d.id has no prefix, just raw id
-      //     if (Object.keys(factBasedReports).indexOf(d.id) === -1) {
-      //       // Remove the fact related highlighting
-      //       removeFactBasedHighlighting(d.id);
-      //     }
-      //
-      //     // Highlight the selected report circle with solid fill and thicker stroke
-      //     highlightSelectedTimelineReport(d.id);
-      //
-      //     // And show the report content
-      //     $("#report_instance").show();
-      //     that.setReportId(d.id);
-      //     //that.setReportId("fake_patient1_fake_patient1_04032024_225414_fake_patient1_doc8_SP_8_04032024_225414_M_42")
-      //     //that.getReport(d.id, "", that.patientJson);
-      //   });
-
-      // const element = d3.select("g");  // or select the specific element you want
-      //
-      // const bbox = element.node().getBoundingClientRect();
-      // console.log("Width:", bbox.width);
-      // console.log("Height:", bbox.height);
 
       // Main area x axis
       // https://github.com/d3/d3-axis#axisBottom
       let xAxis = d3.axisBottom(mainX).tickSizeInner(5).tickSizeOuter(0);
-      // .tickFormat(function (d) {
-      //   const diff = mainX.domain()[1] - mainX.domain()[0]; // time range in ms
-      //
-      //   if (diff < 1000 * 60 * 60 * 24 * 31 * 4.5) {
-      //     // Less than ~2 months: show day + month
-      //     return d3.timeFormat("%b %d")(d); // e.g., "Jan 12"
-      //   } else {
-      //     // Show month only
-      //     return d3.timeFormat("%b")(d); // e.g., "Jan"
-      //   }
-      // });
 
       // Append x axis to the bottom of main area
       main
