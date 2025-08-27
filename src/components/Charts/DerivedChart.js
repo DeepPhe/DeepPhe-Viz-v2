@@ -51,7 +51,8 @@ export default class DerivedChart extends React.Component {
                             <li key={index}>
                                 <a  id={patient.patientId} className="target_patient"
                                    href={baseGuiUri + "/./patient/" + patient.patientId}
-                                   target="_blank" rel="noopener noreferrer">{patient.patientId}</a>({patient.firstEncounterAge})
+                                   target="_blank" rel="noopener noreferrer"
+                                   style={{ color: "blue" }}>{patient.patientId}</a>({patient.firstEncounterAge})
                             </li>
 
                         ))}

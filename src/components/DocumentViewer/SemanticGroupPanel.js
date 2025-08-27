@@ -41,6 +41,8 @@ export function SemanticGroupPanel(props) {
               fontFamily: "Monaco, monospace",
               fontWeight: "bold",
               mr: 1,
+              marginLeft: "10px",
+              color: "white !important",
             }}
             id={"check-all-btn"}
             variant="contained"
@@ -55,6 +57,7 @@ export function SemanticGroupPanel(props) {
               fontSize: "17px",
               fontFamily: "Monaco, monospace",
               fontWeight: "bold",
+              color: "white !important",
             }}
             id={"uncheck-all-btn"}
             variant="contained"

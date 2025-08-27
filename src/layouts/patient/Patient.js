@@ -23,6 +23,11 @@ import { getPatientDocument } from "../../utils/PatientDocumentGetter";
 import createEpisodeTimeline from "../../utils/CreateEpisodeTimeline";
 import createCancerAndTumorSummary from "../../utils/CreateCancerAndTumorSummary";
 import "./Patient.css";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import { Link } from "@mui/material";
+import Button from "@mui/material/Button";
 
 function Patient(props) {
   const { patientId } = useParams();
@@ -253,35 +258,49 @@ function Patient(props) {
 
   const getComponentNavBar = () => {
     return (
-      <Navbar className={"mainNavBar"}>
-        <Container>
-          <Navbar.Brand className={"mainNavBar"} href="/">
-            DeepPhe Visualizer
-            <span style={{ fontSize: "20px" }}> v2.1</span>
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="justify-content-end" style={{ width: "100%" }}>
-              <Nav.Link
-                className={"navItem"}
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://deepphe.github.io/"
-              >
-                About
-              </Nav.Link>
-              <Nav.Link
-                className={"navItem"}
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://github.com/DeepPhe/"
-              >
-                GitHub
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+      <Box sx={{ flexGrow: 1, mb: 4 }}>
+        <AppBar position="static" elevation={4} sx={{ backgroundColor: "#264653" }}>
+          <Toolbar>
+            <Typography
+              variant="h5"
+              component="div"
+              sx={{
+                flexGrow: 1,
+                fontWeight: 400,
+                letterSpacing: 0.5,
+                py: 1.5,
+                color: "white !important",
+              }}
+            >
+              DeepPhe Visualizer v2.1.
+            </Typography>
+
+            {/*<Nav className="justify-content-end" style={{ width: "100%" }}>*/}
+            <Button
+              // className={"navItem"}
+              variant={"outlined"}
+              color={"white"}
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://deepphe.github.io/"
+              sx={{ marginLeft: "10px" }}
+            >
+              About
+            </Button>
+            <Button
+              // className={"navItem"}
+              variant={"outlined"}
+              color={"white"}
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://github.com/DeepPhe/"
+            >
+              GitHub
+            </Button>
+            {/*</Nav>*/}
+          </Toolbar>
+        </AppBar>
+      </Box>
     );
   };
 

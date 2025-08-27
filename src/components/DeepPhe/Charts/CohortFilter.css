@@ -223,7 +223,8 @@ svg[id$="-hs"] {
 }
 
 .Mui-selected {
-    background-color: #1cff002b !important;
+    background-color: #80BFFF !important;
+    color: white !important;
 }
 
 .filter-stack-bar {
