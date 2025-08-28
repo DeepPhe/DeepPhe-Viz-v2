@@ -51,7 +51,7 @@ const TopCharts = () => {
                   fontWeight: 400,
                   letterSpacing: 0.5,
                   py: 1.5,
-                  color: "white",
+                  color: "white !important",
                 }}
               >
                 DeepPhe Visualizer v2.1
