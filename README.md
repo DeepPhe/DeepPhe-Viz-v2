@@ -1,4 +1,4 @@
-# DeepPhe-Viz
+# DeepPhe-Viz-v2
 
 A visualization platform for DeepPhe cancer phenotype data.
 
