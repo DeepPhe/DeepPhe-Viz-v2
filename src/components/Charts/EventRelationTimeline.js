@@ -80,7 +80,7 @@ export default function EventRelationTimeline(props) {
 
   const fetchTXTData = async () => {
     try {
-      const response = await fetch("/Patient01_times.txt");
+      const response = await fetch("/docs/Patient01_times.txt");
       console.log("Fetch response status:", response.status);
       console.log("Fetch response headers:", response.headers);
 
@@ -97,6 +97,7 @@ export default function EventRelationTimeline(props) {
   };
 
   function getDpheGroupByConceptId(conceptId) {
+    console.log("concepts", concepts);
     const concept = concepts.find((concept) => concept.id === conceptId);
     return concept ? concept.dpheGroup : null;
   }
@@ -115,10 +116,11 @@ export default function EventRelationTimeline(props) {
         return acc;
       }, {});
 
-      // console.log("obj", obj);
+      console.log("obj", obj);
 
       // Get and assign dpheGroup
       const dpheGroup = getDpheGroupByConceptId(obj.ConceptID);
+      console.log("dpheGroup", dpheGroup);
       obj.dpheGroup = dpheGroup;
 
       // Optionally count occurrences
@@ -156,36 +158,22 @@ export default function EventRelationTimeline(props) {
   const skipNextEffect = useRef(false);
 
   useEffect(() => {
-    console.log("useEffect triggered, conceptsPerDocument:", conceptsPerDocument);
-    if (!conceptsPerDocument) {
-      console.log("No conceptsPerDocument, returning early");
-      return;
-    }
-
-    console.log("About to call fetchTXTData");
-    fetchTXTData(conceptsPerDocument).then((data) => {
-      console.log("fetchTXTData returned:", data);
-      if (!data) {
-        console.log("No data returned, exiting");
-        return;
-      }
-      // ... rest of the code
-    });
-  }, [conceptsPerDocument]);
-
-  useEffect(() => {
     if (!conceptsPerDocument) return;
 
     fetchTXTData(conceptsPerDocument).then((data) => {
       if (!data) return;
+      console.log("are we getting here");
       setJson(data);
       const transformedData = transformTXTData(data);
+      console.log("transformed data:", transformedData);
       const container = document.getElementById(svgContainerId);
       if (container) {
         container.innerHTML = "";
       }
       const filteredDpheGroup = transformedData.dpheGroup.filter((item) => item != null);
       const filteredLaneGroup = transformedData.laneGroup.filter((item) => item != null);
+      console.log("filteredDpheGroup", filteredDpheGroup);
+      console.log("filteredLaneGroup", filteredLaneGroup);
       if (filteredDpheGroup.length !== 0 && filteredLaneGroup.length !== 0) {
         renderTimeline(
           svgContainerId,
@@ -293,6 +281,16 @@ export default function EventRelationTimeline(props) {
     let verticalPositions = {};
     // Vertical max counts from top to bottom
     // This is used to decide the domain range of mainY and overviewY
+    console.log(
+      svgContainerId,
+      patientId,
+      startRelation,
+      endDate,
+      endDate,
+      laneGroup,
+      dpheGroupCount,
+      laneGroupCount
+    );
 
     function createEventData() {
       const eventData = [];
