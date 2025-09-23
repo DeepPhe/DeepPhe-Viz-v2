@@ -78,90 +78,17 @@ export default function EventRelationTimeline(props) {
     }
   }, [clickedTerms]);
 
-  // const fetchTSVData = async (conceptsPerDocument) => {
-  //     try {
-  //         const response = await fetch("/unsummarized_output.tsv");
-  //         if (!response.ok) throw new Error("Failed to load file");
-  //
-  //         const text = await response.text();
-  //         // Only modify TSV if conceptsPerDocument is passed
-  //         const modifiedText = conceptsPerDocument
-  //             ? appendMentionsToTSV(text, conceptsPerDocument)
-  //             : text;
-  //
-  //         console.log(text);
-  //         console.log(modifiedText);
-  //         console.log(parseTSV(modifiedText));
-  //
-  //         return parseTSV(modifiedText);
-  //     } catch (error) {
-  //         console.error("Error loading TSV:", error);
-  //         return null;
-  //     }
-  // };
-
-  // console.log(fetchTXTData(conceptsPerDocument))
-
-  // Function to parse TSV text into an object
-  // const parseTSV = (tsvText) => {
-  //     const lines = tsvText.trim().split("\n");
-  //     const headers = lines[0].split("\t").map(h => h.trim());
-  //     const chemoCounts = {};
-  //     const chemoGroupCounts =   {};
-  //     const tLinkCounts = {};
-  //
-  //
-  //     const data = lines.slice(1).map(line => {
-  //         const values = line.split("\t"); // Split the line into columns by tab
-  //
-  //         const obj = headers.reduce((acc, header, index) => {
-  //             let value = values[index]?.trim()?.replace(/^"|"$/g, ''); // Trim and remove quotes
-  //
-  //             if (header === "chemo_text"){
-  //                 value = value.toLowerCase()
-  //             }
-  //
-  //             if (value === 'contained-by'){
-  //                 value = 'overlap'
-  //             }
-  //
-  //             acc[header] = value;
-  //             // Assign chemo_text to a group if it exists in the lookup
-  //             if (header === "chemo_text" && chemoTextGroups[value]) {
-  //                 acc["chemo_group"] = chemoTextGroups[value]; // Add group to object
-  //                 chemoGroupCounts[chemoTextGroups[value]] = (chemoGroupCounts[chemoTextGroups[value]] || 0) + 1;
-  //             }
-  //             return acc;
-  //         }, {});
-  //
-  //         const chemoName = obj["chemo_text"];
-  //         if (chemoName) {
-  //             chemoCounts[chemoName] = (chemoCounts[chemoName] || 0) + 1;
-  //         }
-  //
-  //         // Track tlink counts
-  //         const tlinkValue = obj["tlink"];
-  //         if (tlinkValue) {
-  //             tLinkCounts[tlinkValue] = (tLinkCounts[tlinkValue] || 0) + 1;
-  //         }
-  //
-  //
-  //         return obj;
-  //     });
-  //     // Include chemoCounts inside the data array as an additional property
-  //     data.chemoTextCounts = chemoCounts;
-  //     data.chemoTextGroupCounts = chemoGroupCounts;
-  //     data.tLinkCounts = tLinkCounts;
-  //
-  //     return data; // Return data array with chemoCounts included
-  // };
-
   const fetchTXTData = async () => {
     try {
       const response = await fetch("/Patient01_times.txt");
+      console.log("Fetch response status:", response.status);
+      console.log("Fetch response headers:", response.headers);
+
       if (!response.ok) throw new Error("Failed to load file");
 
       const text = await response.text();
+      console.log("Raw text from fetch:", text); // This will show you what's actually being fetched
+
       return parseTXT(text);
     } catch (error) {
       console.error("Error loading TSV:", error);
@@ -226,23 +153,25 @@ export default function EventRelationTimeline(props) {
     };
   };
 
-  // const transformTSVData = (data) => {
-  //     return {
-  //         startDates: data.map(d => d.start_date),
-  //         patientId: data.map(d => d.patient_id),
-  //         chemoText: data.map(d => d.chemo_text),
-  //         chemoTextGroups: data.map(d => d.chemo_group),
-  //         chemoTextGroupCounts: data.chemoTextGroupCounts,
-  //         endDates: data.map(d => d.end_date),
-  //         chemoTextCounts: data.chemoTextCounts,
-  //         tLinkCounts: data.tLinkCounts,
-  //         noteId : data.map(d => d.note_id),
-  //         conceptId : data.map(d => d.concept_id),
-  //         tLink : data.map(d => d.tlink)
-  //     };
-  // }
-
   const skipNextEffect = useRef(false);
+
+  useEffect(() => {
+    console.log("useEffect triggered, conceptsPerDocument:", conceptsPerDocument);
+    if (!conceptsPerDocument) {
+      console.log("No conceptsPerDocument, returning early");
+      return;
+    }
+
+    console.log("About to call fetchTXTData");
+    fetchTXTData(conceptsPerDocument).then((data) => {
+      console.log("fetchTXTData returned:", data);
+      if (!data) {
+        console.log("No data returned, exiting");
+        return;
+      }
+      // ... rest of the code
+    });
+  }, [conceptsPerDocument]);
 
   useEffect(() => {
     if (!conceptsPerDocument) return;
@@ -342,45 +271,6 @@ export default function EventRelationTimeline(props) {
           });
         }
       }
-      //
-      // document.querySelectorAll(`.relation-icon`).forEach(el => {
-      //
-      //     const conceptId = el.getAttribute("data-concept-id");
-      //
-      //     if (clickedTerms.includes(conceptId)) {
-      //         // Highlight it
-      //         if (el.hasAttribute("marker-end")) {
-      //             el.setAttribute("marker-end", "url(#selectedRightArrow)");
-      //         } else if (el.hasAttribute("marker-start")) {
-      //             el.setAttribute("marker-start", "url(#selectedLeftArrow)");
-      //         } else {
-      //             el.classList.add("selected");
-      //             el.classList.remove("unselected");
-      //         }
-      //     } else {
-      //         // Un-highlight it
-      //         if (el.hasAttribute("marker-end")) {
-      //             el.setAttribute("marker-end", "url(#rightArrow)");
-      //         } else if (el.hasAttribute("marker-start")) {
-      //             el.setAttribute("marker-start", "url(#leftArrow)");
-      //         } else {
-      //             el.classList.remove("selected");
-      //             el.classList.add("unselected");
-      //         }
-      //     }
-      //
-      //     // Show/hide the black outline line
-      //     const group = el.closest("g");
-      //     const isNowSelected = el.classList.contains("selected");
-      //     if (group) {
-      //         const outlines = group.querySelectorAll(".relation-outline");
-      //         if (outlines.length) {
-      //             outlines.forEach((outline) => {
-      //                 // Do something with the outlines, like showing or hiding
-      //                 outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
-      //             });
-      //         }
-      //     }
     });
   }, [clickedTerms]);
 
@@ -894,35 +784,6 @@ export default function EventRelationTimeline(props) {
               ageAreaBottomPad) +
             ")"
         );
-
-      // const uniqueLaneGroups = Array.from(new Set(dpheGroup)).filter(item => item !== undefined);
-      // console.log("UNIQUEGROUP:", uniqueLaneGroups);
-      // // Skip the last group (bottom-most) so we don’t draw an extra divider
-      // const groupsToDraw = uniqueLaneGroups.slice(0, -1);
-
-      // *****************************LINE DIVIDER************************************
-
-      // Main report type divider lines
-      // Put this before rendering the report dots so the enlarged dot on hover will cover the divider line
-      // main_ER_svg
-      //     .append("g")
-      //     .selectAll(".report_type_divider")
-      //     .data(chemoTextGroups)
-      //     .enter()
-      //     .append("line")
-      //     .attr("x1", 0)
-      //     .attr("x2", svgWidth)
-      //     .each(function(d) {
-      //         const y = mainY(groupLaneHeights[d] * verticalPositions[d]);
-      //         d3.select(this)
-      //             .attr("y1", y)
-      //             .attr("y2", y);
-      //     })
-      //     .attr("class", "report_type_divider");
-
-      /************ COME BACK TO HERE ***********************/
-      // Need to take the value of where the label is and then
-      // Use this value for getting the correct line divider spot
 
       let laneOffset = 0;
       // Report types texts
@@ -1708,19 +1569,9 @@ export default function EventRelationTimeline(props) {
             }
           });
 
-        // TODO: Figure out how to get noteID from conceptID
-
         const matchingNotes = Object.entries(conceptsPerDocument)
           .filter(([_, objArray]) => objArray.some((obj) => obj.id === clickedConceptId))
           .map(([note]) => note);
-
-        // Emphasize matching circles
-        // document.querySelectorAll(`circle[id*="${clickedNoteId}"]`).forEach(circle => {
-        //     circle.style.fillOpacity = "1";
-        //     circle.style.stroke = "black";
-        //     circle.style.strokeWidth = "2px";
-        //
-        // });
 
         matchingNotes.forEach((noteKey) => {
           console.log(noteKey);

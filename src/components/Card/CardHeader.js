@@ -49,7 +49,7 @@ const CardHeaderRoot = styled(Box)(({ theme, color }) => ({
 }));
 
 export default function CardHeader(props) {
-  const { className, children, color, plain, stats, icon, ...rest } = props;
+  const { className, children, color = "plain", plain, stats, icon, ...rest } = props;
 
   const cardHeaderClasses = classNames({
     "card-header": true,
@@ -82,8 +82,4 @@ CardHeader.propTypes = {
   stats: PropTypes.bool,
   icon: PropTypes.bool,
   children: PropTypes.node,
-};
-
-CardHeader.defaultProps = {
-  color: "plain",
 };
