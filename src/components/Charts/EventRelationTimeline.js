@@ -97,7 +97,6 @@ export default function EventRelationTimeline(props) {
   };
 
   function getDpheGroupByConceptId(conceptId) {
-    console.log("concepts", concepts);
     const concept = concepts.find((concept) => concept.id === conceptId);
     return concept ? concept.dpheGroup : null;
   }
@@ -116,11 +115,8 @@ export default function EventRelationTimeline(props) {
         return acc;
       }, {});
 
-      console.log("obj", obj);
-
       // Get and assign dpheGroup
       const dpheGroup = getDpheGroupByConceptId(obj.ConceptID);
-      console.log("dpheGroup", dpheGroup);
       obj.dpheGroup = dpheGroup;
 
       // Optionally count occurrences
@@ -281,16 +277,16 @@ export default function EventRelationTimeline(props) {
     let verticalPositions = {};
     // Vertical max counts from top to bottom
     // This is used to decide the domain range of mainY and overviewY
-    console.log(
-      svgContainerId,
-      patientId,
-      startRelation,
-      endDate,
-      endDate,
-      laneGroup,
-      dpheGroupCount,
-      laneGroupCount
-    );
+    // console.log(
+    //   svgContainerId,
+    //   patientId,
+    //   startRelation,
+    //   endDate,
+    //   endDate,
+    //   laneGroup,
+    //   dpheGroupCount,
+    //   laneGroupCount
+    // );
 
     function createEventData() {
       const eventData = [];
@@ -330,6 +326,9 @@ export default function EventRelationTimeline(props) {
 
       for (let i = 0; i < startRelation.length; i++) {
         relation1Set.add(startRelation[i]);
+      }
+      for (let i = 0; i < endRelation.length; i++) {
+        relation2Set.add(endRelation[i]);
       }
       dpheGroup = Array.from(dpheGroupSet);
       laneGroup = Array.from(laneGroupSet);
@@ -546,10 +545,11 @@ export default function EventRelationTimeline(props) {
       const arrowLabelGap = 5;
       const labelPadding = 10;
       let labelWidths = [];
+      const allRelations = [...new Set([...startRelation, ...endRelation])];
 
       // Temporarily render text to measure widths
       let temp = legendSvg.append("g").attr("class", "tempTextMeasure");
-      startRelation.forEach((d, i) => {
+      allRelations.forEach((d, i) => {
         const textEl = temp.append("text").text(d);
         const width = textEl.node().getComputedTextLength();
         labelWidths.push(width);
@@ -591,7 +591,7 @@ export default function EventRelationTimeline(props) {
       // Container group for each legend item
       let episodeLegend = episodeLegendGrp
         .selectAll(".episode_legend")
-        .data(startRelation)
+        .data(allRelations)
         .enter()
         .append("g")
         .attr("class", "episode_legend")
@@ -626,6 +626,7 @@ export default function EventRelationTimeline(props) {
         .attr("class", "episode_legend_text")
         .text((d) => `${d}`)
         .each(function (d) {
+          console.log(d);
           d3.select(this)
             .append("title")
             .text(() => {
@@ -714,6 +715,10 @@ export default function EventRelationTimeline(props) {
         showAndMoveCustomBrushHandles(selection);
       };
 
+      // Track expanded/collapsed state for each group
+      const expandedState = {};
+      desiredOrder.forEach((d) => (expandedState[d] = true)); // Start with all expanded
+
       // Zoom rect that covers the main area
       let zoom = d3
         .zoom()
@@ -728,7 +733,7 @@ export default function EventRelationTimeline(props) {
         ])
         .on("zoom", zoomed);
 
-      // Appending zoom rect after the main area will prevent clicking on the report circles
+      // Appending zoom rect after the main area will prevent clicking relations
       svg
         .append("rect")
         .attr("class", "zoom_ER")
@@ -738,7 +743,7 @@ export default function EventRelationTimeline(props) {
         .call(zoom);
 
       // Main area
-      // Create main area after zoom panel, so we can select the report circles
+      // Create main area after zoom panel, so we can select the relations
       let main_ER_svg = svg
         .append("g")
         .attr("class", "main_ER_svg")
@@ -783,9 +788,252 @@ export default function EventRelationTimeline(props) {
             ")"
         );
 
+      // Function to calculate lane positions based on expanded state
+      function calculateLanePositions() {
+        let offset = 0;
+        const positions = [];
+
+        desiredOrder.forEach((d) => {
+          const isExpanded = expandedState[d];
+          const fullHeight = groupLaneHeights[d] * 10 * 2;
+          const collapsedHeight = 20; // Minimal height when collapsed
+          const height = isExpanded ? fullHeight : collapsedHeight;
+
+          positions.push({
+            group: d,
+            y: offset + (isExpanded ? groupLaneHeights[d] * 10 : 0), // Label position (middle if expanded)
+            startY: offset,
+            endY: offset + height,
+            isExpanded: isExpanded,
+          });
+
+          offset += height;
+        });
+
+        return positions;
+      }
+
+      // Store original Y positions for each element
+      const originalYPositions = new Map();
+
+      // Function to create a heatmap for collapsed lanes
+      function createLaneHeatmap(laneGroup, width, height = 15) {
+        // Filter data for this lane group
+        const laneData = eventData.filter((d) => d.laneGroup === laneGroup);
+        console.log("Lane Data:", laneData);
+
+        if (laneData.length === 0) return null;
+
+        // Get the domain from your x scale
+        const xScale = mainX;
+        const domain = xScale.domain();
+        console.log("Domain:", domain);
+
+        // Create bins across the timeline
+        const numBins = 100; // Adjust for granularity
+        const binWidth = (domain[1].getTime() - domain[0].getTime()) / numBins; // binWidth in milliseconds
+        console.log("Bin Width (ms):", binWidth);
+        const bins = Array(numBins).fill(0);
+
+        // Count events in each bin using original time values
+        laneData.forEach((d) => {
+          // Use d.start and d.end (convert to Date if needed)
+          console.log("d.start:", d.start);
+          const startDate = xScale.invert(d.formattedStartDate);
+          const endDate = xScale.invert(d.formattedEndDate);
+          console.log("Event dates:", startDate, endDate);
+
+          // Calculate bin indices using millisecond timestamps
+          const startBin = Math.floor((startDate.getTime() - domain[0].getTime()) / binWidth);
+          const endBin = Math.floor((endDate.getTime() - domain[0].getTime()) / binWidth);
+          console.log("Bins:", startBin, endBin);
+
+          // Increment bins
+          for (let i = Math.max(0, startBin); i <= Math.min(numBins - 1, endBin); i++) {
+            bins[i]++;
+          }
+        });
+        console.log("Bins:", bins);
+
+        // Find max count for color scaling
+        const maxCount = Math.max(...bins);
+        console.log("Max Count:", maxCount);
+
+        // Create color scale
+        const colorScale = d3
+          .scaleSequential(d3.interpolateRgb("white", "green"))
+          .domain([0, maxCount || 1]);
+
+        // Create heatmap data, mapping time to pixels with xScale
+        const heatmapData = bins.map((count, i) => ({
+          x: xScale(new Date(domain[0].getTime() + i * binWidth)), // Convert time to pixel position
+          width: xScale(new Date(domain[0].getTime() + binWidth)) - xScale(domain[0]), // Pixel width of a bin
+          count: count,
+          color: count > 0 ? colorScale(count) : "#f0f0f0",
+        }));
+        console.log("Heatmap Data:", heatmapData);
+
+        return heatmapData;
+      }
+
+      // Function to update the layout
+      function updateLayout(animate = true) {
+        const positions = calculateLanePositions();
+
+        // Update label groups
+        const duration = animate ? 600 : 0;
+
+        labelGroup
+          .transition()
+          .duration(duration)
+          .attr("transform", (d, i) => `translate(0, ${positions[i].y})`);
+
+        // Update toggle buttons position
+        toggleButtonGroup
+          .transition()
+          .duration(duration)
+          .attr("transform", (d, i) => `translate(0, ${positions[i].y})`);
+
+        // Update divider lines
+        const dividers = main_ER_svg.selectAll(".report_type_divider").data(positions.slice(0, -1));
+
+        dividers
+          .transition()
+          .duration(duration)
+          .attr("y1", (d) => d.endY)
+          .attr("y2", (d) => d.endY);
+
+        // Update toggle buttons text/icon - more specific selector
+        toggleButtonGroup.each(function (d) {
+          // ============================================
+          // OPTION 1: Update Plus/Minus Signs
+          // ============================================
+          // d3.select(this)
+          //   .select(".toggle-icon")
+          //   .text(expandedState[d] ? "−" : "+");
+
+          // ============================================
+          // OPTION 2: Update Chevron Arrows
+          // ============================================
+          d3.select(this)
+            .select(".toggle-icon")
+            .transition()
+            .duration(duration)
+            .attr(
+              "d",
+              expandedState[d]
+                ? "M -4 -2 L 0 2 L 4 -2" // Down chevron
+                : "M -2 -4 L 2 0 L -2 4" // Right chevron
+            );
+        });
+
+        // Recalculate groupBaseYMap based on new positions
+        const newGroupBaseYMap = {};
+        positions.forEach((pos) => {
+          newGroupBaseYMap[pos.group] =
+            pos.startY + (pos.isExpanded ? groupLaneHeights[pos.group] * 10 : 0);
+        });
+
+        // Calculate the offset for each group
+        const groupOffsets = {};
+        positions.forEach((pos) => {
+          const oldBaseY = groupBaseYMap[pos.group];
+          const newBaseY = newGroupBaseYMap[pos.group];
+          groupOffsets[pos.group] = newBaseY - oldBaseY;
+        });
+
+        // Update data elements
+        mainReports.selectAll(".main_report_group").each(function (d, i) {
+          const group = d3.select(this);
+          const isExpanded = expandedState[d.laneGroup];
+          const elementId = `${d.laneGroup}_${i}_${d.conceptId}`;
+
+          // Get the relative Y position (stored relative to base)
+          const relativeY = originalYPositions.get(elementId) || 0;
+
+          // Calculate new absolute Y position
+          const newBaseY = newGroupBaseYMap[d.laneGroup];
+          const newY = newBaseY + relativeY;
+
+          group
+            .transition()
+            .duration(duration)
+            .attr("transform", `translate(0, ${newY})`)
+            .style("opacity", isExpanded ? 1 : 0);
+
+          group.style("pointer-events", isExpanded ? "all" : "none");
+        });
+
+        // Update or create heatmaps for collapsed lanes
+        positions.forEach((pos) => {
+          const laneGroup = pos.group;
+          const isExpanded = pos.isExpanded;
+
+          // Remove existing heatmap if it exists
+          main_ER_svg.selectAll(`.heatmap-${laneGroup.replace(/\s+/g, "-")}`).remove();
+
+          if (!isExpanded) {
+            // Create heatmap for collapsed lane
+            const heatmapData = createLaneHeatmap(laneGroup, svgWidth);
+
+            if (heatmapData) {
+              const heatmapGroup = main_ER_svg
+                .append("g")
+                .attr("class", `heatmap-${laneGroup.replace(/\s+/g, "-")}`)
+                .attr("transform", `translate(0, ${pos.startY + 5})`); // Position at lane location
+
+              console.log("heatmapData: ", heatmapData);
+
+              heatmapGroup
+                .selectAll("rect")
+                .data(heatmapData)
+                .enter()
+                .append("rect")
+                .attr("x", (d) => d.x)
+                .attr("y", 0)
+                .attr("width", (d) => Math.max(1, d.width))
+                .attr("height", 10)
+                .attr("fill", (d) => d.color)
+                .attr("stroke", "none")
+                .style("opacity", 0)
+                .transition()
+                .duration(duration)
+                .style("opacity", 0.8);
+
+              // Add a border around the heatmap
+              heatmapGroup
+                .append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", svgWidth)
+                .attr("height", 10)
+                .attr("fill", "none")
+                .attr("stroke", "#ccc")
+                .attr("stroke-width", 1);
+            }
+          }
+        });
+
+        // Update the global groupBaseYMap
+        Object.assign(groupBaseYMap, newGroupBaseYMap);
+      }
+
+      // Create a group for toggle buttons (outside the main graph area)
+      let toggleButtonContainer = svg
+        .append("g")
+        .attr("class", "toggle_button_container")
+        .attr(
+          "transform",
+          "translate(" +
+            (margin.left + svgWidth + 10) + // 10px to the right of the graph
+            "," +
+            (margin.top + legendHeight + gapBetweenlegendAndMain) +
+            ")"
+        );
+
       let laneOffset = 0;
       // Report types texts
-      const labelPositions = []; // Store the y-coordinates
+      const labelPositions = calculateLanePositions(); // Store the y-coordinates
       let previousY = 0;
       const labelGroup = main_ER_svg
         .append("g")
@@ -794,21 +1042,19 @@ export default function EventRelationTimeline(props) {
         .enter()
         .append("g")
         .attr("class", "report_type_label_group")
-        .attr("transform", function (d) {
-          const y = laneOffset + groupLaneHeights[d] * 10;
-          const transform = `translate(0, ${y})`;
+        .attr("transform", (d, i) => `translate(0, ${labelPositions[i].y})`);
 
-          // Store the position for dividing lines
-          labelPositions.push({
-            group: d,
-            y: y,
-            endY: y + groupLaneHeights[d] * 10,
-          });
+      // Store the position for dividing lines
+      // labelPositions.push({
+      //   group: d,
+      //   y: y,
+      //   endY: y + groupLaneHeights[d] * 10,
+      // });
 
-          previousY = y; // Update for next iteration
-          laneOffset += groupLaneHeights[d] * 10 * 2;
-          return transform;
-        });
+      //   previousY = y; // Update for next iteration
+      //   laneOffset += groupLaneHeights[d] * 10 * 2;
+      //   return transform;
+      // });
 
       // Add the main text label
       labelGroup
@@ -817,6 +1063,83 @@ export default function EventRelationTimeline(props) {
         .attr("dy", ".5ex")
         .attr("x", -textMargin)
         .text((d) => `${d} (${laneGroupCount[d]}):`);
+
+      // Create toggle buttons in the separate container
+      const toggleButtonGroup = toggleButtonContainer
+        .selectAll(".toggle_button")
+        .data([...new Set(desiredOrder)])
+        .enter()
+        .append("g")
+        .attr("class", "toggle_button")
+        .attr("transform", (d, i) => `translate(0, ${labelPositions[i].y})`)
+        .style("cursor", "pointer")
+        .on("click", function (d) {
+          d3.event.stopPropagation(); // Use event.stopPropagation() for D3 v6+
+          expandedState[d] = !expandedState[d];
+          updateLayout(true);
+        });
+
+      // ============================================
+      // OPTION 1: Plus/Minus Signs
+      // ============================================
+      // toggleButtonGroup.each(function () {
+      //   const btn = d3.select(this);
+      //
+      //   // Add background circle
+      //   btn
+      //     .append("circle")
+      //     .attr("class", "toggle-bg")
+      //     .attr("r", 10)
+      //     .attr("fill", "#fff")
+      //     .attr("stroke", "#666")
+      //     .attr("stroke-width", 1.5);
+      //
+      //   // Add +/- text
+      //   btn
+      //     .append("text")
+      //     .attr("class", "toggle-icon")
+      //     .attr("text-anchor", "middle")
+      //     .attr("dy", ".35em")
+      //     .attr("font-size", "16px")
+      //     .attr("font-weight", "bold")
+      //     .attr("fill", "#666")
+      //     .text((d) => (expandedState[d] ? "−" : "+"));
+      // });
+
+      // ============================================
+      // OPTION 2: Chevron Arrows
+      // ============================================
+      toggleButtonGroup.each(function () {
+        const btn = d3.select(this);
+
+        // Add background circle
+        btn
+          .append("circle")
+          .attr("class", "toggle-bg")
+          .attr("r", 10)
+          .attr("fill", "#fff")
+          .attr("stroke", "#666")
+          .attr("stroke-width", 1.5);
+
+        // Add chevron path (down arrow when expanded, right arrow when collapsed)
+        btn
+          .append("path")
+          .attr("class", "toggle-icon")
+          .attr("d", (d) => {
+            if (expandedState[d]) {
+              // Down chevron (expanded state)
+              return "M -4 -2 L 0 2 L 4 -2";
+            } else {
+              // Right chevron (collapsed state)
+              return "M -2 -4 L 2 0 L -2 4";
+            }
+          })
+          .attr("fill", "none")
+          .attr("stroke", "#666")
+          .attr("stroke-width", 2)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round");
+      });
 
       labelGroup.each(function (d) {
         const group = d3.select(this);
@@ -1075,7 +1398,7 @@ export default function EventRelationTimeline(props) {
         .enter()
         .append("g")
         .attr("class", "main_report_group")
-        .each(function (d) {
+        .each(function (d, i) {
           const preferredText = concepts.find((c) => c.id === d.conceptId)?.preferredText;
           const group = d3.select(this);
           const x1 = d.formattedStartDate;
@@ -1156,18 +1479,29 @@ export default function EventRelationTimeline(props) {
           slotList.push([d.formattedStartDate, d.formattedEndDate]);
           occupiedSlots.set(y, slotList);
 
+          // When storing, store relative to base
+          const elementId = `${d.laneGroup}_${i}_${d.conceptId}`;
+          const relativeY = y - baseY; // Store position relative to base!
+          originalYPositions.set(elementId, relativeY);
+          // console.log(
+          //   `INITIAL STORE - Group: ${d.laneGroup}, Index: ${i}, ConceptId: ${d.conceptId}, Y: ${y}, BaseY: ${baseY}, RelativeY: ${relativeY}`
+          // );
+
+          // Then set the parent group's position
+          group.attr("transform", `translate(0, ${y})`);
+
           // Adjust line thickness if it's an overlap
           const containsGroup = group.append("g").attr("class", "contains-group");
 
-          function drawRelationLine({ group, d, x1, x2, y, markerStart, markerEnd, handleClick }) {
+          function drawRelationLine({ group, d, x1, x2, markerStart, markerEnd, handleClick }) {
             group
               .append("line")
               .attr("class", "relation-outline")
               .attr("data-line-type", "range")
               .attr("x1", x1 - 1)
-              .attr("y1", y)
+              .attr("y1", 0)
               .attr("x2", x2 + 1)
-              .attr("y2", y)
+              .attr("y2", 0)
               .attr("stroke", "black")
               .attr("stroke-width", 7)
               .style("cursor", "pointer")
@@ -1180,8 +1514,8 @@ export default function EventRelationTimeline(props) {
               .attr("data-line-type", "range")
               .attr("x1", x1)
               .attr("x2", x2)
-              .attr("y1", y)
-              .attr("y2", y)
+              .attr("y1", 0)
+              .attr("y2", 0)
               .attr("stroke", "rgb(49, 163, 84)")
               .attr("stroke-width", 5)
               .attr("stroke-opacity", 0.75)
@@ -1202,7 +1536,7 @@ export default function EventRelationTimeline(props) {
             group
               .append("circle")
               .attr("cx", x2)
-              .attr("cy", y)
+              .attr("cy", 0)
               .attr("data-marker-type", "end")
               .attr("r", 8) // increase as needed to ensure easy hover/click
               .style("fill", "transparent")
@@ -1217,7 +1551,7 @@ export default function EventRelationTimeline(props) {
             group
               .append("circle")
               .attr("cx", x1)
-              .attr("cy", y)
+              .attr("cy", 0)
               .attr("data-marker-type", "start")
               .attr("r", 8) // increase as needed to ensure easy hover/click
               .style("fill", "transparent")
@@ -1230,13 +1564,13 @@ export default function EventRelationTimeline(props) {
               );
           }
 
-          function drawSoloAfterRelation({ group, d, x, y, handleClick }) {
+          function drawSoloAfterRelation({ group, d, x, handleClick }) {
             group
               .append("rect")
               .attr("data-concept-id", d.conceptId)
               .attr("data-rect-type", "after")
               .attr("x", x - 5) // Align with arrow
-              .attr("y", y - 5)
+              .attr("y", -5)
               .attr("width", 10)
               .attr("height", 10)
               .style("fill", "transparent")
@@ -1248,13 +1582,13 @@ export default function EventRelationTimeline(props) {
               );
           }
 
-          function drawSoloBeforeRelation({ group, d, x, y, handleClick }) {
+          function drawSoloBeforeRelation({ group, d, x, handleClick }) {
             group
               .append("rect")
               .attr("data-concept-id", d.conceptId)
               .attr("data-rect-type", "before")
               .attr("x", x - 10) // Align with arrow
-              .attr("y", y - 5)
+              .attr("y", -5)
               .attr("width", 10)
               .attr("height", 10)
               .style("fill", "transparent")
@@ -1266,15 +1600,15 @@ export default function EventRelationTimeline(props) {
               );
           }
 
-          function drawOnRelation({ group, d, x, y, lineType, handleClick }) {
+          function drawOnRelation({ group, d, x, lineType, handleClick }) {
             group
               .append("line")
               .attr("class", "relation-outline")
               .attr("data-line-type", lineType)
               .attr("x1", x)
-              .attr("y1", y - 7)
+              .attr("y1", -7)
               .attr("x2", x)
-              .attr("y2", y + 7)
+              .attr("y2", 7)
               .attr("stroke", "black")
               .attr("stroke-width", 5)
               .style("cursor", "pointer")
@@ -1285,8 +1619,8 @@ export default function EventRelationTimeline(props) {
               .attr("class", "main_report_contains relation-icon")
               .attr("data-concept-id", d.conceptId)
               .attr("data-line-type", lineType)
-              .attr("y1", y - 6) // Extends above
-              .attr("y2", y + 6) // Extends below
+              .attr("y1", -6) // Extends above
+              .attr("y2", 6) // Extends below
               .attr("stroke", "rgb(49, 163, 84)")
               .attr("stroke-width", 4)
               .attr("stroke-opacity", 0.75)
@@ -1308,14 +1642,12 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               handleClick,
             });
             drawSoloAfterRelation({
               group: containsGroup,
               d,
               x: x2,
-              y,
               handleClick,
             });
           }
@@ -1326,7 +1658,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#rightArrow)",
               markerEnd: "url(#rightCap)",
               handleClick,
@@ -1341,7 +1672,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#rightArrow)",
               markerEnd: "url(#verticalLineCap)",
               handleClick,
@@ -1354,7 +1684,6 @@ export default function EventRelationTimeline(props) {
                 group: containsGroup,
                 d,
                 x: x1,
-                y,
                 lineType: "x1-only",
                 handleClick,
               });
@@ -1364,7 +1693,6 @@ export default function EventRelationTimeline(props) {
                 d,
                 x1,
                 x2,
-                y,
                 markerStart: "url(#verticalLineCap)",
                 markerEnd: "url(#verticalLineCap)",
                 handleClick,
@@ -1378,7 +1706,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#verticalLineCap)",
               markerEnd: "url(#leftArrow)",
               handleClick,
@@ -1391,7 +1718,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#verticalLineCap)",
               markerEnd: "url(#rightCap)",
               handleClick,
@@ -1405,7 +1731,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#rightArrow)",
               markerEnd: "url(#leftArrow)",
               handleClick,
@@ -1418,14 +1743,12 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               handleClick,
             });
             drawSoloBeforeRelation({
               group: containsGroup,
               d,
               x: x1,
-              y,
               handleClick,
             });
           }
@@ -1436,7 +1759,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#leftArrow)",
               markerEnd: "url(#rightCap)",
               handleClick,
@@ -1449,7 +1771,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#leftCap)",
               markerEnd: "url(#leftArrow)",
               handleClick,
@@ -1463,7 +1784,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#leftCap)",
               markerEnd: "url(#verticalLineCap)",
               handleClick,
@@ -1476,7 +1796,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              y,
               markerStart: "url(#leftCap)",
               markerEnd: "url(#rightCap)",
               handleClick,
@@ -1661,35 +1980,6 @@ export default function EventRelationTimeline(props) {
         .attr("dy", ".5ex")
         .attr("class", "overview_label")
         .text("Date");
-
-      // Report dots in overview area
-      // No need to use clipping path since the overview area contains all the report dots
-      // overview
-      //     .append("g")
-      //     .selectAll(".overview_report")
-      //     .data(eventData)
-      //     .enter()
-      //     .append("g")
-      //     .append("circle")
-      //     .attr("id", function (d) {
-      //         // Prefix with "overview_"
-      //         return "overview_" + d.noteName;
-      //     })
-      //     .attr("class", "overview_report")
-      //     .attr("r", reportOverviewRadius)
-      //     .attr("cx", function (d) {
-      //         return d.formattedStartDate;
-      //     })
-      //     .attr("cy", function (d) {
-      //         return getReportCirclePositionY(
-      //             d,
-      //             overviewY,
-      //             overviewChemoTextRowHeightPerCount
-      //         );
-      //     })
-      //     .style("fill", function (d) {
-      //         return 'rgb(49, 163, 84)';
-      //     });
 
       // Overview x axis
       let overviewXAxis = d3
