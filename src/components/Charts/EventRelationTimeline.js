@@ -841,27 +841,27 @@ export default function EventRelationTimeline(props) {
           console.log("d.start:", d.start);
           const startDate = xScale.invert(d.formattedStartDate);
           const endDate = xScale.invert(d.formattedEndDate);
-          console.log("Event dates:", startDate, endDate);
+          // console.log("Event dates:", startDate, endDate);
 
           // Calculate bin indices using millisecond timestamps
           const startBin = Math.floor((startDate.getTime() - domain[0].getTime()) / binWidth);
           const endBin = Math.floor((endDate.getTime() - domain[0].getTime()) / binWidth);
-          console.log("Bins:", startBin, endBin);
+          // console.log("Bins:", startBin, endBin);
 
           // Increment bins
           for (let i = Math.max(0, startBin); i <= Math.min(numBins - 1, endBin); i++) {
             bins[i]++;
           }
         });
-        console.log("Bins:", bins);
+        // console.log("Bins:", bins);
 
         // Find max count for color scaling
         const maxCount = Math.max(...bins);
-        console.log("Max Count:", maxCount);
+        // console.log("Max Count:", maxCount);
 
         // Create color scale
         const colorScale = d3
-          .scaleSequential(d3.interpolateRgb("white", "green"))
+          .scaleSequential(d3.interpolateRgb("#ffffff", "#006d2c"))
           .domain([0, maxCount || 1]);
 
         // Create heatmap data, mapping time to pixels with xScale
@@ -869,7 +869,7 @@ export default function EventRelationTimeline(props) {
           x: xScale(new Date(domain[0].getTime() + i * binWidth)), // Convert time to pixel position
           width: xScale(new Date(domain[0].getTime() + binWidth)) - xScale(domain[0]), // Pixel width of a bin
           count: count,
-          color: count > 0 ? colorScale(count) : "#f0f0f0",
+          color: count > 0 ? colorScale(count) : "#ffffff",
         }));
         console.log("Heatmap Data:", heatmapData);
 
@@ -883,16 +883,91 @@ export default function EventRelationTimeline(props) {
         // Update label groups
         const duration = animate ? 600 : 0;
 
+        // Calculate total height needed
+        const totalHeight = positions.length > 0 ? positions[positions.length - 1].endY : 0;
+
+        // Calculate new total SVG height
+        const newSvgHeight =
+          totalHeight +
+          margin.top +
+          margin.bottom +
+          legendHeight +
+          gapBetweenlegendAndMain +
+          pad +
+          ageAreaHeight +
+          ageAreaBottomPad +
+          overviewHeight;
+
+        console.log("New SVG height:", newSvgHeight);
+        console.log("Total main height:", totalHeight);
+
+        // Update the viewBox (not the height attribute)
+        svg
+          .transition()
+          .duration(duration)
+          .attr("viewBox", `0 0 ${containerWidth} ${newSvgHeight}`);
+
+        // Update zoom rect height
+        svg
+          .select(".zoom_ER")
+          .transition()
+          .duration(duration)
+          .attr("height", totalHeight + gapBetweenlegendAndMain);
+
+        // Update age_ER position
+        age_ER
+          .transition()
+          .duration(duration)
+          .attr(
+            "transform",
+            `translate(${margin.left}, ${
+              margin.top + legendHeight + gapBetweenlegendAndMain + totalHeight + pad
+            })`
+          );
+
+        // Update x-axis position (bottom of main area)
+        svg
+          .select(".main-ER-x-axis-bottom")
+          .transition()
+          .duration(duration)
+          .attr(
+            "transform",
+            `translate(0, ${margin.top + legendHeight + gapBetweenlegendAndMain + totalHeight})`
+          );
+
+        // Update overview position
+        overview
+          .transition()
+          .duration(duration)
+          .attr(
+            "transform",
+            `translate(${margin.left}, ${
+              margin.top +
+              legendHeight +
+              gapBetweenlegendAndMain +
+              totalHeight +
+              pad +
+              ageAreaHeight +
+              ageAreaBottomPad
+            })`
+          );
+
         labelGroup
           .transition()
           .duration(duration)
-          .attr("transform", (d, i) => `translate(0, ${positions[i].y})`);
+          .attr("transform", (d, i) => {
+            const offset = positions[i].isExpanded ? 0 : 10;
+            return `translate(0, ${positions[i].y + offset})`;
+          });
 
         // Update toggle buttons position
         toggleButtonGroup
           .transition()
           .duration(duration)
-          .attr("transform", (d, i) => `translate(0, ${positions[i].y})`);
+          .attr("transform", (d, i) => {
+            const offset = positions[i].isExpanded ? 0 : 10;
+            return `translate(0, ${positions[i].y + offset})`;
+          });
 
         // Update divider lines
         const dividers = main_ER_svg.selectAll(".report_type_divider").data(positions.slice(0, -1));
@@ -900,21 +975,17 @@ export default function EventRelationTimeline(props) {
         dividers
           .transition()
           .duration(duration)
-          .attr("y1", (d) => d.endY)
-          .attr("y2", (d) => d.endY);
+          .attr("y1", (d) => {
+            // If the lane is collapsed, position divider after the heatmap
+            // Otherwise position it at the end of the expanded lane
+            return d.isExpanded ? d.endY : d.y + 20;
+          })
+          .attr("y2", (d) => {
+            return d.isExpanded ? d.endY : d.y + 20;
+          });
 
         // Update toggle buttons text/icon - more specific selector
         toggleButtonGroup.each(function (d) {
-          // ============================================
-          // OPTION 1: Update Plus/Minus Signs
-          // ============================================
-          // d3.select(this)
-          //   .select(".toggle-icon")
-          //   .text(expandedState[d] ? "−" : "+");
-
-          // ============================================
-          // OPTION 2: Update Chevron Arrows
-          // ============================================
           d3.select(this)
             .select(".toggle-icon")
             .transition()
@@ -980,9 +1051,7 @@ export default function EventRelationTimeline(props) {
               const heatmapGroup = main_ER_svg
                 .append("g")
                 .attr("class", `heatmap-${laneGroup.replace(/\s+/g, "-")}`)
-                .attr("transform", `translate(0, ${pos.startY + 5})`); // Position at lane location
-
-              console.log("heatmapData: ", heatmapData);
+                .attr("transform", `translate(0, ${pos.y + 5})`); // Position at lane location
 
               heatmapGroup
                 .selectAll("rect")
@@ -1044,18 +1113,6 @@ export default function EventRelationTimeline(props) {
         .attr("class", "report_type_label_group")
         .attr("transform", (d, i) => `translate(0, ${labelPositions[i].y})`);
 
-      // Store the position for dividing lines
-      // labelPositions.push({
-      //   group: d,
-      //   y: y,
-      //   endY: y + groupLaneHeights[d] * 10,
-      // });
-
-      //   previousY = y; // Update for next iteration
-      //   laneOffset += groupLaneHeights[d] * 10 * 2;
-      //   return transform;
-      // });
-
       // Add the main text label
       labelGroup
         .append("text")
@@ -1079,36 +1136,6 @@ export default function EventRelationTimeline(props) {
           updateLayout(true);
         });
 
-      // ============================================
-      // OPTION 1: Plus/Minus Signs
-      // ============================================
-      // toggleButtonGroup.each(function () {
-      //   const btn = d3.select(this);
-      //
-      //   // Add background circle
-      //   btn
-      //     .append("circle")
-      //     .attr("class", "toggle-bg")
-      //     .attr("r", 10)
-      //     .attr("fill", "#fff")
-      //     .attr("stroke", "#666")
-      //     .attr("stroke-width", 1.5);
-      //
-      //   // Add +/- text
-      //   btn
-      //     .append("text")
-      //     .attr("class", "toggle-icon")
-      //     .attr("text-anchor", "middle")
-      //     .attr("dy", ".35em")
-      //     .attr("font-size", "16px")
-      //     .attr("font-weight", "bold")
-      //     .attr("fill", "#666")
-      //     .text((d) => (expandedState[d] ? "−" : "+"));
-      // });
-
-      // ============================================
-      // OPTION 2: Chevron Arrows
-      // ============================================
       toggleButtonGroup.each(function () {
         const btn = d3.select(this);
 
@@ -1157,17 +1184,20 @@ export default function EventRelationTimeline(props) {
         });
       });
 
+      // Initial divider lines
       main_ER_svg
         .append("g")
         .selectAll(".report_type_divider")
-        .data(labelPositions.slice(0, -1)) // Skip the last one if you don't want a line after the last group
+        .data(labelPositions.slice(0, -1))
         .enter()
         .append("line")
         .attr("class", "report_type_divider")
         .attr("x1", 0)
         .attr("x2", svgWidth)
-        .attr("y1", (d) => d.endY) // or just d.y if you want lines at the start of each group
-        .attr("y2", (d) => d.endY);
+        .attr("y1", (d) => Math.round(d.endY))
+        .attr("y2", (d) => Math.round(d.endY))
+        .attr("stroke", "#666")
+        .attr("stroke-width", 2);
 
       const defs = d3.select("svg").append("defs");
 

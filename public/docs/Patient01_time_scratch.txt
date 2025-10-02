@@ -1,0 +1,432 @@
+Begins-On Jan 1			|-|	
+Overlap Jan 1 Jan 29	---------
+Before Jan 31			<
+	Not a great display, as the Begins-On Jan 1 and Overlaps Jan 1-Jan 29 conflict.  Before Jan 31 doesn't conflict, but how to display?
+	Using graphical codes instead of relations, the burden is on the system to determine display, and more accurate display can be made.
+			|----------------------------------- - -
+
+
+VerticalHash	Date  		(Same Date)
+SolidLine		StartDate	EndDate
+FadeInLine		StartDate	EndDate
+FadeOutLine		StartDate	EndDate
+LeftArrow		Date  		(Same Date)
+RightArrow		Date  		(Same Date)
+
+
+// Not all of Eli's columns should be necessary for the viz tool.
+// Dates are formatted YYYY-mm-dd
+// In the future, Behavior, Stage, TNM, Diseases, Neoplasms, Masses should be Overlap or Before/After.
+// In the future, Meds, Therapies should be Overlap, Begins-On, Ends-On or Before/After.  Explicit or Implicit Within.
+// In the future, Tests/Results, Procedures should be Within or Before/After.
+// In the future ... Negated masses should be within?  Negated Diseases?  Or overlap?
+// In the future, Need to apply Laterality to procedures.
+
+
+patient_id	concept_id	relation_type	start_date	end_date
+
+// 					Behavior
+//					========
+//		fake_patient1_23052025115154_C_118 Metastatic, 90%
+// fake_patient1_23052025115154_M_117	Overlaps	2010-01-23	2010-01-23
+//// fake_patient1_23052025115154_M_513	Overlaps	2010-01-01	2010-01-31
+//// fake_patient1_23052025115154_M_740	Overlaps	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_150	Before	2010-01-31
+// fake_patient1_23052025115154_M_224	Overlaps	2010-01-31	2010-01-31
+//// fake_patient1_23052025115154_M_513	Overlaps	2010-01-01	2010-01-31
+//// fake_patient1_23052025115154_M_740	Overlaps	2010-01-01	2010-01-31
+//		Combining the above: Overlaps 2010-01-01 2010-01-31
+// fake_patient1_23052025115154_M_278	Overlaps	2010-05-31	2010-05-31
+//		Overlaps 2010-05-31
+// fake_patient1_23052025115154_M_372	Overlaps	2010-07-10	2010-07-10
+// fake_patient1_23052025115154_M_375	Overlaps	2010-07-10	2010-07-10
+//		Combining the above: Overlaps 2010-07-10
+// fake_patient1_23052025115154_M_498	Before	2011-02-01
+//	Summary: Within 2010-01-23, Within 2010-01-31, Overlaps 2010-05-31, Within 2010-07-10
+//	Since it is the same concept, therefore sharing ALL times and relations:
+fake_patient1	fake_patient1_23052025115154_C_118	Within	2010-01-23	2010-07-10
+//fake_patient1	fake_patient1_23052025115154_C_118	Begins-On	2010-01-23	Ends-On	2010-07-10
+
+//		fake_patient1_23052025115154_C_120 Invasive, 85%
+// fake_patient1_23052025115154_M_792	Within	2011-02-01	2011-02-01
+//		Within 2011-02-01
+// fake_patient1_23052025115154_M_614	Within	2011-02-03	2011-02-03
+//		Within 2011-02-03
+// fake_patient1_23052025115154_M_668	Within	2011-02-15	2011-02-15
+// fake_patient1_23052025115154_M_648	Overlaps	2011-02-15	2011-02-15
+//		Combining above: Within 2011-02-15
+// fake_patient1_23052025115154_M_819	Within	2011-03-01	2011-03-01
+// fake_patient1_23052025115154_M_725	Overlaps	2011-03-01	2011-03-15
+//		Combining above: Within 2011-03-01
+//	Since it is the same concept, therefore sharing ALL times and relations:
+fake_patient1	fake_patient1_23052025115154_C_120	Overlaps	2011-02-01	2011-03-01
+//fake_patient1	fake_patient1_23052025115154_C_120	Begins-On	2011-02-01	Ends-On	2011-03-01
+
+
+//		fake_patient1_23052025115154_C_119 In Situ, 79%
+// fake_patient1_23052025115154_M_108	Within	2010-01-23	2010-01-23
+// fake_patient1_23052025115154_M_796	Within	2011-02-01	2011-02-01
+// fake_patient1_23052025115154_M_619	Within	2011-02-03	2011-02-03
+// fake_patient1_23052025115154_M_674	Within	2011-02-15	2011-02-15
+// fake_patient1_23052025115154_M_679	Within	2011-02-15	2011-02-15
+fake_patient1	fake_patient1_23052025115154_C_119	Within	2010-01-23	2011-02-15
+//fake_patient1	fake_patient1_23052025115154_C_119	Begins-On	2010-01-23	Ends-On	2011-02-15
+
+//		fake_patient1_23052025115154_C_184 Metastatic, 66%	negated
+// fake_patient1_23052025115154_M_449	Within	2010-08-30	2010-08-30
+// fake_patient1_23052025115154_M_630	Within	2011-02-03	2011-02-03
+fake_patient1	fake_patient1_23052025115154_C_184	Within	2010-08-30	2011-02-03
+//fake_patient1	fake_patient1_23052025115154_C_184	Begins-On	2010-08-30	Ends-On	2011-02-03
+
+
+//		fake_patient1_23052025115154_C_185 In Situ, 42%	negated
+// fake_patient1_23052025115154_M_360	Within	2010-07-10	2010-07-10
+fake_patient1	fake_patient1_23052025115154_C_185	Within	2010-07-10	2010-07-10
+//fake_patient1	fake_patient1_23052025115154_C_185	Begins-On	2010-07-10	Ends-On	2010-07-10
+
+
+//					Chemo/immuno/hormone Therapy Regimen
+//					====================================
+//		fake_patient1_23052025115154_C_5 Carboplatin, 83%
+// fake_patient1_23052025115154_M_752	Within	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_521	Within	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_232	After	2010-01-31
+// fake_patient1_23052025115154_M_268	Before	2010-05-31
+// fake_patient1_23052025115154_M_424	Before	2010-08-30	2010-08-30
+fake_patient1	fake_patient1_23052025115154_C_5	Overlaps	2010-01-01	2010-01-31
+//fake_patient1	fake_patient1_23052025115154_C_5	Begins-On	2010-01-01	After	2010-01-31
+
+//		fake_patient1_23052025115154_C_7 Doxorubicin, 83%
+// fake_patient1_23052025115154_M_423	Before	2010-08-30
+// fake_patient1_23052025115154_M_751	After	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_520	After	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_267	Before	2010-05-31
+// fake_patient1_23052025115154_M_231	After	2010-01-31
+fake_patient1	fake_patient1_23052025115154_C_7	Within	2010-01-31	2010-05-31
+//fake_patient1	fake_patient1_23052025115154_C_7	After	2010-01-31	Before	2010-05-31
+
+//		fake_patient1_23052025115154_C_6 Tamoxifen, 80%
+// fake_patient1_23052025115154_M_434	After	2010-07-30		(Begins-On)
+// fake_patient1_23052025115154_M_764	Overlaps	2011-03-01
+// fake_patient1_23052025115154_M_533	Overlaps	2011-02-01
+// fake_patient1_23052025115154_M_487	Overlaps	2010-08-30
+fake_patient1	fake_patient1_23052025115154_C_6	Overlaps	2010-08-30	2011-03-01
+//fake_patient1	fake_patient1_23052025115154_C_6	Begins-On	2010-07-30	Overlaps	2011-03-01
+
+
+//					Clinical Test Result
+//					====================
+//		fake_patient1_23052025115154_C_29 Estrogen Receptor Status (fake_patient1_23052025115154_A_55 = Negative;Positive), 89%
+// fake_patient1_23052025115154_M_244	Overlaps	2010-05-31
+// fake_patient1_23052025115154_M_139	Overlaps	2010-01-31
+// fake_patient1_23052025115154_M_729	Overlaps	2011-03-01
+// fake_patient1_23052025115154_M_414	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_503	Overlaps	2011-02-01
+// fake_patient1_23052025115154_M_124	Within	2010-01-23
+// fake_patient1_23052025115154_M_635	Within	2011-02-03
+// fake_patient1_23052025115154_M_702	Within	2011-02-15
+// fake_patient1_23052025115154_M_383	Within	2010-07-10
+// fake_patient1_23052025115154_M_319	Overlaps	2010-05-31
+fake_patient1	fake_patient1_23052025115154_C_29	Overlaps	2010-01-23	2011-03-01
+//fake_patient1	fake_patient1_23052025115154_C_29	Begins-On	2010-01-23	Overlaps	2011-03-01
+
+//		fake_patient1_23052025115154_C_30 HER2/Neu Status (fake_patient1_23052025115154_A_57 = Negative), 86%
+// fake_patient1_23052025115154_M_735	Overlaps	2011-03-01
+// fake_patient1_23052025115154_M_420	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_509	Overlaps	2011-02-01
+// fake_patient1_23052025115154_M_130	Within	2010-01-23
+// fake_patient1_23052025115154_M_641	Within	2011-02-03
+// fake_patient1_23052025115154_M_708	Within	2011-02-15
+// fake_patient1_23052025115154_M_713	Within	2011-02-15
+// fake_patient1_23052025115154_M_389	Within	2010-07-10
+fake_patient1	fake_patient1_23052025115154_C_30	Overlaps	2010-01-23	2011-03-01
+//fake_patient1	fake_patient1_23052025115154_C_30	Begins-On	2010-01-23	Overlaps	2011-03-01
+
+//		fake_patient1_23052025115154_C_28 Progesterone Receptor Status (fake_patient1_23052025115154_AV_17 = Negative;Positive), 85%
+// fake_patient1_23052025115154_M_733	Overlaps	2011-03-01
+// fake_patient1_23052025115154_M_418	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_507	Overlaps	2011-02-01
+// fake_patient1_23052025115154_M_128	Within	2010-01-23
+// fake_patient1_23052025115154_M_639	Within	2011-02-03
+// fake_patient1_23052025115154_M_706	Within	2011-02-15
+// fake_patient1_23052025115154_M_387	Within	2010-07-10
+fake_patient1	fake_patient1_23052025115154_C_28	Overlaps	2010-01-23	2011-03-01
+//fake_patient1	fake_patient1_23052025115154_C_28	Begins-On	2010-01-23	Overlaps	2011-03-01
+
+
+//					Disease Stage Qualifier
+//					=======================
+//		fake_patient1_23052025115154_C_116 Stage IIA, 92%
+// fake_patient1_23052025115154_M_236	Overlaps	2010-05-31
+// fake_patient1_23052025115154_M_591	Overlaps	2011-02-03	--> Note, Overlap relation 2 days after a Before relation.
+// fake_patient1_23052025115154_M_399	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_135	Overlaps	2010-01-31
+// fake_patient1_23052025115154_M_489	Before		2011-02-01	--> Note, Before relation 2 days before an Overlap relation.
+// fake_patient1_23052025115154_M_490	Before		2011-02-01
+// fake_patient1_23052025115154_M_654	Before		2011-02-15
+// fake_patient1_23052025115154_M_745	Overlaps	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_745	Before	2011-03-01		--> Note, one mention with 2 relations to 2 times.
+// fake_patient1_23052025115154_M_469	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_216	Overlaps	2010-01-31
+// fake_patient1_23052025115154_M_215	Overlaps	2010-01-31
+// fake_patient1_23052025115154_M_570	Overlaps	2011-02-01
+fake_patient1	fake_patient1_23052025115154_C_116	Overlaps	2010-01-01	2011-02-03
+//fake_patient1	fake_patient1_23052025115154_C_116	Before	2011-02-01	2011-02-01		--> Note, 2 day conflict with overlap.
+//fake_patient1	fake_patient1_23052025115154_C_116	Overlaps	2010-01-01	Ends-On 2011-02-01
+//fake_patient1	fake_patient1_23052025115154_C_116	Certain	2011-01-01	Uncertain 2011-02-03
+
+//		fake_patient1_23052025115154_C_117 Stage IA, 66%
+// fake_patient1_23052025115154_M_788	Overlaps	2011-02-01
+// fake_patient1_23052025115154_M_815	Overlaps	2011-03-01
+fake_patient1	fake_patient1_23052025115154_C_117	Overlaps	2011-02-01	2011-03-01
+
+
+//					Finding
+//					=======
+//		fake_patient1_23052025115154_C_135 Vomiting, 75%, Negated
+// fake_patient1_23052025115154_M_273	Overlaps	2010-05-31
+// fake_patient1_23052025115154_M_569	Within		2011-02-01
+// fake_patient1_23052025115154_M_814	Within		2011-03-01	--> Note, within 2 different dates.  In the future this should be 3 concepts.
+fake_patient1	fake_patient1_23052025115154_C_135	Overlaps	2010-05-31	2010-05-31
+fake_patient1	fake_patient1_23052025115154_C_135	Within		2011-02-01	2011-02-01
+fake_patient1	fake_patient1_23052025115154_C_135	Within		2011-03-01	2011-03-01
+
+//		fake_patient1_23052025115154_C_137 Erythema, 67%, Negated
+// fake_patient1_23052025115154_M_437	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_810	Within	2011-03-01
+fake_patient1	fake_patient1_23052025115154_C_137	Overlaps	2010-08-30	2010-08-30
+fake_patient1	fake_patient1_23052025115154_C_137	Within		2011-03-01	2011-03-01
+
+//		fake_patient1_23052025115154_C_20 Infection, 50%
+// fake_patient1_23052025115154_M_439	Overlaps	2010-08-30
+fake_patient1	fake_patient1_23052025115154_C_20	Overlaps	2010-08-30	2010-08-30
+
+
+//					Generic TNM Finding
+//					===================
+//		fake_patient1_23052025115154_C_15 M0, 85%
+// fake_patient1_23052025115154_M_239	Overlaps	2010-05-31
+// fake_patient1_23052025115154_M_402	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_138	Overlaps	2010-01-31
+// fake_patient1_23052025115154_M_493	Before	2011-02-01
+// fake_patient1_23052025115154_M_748	Overlaps	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_748	Before	2011-03-01		--> Note, one mention with 2 relations to 2 times.
+// fake_patient1_23052025115154_M_472	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_219	Overlaps	2010-01-31
+fake_patient1	fake_patient1_23052025115154_C_15	Overlaps	2010-01-01	2010-08-30
+
+//		fake_patient1_23052025115154_C_14 T1, 85%
+// fake_patient1_23052025115154_M_237	Overlaps	2010-05-31
+// fake_patient1_23052025115154_M_400	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_136	Overlaps	2010-01-31
+// fake_patient1_23052025115154_M_491	Before	2011-02-01
+// fake_patient1_23052025115154_M_746	Overlaps	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_746	Before	2011-03-01		--> Note, one mention with 2 relations to 2 times.
+fake_patient1	fake_patient1_23052025115154_C_14	Overlaps	2010-01-01	2010-08-30
+
+//		fake_patient1_23052025115154_C_13 N1, 44%
+// fake_patient1_23052025115154_M_747	Overlaps	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_747	Before	2011-03-01		--> Note, one mention with 2 relations to 2 times.
+fake_patient1	fake_patient1_23052025115154_C_13	Overlaps	2010-01-01	2010-01-31
+
+
+//					Intervention or Procedure
+//					=========================
+//		fake_patient1_23052025115154_C_107 Diagnostic Ultrasound, 96%
+// fake_patient1_23052025115154_M_88	Within	2010-01-23
+// fake_patient1_23052025115154_M_87	Within	2010-01-23	--> Duplicate
+// fake_patient1_23052025115154_M_6		Within	2009-01-28
+// fake_patient1_23052025115154_M_99	Within	2010-01-23
+// fake_patient1_23052025115154_M_100	Within	2010-01-23	--> Duplicate
+// fake_patient1_23052025115154_M_11	Within	2010-01-23
+// fake_patient1_23052025115154_M_610	Within	2011-02-03
+// fake_patient1_23052025115154_M_611	Within	2011-02-03	--> Duplicate
+// fake_patient1_23052025115154_M_23	Within	2010-01-23
+// fake_patient1_23052025115154_M_22	Within	2010-01-23	--> Duplicate
+// fake_patient1_23052025115154_M_31	Within	2010-01-23
+// fake_patient1_23052025115154_M_30	Within	2010-01-23	--> Duplicate
+// fake_patient1_23052025115154_M_776	Within	2010-01-31
+// fake_patient1_23052025115154_M_775	Within	2010-01-31	--> Duplicate
+// fake_patient1_23052025115154_M_51	Within	2010-01-23
+// fake_patient1_23052025115154_M_50	Within	2010-01-23	--> Duplicate
+// fake_patient1_23052025115154_M_545	Within	2010-01-31
+// fake_patient1_23052025115154_M_544	Within	2010-01-31	--> Duplicate
+// fake_patient1_23052025115154_M_66	Within	2010-01-23
+// fake_patient1_23052025115154_M_65	Within	2010-01-23	--> Duplicate
+// fake_patient1_23052025115154_M_78	Within	2010-01-23
+// fake_patient1_23052025115154_M_79	Within	2010-01-23	--> Duplicate
+// fake_patient1_23052025115154_M_583	After	2011-02-01
+// fake_patient1_23052025115154_M_584	After	2011-02-01	--> Duplicate
+// fake_patient1_23052025115154_M_587	After	2011-02-01
+// fake_patient1_23052025115154_M_588	After	2011-02-01	--> Duplicate
+fake_patient1	fake_patient1_23052025115154_C_107	Within	2009-01-28	2009-01-28
+fake_patient1	fake_patient1_23052025115154_C_107	Within	2010-01-23	2010-01-23
+fake_patient1	fake_patient1_23052025115154_C_107	Within	2010-01-31	2010-01-31
+fake_patient1	fake_patient1_23052025115154_C_107	Within	2011-02-03	2011-02-03
+
+//		fake_patient1_23052025115154_C_111 Mastectomy, 91%
+// fake_patient1_23052025115154_M_653	Before	2011-02-15
+// fake_patient1_23052025115154_M_598	Before	2011-02-03
+// fake_patient1_23052025115154_M_661	Before	2011-02-15
+// fake_patient1_23052025115154_M_342	Within	2010-07-10	--> Note, Right Breast.
+// fake_patient1_23052025115154_M_666	Within	2011-02-15	--> Note, Left Breast.  In the future these should be separate concepts.
+// fake_patient1_23052025115154_M_755	Within	2010-07-10
+// fake_patient1_23052025115154_M_524	Within	2010-07-10
+// fake_patient1_23052025115154_M_782	Within	2011-02-01	--> Note, Left Breast Segmental, doesn't conflict with 2011-02-15.
+// fake_patient1_23052025115154_M_577	Before	2011-02-01	--> Note, Right Breast historic.
+// fake_patient1_23052025115154_M_824	Before	2011-03-01
+fake_patient1	fake_patient1_23052025115154_C_111	Within	2010-07-10	2010-07-10
+fake_patient1	fake_patient1_23052025115154_C_111	Within	2011-02-01	2011-02-01
+fake_patient1	fake_patient1_23052025115154_C_111	Within	2011-02-15	2011-02-15
+
+//		fake_patient1_23052025115154_C_108 Chemotherapy, 90%
+// fake_patient1_23052025115154_M_324	Before	2010-07-10
+// fake_patient1_23052025115154_M_596	Before	2011-02-03
+// fake_patient1_23052025115154_M_660	Before	2011-02-15
+// fake_patient1_23052025115154_M_750	After	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_750	Before	2011-03-01
+// fake_patient1_23052025115154_M_519	After	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_519	Before	2010-02-01
+// fake_patient1_23052025115154_M_318	Before	2010-05-31
+// fake_patient1_23052025115154_M_484	Before	2010-08-30
+// fake_patient1_23052025115154_M_230	After	2010-01-31
+// fake_patient1_23052025115154_M_576	Before	2011-02-01
+fake_patient1	fake_patient1_23052025115154_C_108	Wtthin	2010-01-31	2010-02-01
+//fake_patient1	fake_patient1_23052025115154_C_108	After	2010-01-31	Before	2010-02-01
+
+//		fake_patient1_23052025115154_C_112 Pharmacotherapy, 90%		--> Duplicate
+// fake_patient1_23052025115154_M_325	Before	2010-07-10
+// fake_patient1_23052025115154_M_597	Before	2011-02-03
+// fake_patient1_23052025115154_M_659	Before	2011-02-15
+// fake_patient1_23052025115154_M_749	After	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_749	Before	2011-03-01
+// fake_patient1_23052025115154_M_518	After	2010-01-01	2010-01-31
+// fake_patient1_23052025115154_M_518	Before	2011-03-01
+// fake_patient1_23052025115154_M_317	Before	2010-05-31
+// fake_patient1_23052025115154_M_485	Before	2010-08-30
+// fake_patient1_23052025115154_M_229	After	2010-01-31
+// fake_patient1_23052025115154_M_575	Before	2011-02-01
+fake_patient1	fake_patient1_23052025115154_C_112	Within	2010-01-31	2010-02-01
+//fake_patient1	fake_patient1_23052025115154_C_112	After	2010-01-31	Before	2010-02-01
+
+//		fake_patient1_23052025115154_C_113 Radiation Therapy, 90%
+// fake_patient1_23052025115154_M_600	Before	2011-02-03
+// fake_patient1_23052025115154_M_662	Before	2011-02-15
+// fake_patient1_23052025115154_M_760	After	2010-07-10
+// fake_patient1_23052025115154_M_760	Before	2011-03-01
+// fake_patient1_23052025115154_M_529	After	2010-07-10
+// fake_patient1_23052025115154_M_529	Before	2011-02-01
+// fake_patient1_23052025115154_M_441	Overlaps	2010-08-30
+// fake_patient1_23052025115154_M_451	Before	2010-08-30
+// fake_patient1_23052025115154_M_486	Before	2010-08-30
+// fake_patient1_23052025115154_M_578	Before	2011-02-01
+// fake_patient1_23052025115154_M_830	After	2011-03-01	--> Note, Left Breast (vs. Earlier Right)
+fake_patient1	fake_patient1_23052025115154_C_113	Wtthin	2010-07-10	2010-08-30
+//fake_patient1	fake_patient1_23052025115154_C_113	After	2010-07-10	Before	2010-08-30
+
+//		fake_patient1_23052025115154_C_114 Mammography, 83%
+// fake_patient1_23052025115154_M_1			on 1/28/09
+// fake_patient1_23052025115154_M_768		on 1/31/10
+// fake_patient1_23052025115154_M_537		on 1/31/10
+// fake_patient1_23052025115154_M_72		2010-01-23
+// fake_patient1_23052025115154_M_234		after 2010-01-31
+
+//		fake_patient1_23052025115154_C_109 Surgical Incision, 83%
+        "fake_patient1_23052025115154_M_435",	(is healed) 2010-08-30
+        "fake_patient1_23052025115154_M_48",	on 2010-01-23
+        "fake_patient1_23052025115154_M_63",	on 2010-01-23
+        "fake_patient1_23052025115154_M_558",	(is healed) 2011-02-01
+        "fake_patient1_23052025115154_M_803"	(is healed) 2011-03-01
+
+//		fake_patient1_23052025115154_C_110 Axillary Lymph Node Dissection, 83%
+        "fake_patient1_23052025115154_M_343",	on 2010-07-10
+        "fake_patient1_23052025115154_M_430",	on 7/10/10
+        "fake_patient1_23052025115154_M_756",	on 7/10/10
+        "fake_patient1_23052025115154_M_525",	on 7/10/10
+        "fake_patient1_23052025115154_M_364",	on 2010-07-10
+
+//		fake_patient1_23052025115154_C_115 Axillary Lymph Node Biopsy, 67%
+        "fake_patient1_23052025115154_M_784",	on 2/1/11
+        "fake_patient1_23052025115154_M_826"	before 2011-03-01
+
+//		fake_patient1_23052025115154_C_181 Chemotherapy, 50%, Negated
+        "fake_patient1_23052025115154_M_270"	overlap 2010-05-31
+
+//		fake_patient1_23052025115154_C_12 Firm Mass, 91%
+       "fake_patient1_23052025115154_M_91",		s/p 2010-01-23
+        "fake_patient1_23052025115154_M_3",		on 1/28/09
+        "fake_patient1_23052025115154_M_602",	now has 2011-02-03  (right)
+        "fake_patient1_23052025115154_M_7",		on 1/28/09 (ultrasound)
+        "fake_patient1_23052025115154_M_257",	on 1/21/2010
+        "fake_patient1_23052025115154_M_19",	now presents 2010-01-23
+        "fake_patient1_23052025115154_M_769",	on 1/31/10	(left)
+        "fake_patient1_23052025115154_M_277",	on 5/25/10 
+        "fake_patient1_23052025115154_M_538",	on 1/31/10
+        "fake_patient1_23052025115154_M_777",	on 1/31/10
+        "fake_patient1_23052025115154_M_778",	on 1/31/10
+        "fake_patient1_23052025115154_M_546",	on 1/31/10
+        "fake_patient1_23052025115154_M_547",	on 1/31/10
+        "fake_patient1_23052025115154_M_550",	2011-02-01	(right)
+        "fake_patient1_23052025115154_M_586",	after 2011-02-01
+        "fake_patient1_23052025115154_M_590"	after 2011-02-01
+	overlaps 2011-02-01
+	overlaps 2010-01-31
+	overlaps 2010-05-25 ...
+	
+//		fake_patient1_23052025115154_C_129 Mass, 73%, Negated  --> No Mass on Neck, last mention is no mass on R Breast.
+        "fake_patient1_23052025115154_M_196",	2010-01-31
+        "fake_patient1_23052025115154_M_299",	2010-05-31
+        "fake_patient1_23052025115154_M_807"	2011-03-01
+
+//	fake_patient1_23052025115154_C_11 Nodule, 64%
+        "fake_patient1_23052025115154_M_765",	2011-03-01
+        "fake_patient1_23052025115154_M_534"	2011-02-01
+
+
+//		fake_patient1_23052025115154_C_26	Invasive Breast Lobular Carcinoma, 92%
+        "fake_patient1_23052025115154_M_647",	2011-02-15
+        "fake_patient1_23052025115154_M_724",	2011-03-01
+        "fake_patient1_23052025115154_M_247",	2010-05-31	(idc, not ilc).  Bad Summary.
+        "fake_patient1_23052025115154_M_741",	2010-01-01 -- 2010-01-31  (idc)
+        "fake_patient1_23052025115154_M_613",	2011-02-03
+        "fake_patient1_23052025115154_M_667",	2011-02-15
+        "fake_patient1_23052025115154_M_514",	2010-01-01 -- 2010-01-31  (idc)
+        "fake_patient1_23052025115154_M_171",	2010-01-25
+        "fake_patient1_23052025115154_M_779",	on 1/31/10
+        "fake_patient1_23052025115154_M_548",	on 1/31/10
+        "fake_patient1_23052025115154_M_791",	on 2/1/11
+        "fake_patient1_23052025115154_M_818"	2011-03-01
+
+//		fake_patient1_23052025115154_C_25 Breast Lobular Carcinoma In Situ, 76%
+        "fake_patient1_23052025115154_M_617",	2011-02-03
+        "fake_patient1_23052025115154_M_672",	2011-02-15
+        "fake_patient1_23052025115154_M_794",	on 2/1/11
+        "fake_patient1_23052025115154_M_821"	2011-03-01
+
+//		fake_patient1_23052025115154_C_27 Malignant Breast Neoplasm, 75%
+        "fake_patient1_23052025115154_M_247",	2010-05-31
+        "fake_patient1_23052025115154_M_741",	2010-01-01
+        "fake_patient1_23052025115154_M_514"	2010-01-01
+
+//	fake_patient1_23052025115154_C_24 Malignant Neoplasm, 75%
+        "fake_patient1_23052025115154_M_171",	2010-01-25
+        "fake_patient1_23052025115154_M_779",	on 1/31/10
+        "fake_patient1_23052025115154_M_548"	on 1/31/10
+		
+//		fake_patient1_23052025115154_C_33 N0, 71%
+        "fake_patient1_23052025115154_M_722",	2011-02-15
+        "fake_patient1_23052025115154_M_790",	on 2/1/11
+        "fake_patient1_23052025115154_M_817"	2011-03-01
+
+//	fake_patient1_23052025115154_C_32 T1a, 71%
+        "fake_patient1_23052025115154_M_721",	2011-02-15
+        "fake_patient1_23052025115154_M_789",	on 2/1/11
+        "fake_patient1_23052025115154_M_816"	2011-03-01
+
+//	fake_patient1_23052025115154_C_106 Nab-Paclitaxel 83%
+        "fake_patient1_23052025115154_M_425",	before 2010-08-30
+        "fake_patient1_23052025115154_M_753",	before 2011-03-01		after (jan) 2010-01-31
+        "fake_patient1_23052025115154_M_522",	before 2011-02-01		after (jan) 2010-01-31
+        "fake_patient1_23052025115154_M_269",	overlaps 2010-05-31
+        "fake_patient1_23052025115154_M_233"	after 2010-01-31
+			after 2010-01-31  overlaps 2020-05-31  before 2010-08-30
