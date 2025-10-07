@@ -876,6 +876,14 @@ export default function EventRelationTimeline(props) {
         return heatmapData;
       }
 
+      // Zoom in (for collapsed - click to expand/zoom in)
+      const zoomIn =
+        "M 0 0 m -8 0 a 8 8 0 1 0 16 0 a 8 8 0 1 0 -16 0 M 5.65 5.65 L 10 10 M 0 -3 L 0 3 M -3 0 L 3 0";
+
+      // Zoom out (for expanded - click to collapse/zoom out)
+      const zoomOut =
+        "M 0 0 m -8 0 a 8 8 0 1 0 16 0 a 8 8 0 1 0 -16 0 M 5.65 5.65 L 10 10 M -3 0 L 3 0";
+
       // Function to update the layout
       function updateLayout(animate = true) {
         const positions = calculateLanePositions();
@@ -887,25 +895,37 @@ export default function EventRelationTimeline(props) {
         const totalHeight = positions.length > 0 ? positions[positions.length - 1].endY : 0;
 
         // Calculate new total SVG height
-        const newSvgHeight =
-          totalHeight +
-          margin.top +
-          margin.bottom +
-          legendHeight +
-          gapBetweenlegendAndMain +
-          pad +
-          ageAreaHeight +
-          ageAreaBottomPad +
-          overviewHeight;
+        const newSvgHeight = totalHeight + overviewHeight;
+        // margin.bottom +
+        // legendHeight +
+        // gapBetweenlegendAndMain +
+        // pad +
+        // ageAreaHeight +
+        // ageAreaBottomPad +
+        // overviewHeight;
 
+        // DEBUG: Check if these values are changing
+        console.log("=== SVG Height Update ===");
+        console.log("Total height:", totalHeight);
         console.log("New SVG height:", newSvgHeight);
-        console.log("Total main height:", totalHeight);
+        console.log("Current SVG height:", svg.style("height"));
 
-        // Update the viewBox (not the height attribute)
-        svg
+        // Get the parent of the SVG (which is the MUI Box)
+        const svgNode = svg.node();
+        const parentBox = d3.select(svgNode.parentNode);
+
+        parentBox
           .transition()
           .duration(duration)
-          .attr("viewBox", `0 0 ${containerWidth} ${newSvgHeight}`);
+          .style("height", `${newSvgHeight}px`)
+          .style("min-height", "unset"); // Remove any min-height constraints
+
+        svg
+          .interrupt()
+          .transition()
+          .duration(duration)
+          .attr("viewBox", `0 0 ${containerWidth} ${newSvgHeight}`)
+          .style("height", `${newSvgHeight}px`);
 
         // Update zoom rect height
         svg
@@ -943,6 +963,7 @@ export default function EventRelationTimeline(props) {
             "transform",
             `translate(${margin.left}, ${
               margin.top +
+              margin.bottom +
               legendHeight +
               gapBetweenlegendAndMain +
               totalHeight +
@@ -990,12 +1011,7 @@ export default function EventRelationTimeline(props) {
             .select(".toggle-icon")
             .transition()
             .duration(duration)
-            .attr(
-              "d",
-              expandedState[d]
-                ? "M -4 -2 L 0 2 L 4 -2" // Down chevron
-                : "M -2 -4 L 2 0 L -2 4" // Right chevron
-            );
+            .attr("d", expandedState[d] ? zoomOut : zoomIn);
         });
 
         // Recalculate groupBaseYMap based on new positions
@@ -1148,17 +1164,14 @@ export default function EventRelationTimeline(props) {
           .attr("stroke", "#666")
           .attr("stroke-width", 1.5);
 
-        // Add chevron path (down arrow when expanded, right arrow when collapsed)
         btn
           .append("path")
           .attr("class", "toggle-icon")
           .attr("d", (d) => {
             if (expandedState[d]) {
-              // Down chevron (expanded state)
-              return "M -4 -2 L 0 2 L 4 -2";
+              return zoomOut;
             } else {
-              // Right chevron (collapsed state)
-              return "M -2 -4 L 2 0 L -2 4";
+              return zoomIn;
             }
           })
           .attr("fill", "none")
