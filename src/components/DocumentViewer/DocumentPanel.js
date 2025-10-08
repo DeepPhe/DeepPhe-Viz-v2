@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import parse from "html-react-parser";
 import { hexToRgba } from "./ColorUtils";
 
@@ -16,12 +16,49 @@ export function DocumentPanel(props) {
   const confidence = props.confidence;
   const filterLabel = props.filterLabel;
   const reportId = props.reportId;
+  const containerRef = useRef(null);
 
   useEffect(() => {
     if (Array.isArray(filteredConcepts) && filteredConcepts.length > 0) {
       setFilteredConceptsStartingCopy(filteredConcepts);
     }
   }, [filteredConcepts]);
+
+  useEffect(() => {
+    const handleSpanClick = (event) => {
+      const span = event.target.closest(".span-info");
+      if (span) {
+        const mentionIndex = span.dataset.mentionIndex;
+        const conceptId = span.dataset.conceptId;
+        const begin = span.dataset.begin;
+        const end = span.dataset.end;
+
+        console.log("Clicked mention:", {
+          index: mentionIndex,
+          conceptId: conceptId,
+          begin: begin,
+          end: end,
+        });
+
+        // Call the parent's callback with the conceptId
+        if (props.onMentionClick && conceptId) {
+          props.onMentionClick(conceptId);
+        }
+
+        // Add your logic here
+      }
+    };
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("click", handleSpanClick);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("click", handleSpanClick);
+      }
+    };
+  }, [docText, props.onMentionClick]);
 
   // When clickedTerms change:
   useEffect(() => {
@@ -107,11 +144,14 @@ export function DocumentPanel(props) {
     FilteredConceptsIds.forEach(function (nestedArray) {
       nestedArray.forEach(function (obj) {
         const mentionConfidence = calculateMentionConfidence(obj);
+        // Find the concept ID for this mention
+        const conceptId = concepts.find((c) => c.mentionIds.includes(obj.id))?.id || "";
+
         let textMentionObj = {
-          // preferredText: obj["preferredText"],
           begin: obj.begin,
           end: obj.end,
           id: obj.id,
+          conceptId: conceptId, // ADD THIS
           negated: obj.negated,
           classUri: obj.classUri,
           confidence: mentionConfidence,
@@ -183,6 +223,35 @@ export function DocumentPanel(props) {
     return negatedArray.includes(true);
   }
 
+  function createHighlightedSpan(textMention, reportText, borderColor, borderRadius, index) {
+    const spanClass = isNegated(textMention.negated) ? "neg" : "";
+    const spanStyle = `background-color: ${textMention.backgroundColor};
+    border-style: solid; 
+    ${borderColor};
+    border-radius: ${borderRadius};
+    padding-left: 2px;
+    padding-right: 2px;`;
+
+    // Serialize the textMention data as JSON for the onclick
+    const mentionData = JSON.stringify({
+      begin: textMention.begin,
+      end: textMention.end,
+      confidence: textMention.confidence,
+      conceptId: textMention.conceptId || "",
+      backgroundColor: textMention.backgroundColor,
+    }).replace(/"/g, "&quot;"); // Escape quotes for HTML attribute
+
+    return (
+      `<span style="${spanStyle}${
+        isNegated(textMention.negated) ? "; line-height: 1.2;" : ""
+      }" class="span-info ${spanClass}" onclick="handleMentionClick(event, ${index}, '${mentionData}')" style="cursor: pointer;">` +
+      `${reportText.substring(textMention.begin, textMention.end).trim()}` +
+      `<span class="tooltip">${textMention.confidence[0]}%</span>` +
+      (isNegated(textMention.negated) ? '<span class="icon">&#8856;</span>' : "") +
+      `</span>`
+    );
+  }
+
   function highlightTextMentions(textMentions, reportText) {
     if (textMentions.length === 0) {
       return reportText;
@@ -231,15 +300,18 @@ export function DocumentPanel(props) {
         ) {
           const spanClass = isNegated(textMention.negated) ? "neg" : "";
           const spanStyle = `background-color: ${textMention.backgroundColor};
-              border-style: solid; 
-              ${borderColor};
-              border-radius: 5px 0 0 5px;
-              padding-left: 2px;
-              padding-right: 2px;`;
+            border-style: solid; 
+            ${borderColor};
+            border-radius: 5px 0 0 5px;
+            padding-left: 2px;
+            padding-right: 2px;
+            cursor: pointer;`;
           const htmlString =
             `<span style="${spanStyle}${
               isNegated(textMention.negated) ? "; line-height: 1.2;" : ""
-            }" class="span-info ${spanClass}">` +
+            }" class="span-info ${spanClass}" data-mention-index="${i}" data-concept-id="${
+              textMention.conceptId || ""
+            }" data-begin="${textMention.begin}" data-end="${textMention.end}">` +
             `${reportText.substring(textMention.begin, textMention.end).trim()}` +
             `<span class="tooltip">${textMention.confidence[0]}%</span>` +
             (isNegated(textMention.negated) ? '<span class="icon">&#8856;</span>' : "") +
@@ -255,11 +327,14 @@ export function DocumentPanel(props) {
           ${borderColor};
           border-radius: 5px;
           padding-left: 2px;
-          padding-right: 2px;`;
+          padding-right: 2px;
+          cursor: pointer;`;
           const htmlString =
             `<span style="${spanStyle}${
               isNegated(textMention.negated) ? "; line-height: 1.2;" : ""
-            }" class="span-info ${spanClass}">` +
+            }" class="span-info ${spanClass}" data-mention-index="${i}" data-concept-id="${
+              textMention.conceptId || ""
+            }" data-begin="${textMention.begin}" data-end="${textMention.end}">` +
             `${reportText.substring(textMention.begin, textMention.end).trim()}` +
             `<span class="tooltip">${textMention.confidence[0]}%</span>` +
             (isNegated(textMention.negated) ? '<span class="icon">&#8856;</span>' : "") +
@@ -282,11 +357,14 @@ export function DocumentPanel(props) {
           ${borderColor};
           border-radius:0 5px 5px 0;
           padding-left: 2px;
-          padding-right: 2px;`;
+          padding-right: 2px;
+          cursor: pointer;`;
           const htmlString =
             `<span style="${spanStyle}${
               isNegated(textMention.negated) ? "; line-height: 1.2;" : ""
-            }" class="span-info ${spanClass}">` +
+            }" class="span-info ${spanClass}" data-mention-index="${i}" data-concept-id="${
+              textMention.conceptId || ""
+            }" data-begin="${textMention.begin}" data-end="${textMention.end}">` +
             `${reportText.substring(textMention.begin, textMention.end).trim()}` +
             `<span class="tooltip">${textMention.confidence[0]}%</span>` +
             (isNegated(textMention.negated) ? '<span class="icon">&#8856;</span>' : "") +
@@ -300,11 +378,14 @@ export function DocumentPanel(props) {
           ${borderColor};
           border-radius: 5px;
           padding-left: 2px;
-          padding-right: 2px;`;
+          padding-right: 2px;
+          cursor: pointer;`;
           const htmlString =
             `<span style="${spanStyle}${
               isNegated(textMention.negated) ? "; line-height: 1.2;" : ""
-            }" class="span-info ${spanClass}">` +
+            }" class="span-info ${spanClass}" data-mention-index="${i}" data-concept-id="${
+              textMention.conceptId || ""
+            }" data-begin="${textMention.begin}" data-end="${textMention.end}">` +
             `${reportText.substring(textMention.begin, textMention.end).trim()}` +
             `<span class="tooltip">${textMention.confidence[0]}%</span>` +
             (isNegated(textMention.negated) ? '<span class="icon">&#8856;</span>' : "") +
@@ -326,12 +407,15 @@ export function DocumentPanel(props) {
         ${borderColor};
         border-radius:${borderRadius};
         padding-left: 2px;
-        padding-right: 2px;`;
+        padding-right: 2px;
+        cursor: pointer;`;
 
         const htmlString =
           `<span style="${spanStyle}${
             isNegated(textMention.negated) ? "; line-height: 1.2;" : ""
-          }" class="span-info ${spanClass}">` +
+          }" class="span-info ${spanClass}" data-mention-index="${i}" data-concept-id="${
+            textMention.conceptId || ""
+          }" data-begin="${textMention.begin}" data-end="${textMention.end}">` +
           `${reportText.substring(textMention.begin, textMention.end).trim()}` +
           `<span class="tooltip">${textMention.confidence[0]}%</span>` +
           (isNegated(textMention.negated) ? '<span class="icon">&#8856;</span>' : "") +
@@ -499,7 +583,9 @@ export function DocumentPanel(props) {
   } else {
     return (
       <React.Fragment>
-        <div style={{ fontSize: fontSize }}>{getHTML(docText)}</div>
+        <div ref={containerRef} style={{ fontSize: fontSize }}>
+          {getHTML(docText)}
+        </div>
       </React.Fragment>
     );
   }
