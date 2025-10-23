@@ -31,7 +31,7 @@
 }
 
 .selected_report {
-    fill-opacity: 1 !important;
+    /*fill-opacity: 1 !important;*/
     stroke: black !important;
     stroke-width: 2px !important;
 }
@@ -47,7 +47,9 @@
 }
 
 .main_report_PE:hover {
-    fill-opacity: 1;
+    /*fill-opacity: 1;*/
+    stroke: black !important;
+    stroke-width: 2px !important;
 }
 
 .overview_report {

@@ -351,8 +351,8 @@ function Patient(props) {
         <GridItem xs={12} sm={12} md={10}>
           {getComponentPatientIdAndDemographics()}
           {getComponentCancerAndTumorDetail()}
-          {getComponentPatientEpisodeTimeline()}
           {getComponentEventRelationTimeline()}
+          {getComponentPatientEpisodeTimeline()}
           {getComponentDocumentViewer()}
         </GridItem>
         <GridItem xs={12} sm={12} md={1} />

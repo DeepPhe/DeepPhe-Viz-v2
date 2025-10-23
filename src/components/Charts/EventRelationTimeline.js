@@ -158,18 +158,18 @@ export default function EventRelationTimeline(props) {
 
     fetchTXTData(conceptsPerDocument).then((data) => {
       if (!data) return;
-      console.log("are we getting here");
+      // console.log("are we getting here");
       setJson(data);
       const transformedData = transformTXTData(data);
-      console.log("transformed data:", transformedData);
+      // console.log("transformed data:", transformedData);
       const container = document.getElementById(svgContainerId);
       if (container) {
         container.innerHTML = "";
       }
       const filteredDpheGroup = transformedData.dpheGroup.filter((item) => item != null);
       const filteredLaneGroup = transformedData.laneGroup.filter((item) => item != null);
-      console.log("filteredDpheGroup", filteredDpheGroup);
-      console.log("filteredLaneGroup", filteredLaneGroup);
+      // console.log("filteredDpheGroup", filteredDpheGroup);
+      // console.log("filteredLaneGroup", filteredLaneGroup);
       if (filteredDpheGroup.length !== 0 && filteredLaneGroup.length !== 0) {
         renderTimeline(
           svgContainerId,
@@ -410,15 +410,24 @@ export default function EventRelationTimeline(props) {
       maxEndDate.setDate(maxEndDate.getDate() + marginOfDays);
 
       let mainX = d3.scaleTime().domain([minStartDate, maxEndDate]).range([0, svgWidth]);
+      const allDates = new Set();
 
       eventData.forEach(function (d) {
-        // console.log("FORMATTED",d);
         const startDate = new Date(d.start);
         const endDate = new Date(d.end);
+
+        // Add timestamps to Set for uniqueness
+        allDates.add(startDate.getTime());
+        allDates.add(endDate.getTime());
 
         d.formattedStartDate = mainX(startDate);
         d.formattedEndDate = mainX(endDate);
       });
+
+      // Convert timestamps back to Date objects and sort
+      const uniqueDates = Array.from(allDates)
+        .map((timestamp) => new Date(timestamp))
+        .sort((a, b) => a - b);
 
       removeDuplicatesFromDpheAndLane();
       const desiredOrder = ["Finding", "Disease", "Severity", "Treatment"];
@@ -428,18 +437,6 @@ export default function EventRelationTimeline(props) {
         const eventsInGroup = eventData.filter((d) => d.laneGroup === group);
         const slots = [];
         const isPoint = ([start, end]) => start === end;
-
-        // const checkOverlap = (a, b) => {
-        //     if (isPoint(a) && isPoint(b)) {
-        //         return a[0] === b[0];
-        //     } else if (isPoint(a)) {
-        //         return b[0] <= a[0] && a[0] <= b[1];
-        //     } else if (isPoint(b)) {
-        //         return a[0] <= b[0] && b[0] <= a[1];
-        //     } else {
-        //         return Math.max(a[0], b[0]) < Math.min(a[1], b[1]);
-        //     }
-        // };
 
         const pixelPadding = 8;
         const checkOverlapWithPadding = (a, b, padding) => {
@@ -703,6 +700,8 @@ export default function EventRelationTimeline(props) {
 
         // Redraw all reports using new mainX scale
         updateMainReports();
+        updateHeatmaps();
+        updateDateAnchors();
 
         // Sync brush with zoom
         // let newBrushSelection = mainX.range().map(transform.invertX, transform);
@@ -827,21 +826,17 @@ export default function EventRelationTimeline(props) {
         // Get the domain from your x scale
         const xScale = mainX;
         const domain = xScale.domain();
-        console.log("Domain:", domain);
 
         // Create bins across the timeline
         const numBins = 100; // Adjust for granularity
         const binWidth = (domain[1].getTime() - domain[0].getTime()) / numBins; // binWidth in milliseconds
-        console.log("Bin Width (ms):", binWidth);
         const bins = Array(numBins).fill(0);
 
         // Count events in each bin using original time values
         laneData.forEach((d) => {
           // Use d.start and d.end (convert to Date if needed)
-          console.log("d.start:", d.start);
           const startDate = xScale.invert(d.formattedStartDate);
           const endDate = xScale.invert(d.formattedEndDate);
-          // console.log("Event dates:", startDate, endDate);
 
           // Calculate bin indices using millisecond timestamps
           const startBin = Math.floor((startDate.getTime() - domain[0].getTime()) / binWidth);
@@ -876,6 +871,59 @@ export default function EventRelationTimeline(props) {
         return heatmapData;
       }
 
+      function updateHeatmaps() {
+        const laneGroups = [...new Set(eventData.map((d) => d.laneGroup))];
+
+        laneGroups.forEach((laneGroup) => {
+          const heatmapClass = `heatmap-${laneGroup.replace(/\s+/g, "-")}`;
+          const heatmapGroup = d3.select(`.${heatmapClass}`);
+
+          if (!heatmapGroup.empty()) {
+            // Get the current transform (y position)
+            const transform = heatmapGroup.attr("transform");
+
+            // Remove old heatmap
+            heatmapGroup.remove();
+
+            // Regenerate heatmap data with updated mainX scale
+            const heatmapData = createLaneHeatmap(laneGroup, svgWidth);
+
+            if (heatmapData) {
+              // Create new heatmap group
+              const newHeatmapGroup = main_ER_svg
+                .append("g")
+                .attr("class", heatmapClass)
+                .attr("transform", transform); // Keep same y position
+
+              // Draw rectangles
+              newHeatmapGroup
+                .selectAll("rect")
+                .data(heatmapData)
+                .enter()
+                .append("rect")
+                .attr("x", (d) => d.x)
+                .attr("y", 0)
+                .attr("width", (d) => Math.max(1, d.width))
+                .attr("height", 10)
+                .attr("fill", (d) => d.color)
+                .attr("stroke", "none")
+                .style("opacity", 0.8);
+
+              // Add border
+              newHeatmapGroup
+                .append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", svgWidth)
+                .attr("height", 10)
+                .attr("fill", "none")
+                .attr("stroke", "#ccc")
+                .attr("stroke-width", 1);
+            }
+          }
+        });
+      }
+
       // Zoom in (for collapsed - click to expand/zoom in)
       const zoomIn =
         "M 0 0 m -8 0 a 8 8 0 1 0 16 0 a 8 8 0 1 0 -16 0 M 5.65 5.65 L 10 10 M 0 -3 L 0 3 M -3 0 L 3 0";
@@ -896,19 +944,6 @@ export default function EventRelationTimeline(props) {
 
         // Calculate new total SVG height
         const newSvgHeight = totalHeight + overviewHeight;
-        // margin.bottom +
-        // legendHeight +
-        // gapBetweenlegendAndMain +
-        // pad +
-        // ageAreaHeight +
-        // ageAreaBottomPad +
-        // overviewHeight;
-
-        // DEBUG: Check if these values are changing
-        console.log("=== SVG Height Update ===");
-        console.log("Total height:", totalHeight);
-        console.log("New SVG height:", newSvgHeight);
-        console.log("Current SVG height:", svg.style("height"));
 
         // Get the parent of the SVG (which is the MUI Box)
         const svgNode = svg.node();
@@ -926,6 +961,13 @@ export default function EventRelationTimeline(props) {
           .duration(duration)
           .attr("viewBox", `0 0 ${containerWidth} ${newSvgHeight}`)
           .style("height", `${newSvgHeight}px`);
+
+        // Inside updateLayout function, add:
+        main_ER_svg
+          .selectAll(".date-anchor-line")
+          .transition()
+          .duration(duration)
+          .attr("y2", totalHeight); // Update to new total height
 
         // Update zoom rect height
         svg
@@ -1411,6 +1453,36 @@ export default function EventRelationTimeline(props) {
         .style("stroke-width", 3)
         .style("stroke-opacity", 0.75);
 
+      function updateDateAnchors() {
+        d3.selectAll(".date-anchor-line")
+          .attr("x1", (d) => mainX(d))
+          .attr("x2", (d) => mainX(d));
+      }
+
+      // Add this BEFORE you create mainReports
+      const dateAnchorGroup = main_ER_svg
+        .append("g")
+        .attr("class", "date-anchors")
+        .attr("clip-path", "url(#secondary_area_clip)")
+        .lower(); // Send to back so relations appear on top
+
+      // Add vertical lines at each unique date
+      dateAnchorGroup
+        .selectAll(".date-anchor-line")
+        .data(uniqueDates)
+        .enter()
+        .append("line")
+        .attr("class", "date-anchor-line")
+        .attr("x1", (d) => mainX(d))
+        .attr("x2", (d) => mainX(d))
+        .attr("y1", 0)
+        .attr("y2", svgTotalHeight) // spans all lanes
+        .style("stroke", "#d3d3d3") // light gray
+        .style("stroke-width", 2)
+        .style("stroke-dasharray", "3,3") // dashed line
+        .style("opacity", 0.9)
+        .style("pointer-events", "none"); // don't interfere with clicks
+
       let mainReports = main_ER_svg.append("g").attr("clip-path", "url(#secondary_area_clip)");
 
       const occupiedSlots = new Map(); // Key: base Y, Value: array of [x1, x2] pairs
@@ -1891,7 +1963,7 @@ export default function EventRelationTimeline(props) {
           .querySelectorAll(`.relation-icon[data-concept-id="${clickedConceptId}"]`)
           .forEach((el) => {
             skipNextEffect.current = true;
-            console.log(clickedConceptId);
+            // console.log(clickedConceptId);
 
             if (el.hasAttribute("marker-end")) {
               const currentMarker = el.getAttribute("marker-end");
@@ -1933,13 +2005,34 @@ export default function EventRelationTimeline(props) {
           .filter(([_, objArray]) => objArray.some((obj) => obj.id === clickedConceptId))
           .map(([note]) => note);
 
-        matchingNotes.forEach((noteKey) => {
-          console.log(noteKey);
-          document.querySelectorAll(`circle[id*="${noteKey}"]`).forEach((circle) => {
-            circle.style.fillOpacity = "1";
-            circle.style.stroke = "black";
-            circle.style.strokeWidth = "2px";
-          });
+        matchingNotes.forEach((reportId) => {
+          const circle = document.getElementById(reportId);
+
+          if (circle && circle.parentNode) {
+            const svg = circle.parentNode;
+            const existingRing = svg.querySelector(`#highlight-ring-${reportId}`);
+
+            if (existingRing) {
+              // 🔹 If it's already highlighted, remove the ring (toggle off)
+              existingRing.remove();
+              return;
+            }
+
+            // 🔹 Otherwise, create a slightly larger ring behind the circle
+            const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            ring.setAttribute("cx", circle.getAttribute("cx"));
+            ring.setAttribute("cy", circle.getAttribute("cy"));
+            ring.setAttribute("r", parseFloat(circle.getAttribute("r")) * 1.4);
+            ring.setAttribute("fill", "none");
+            ring.setAttribute("stroke", "gold");
+            ring.setAttribute("stroke-opacity", "0.7");
+            ring.setAttribute("stroke-width", "6");
+            ring.setAttribute("id", `highlight-ring-${reportId}`);
+
+            svg.insertBefore(ring, circle);
+          } else {
+            console.log("Circle not found:", reportId);
+          }
         });
       }
 
@@ -2127,7 +2220,9 @@ export default function EventRelationTimeline(props) {
         mainX.domain(selection.map(overviewX.invert));
 
         // Redraw reports
-        updateMainReports(eventData);
+        updateMainReports();
+        updateHeatmaps();
+        updateDateAnchors();
 
         // Sync zoom with brush
         svg

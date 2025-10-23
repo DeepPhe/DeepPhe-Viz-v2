@@ -71,14 +71,13 @@ function createEpisodeTimeline(patientId) {
   };
 
   const getEpisodeDates = (reportData) => {
-    //group reports by episode and date
     const episodeDates = {};
     reportData.forEach((report) => {
+      const formattedDate = formatDate(report.date);
       if (!episodeDates[report.episode]) {
         episodeDates[report.episode] = [];
       }
-      //date needs to be in 2009/09/02 format
-      episodeDates[report.episode].push(formatDate(report.date));
+      episodeDates[report.episode].push(formattedDate);
     });
     return episodeDates;
   };
