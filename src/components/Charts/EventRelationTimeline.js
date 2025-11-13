@@ -288,23 +288,67 @@ export default function EventRelationTimeline(props) {
     //   laneGroupCount
     // );
 
+    // function createEventData() {
+    //   const eventData = [];
+    //
+    //   for (let i = 0; i < startDate.length; i++) {
+    //     eventData.push({
+    //       start: startDate[i],
+    //       end: endDate[i],
+    //       patient_id: patientId[i], // Use patientId as unique identifier
+    //       laneGroup: laneGroup[i],
+    //       relation1: startRelation[i],
+    //       relation2: endRelation[i],
+    //       dpheGroup: dpheGroup[i],
+    //       conceptId: conceptId[i],
+    //     });
+    //   }
+    //
+    //   return eventData;
+    // }
+
     function createEventData() {
-      const eventData = [];
+      const eventMap = new Map(); // To track events by lane + start + end
 
       for (let i = 0; i < startDate.length; i++) {
-        eventData.push({
-          start: startDate[i],
-          end: endDate[i],
-          patient_id: patientId[i], // Use patientId as unique identifier
-          laneGroup: laneGroup[i],
-          relation1: startRelation[i],
-          relation2: endRelation[i],
-          dpheGroup: dpheGroup[i],
-          conceptId: conceptId[i],
-        });
+        const key = `${laneGroup[i]}_${startDate[i]}_${endDate[i]}`;
+
+        if (eventMap.has(key)) {
+          // Merge with existing event
+          console.log("Merging event:", key); // Check if merging is happening
+          const existingEvent = eventMap.get(key);
+
+          // Merge patient_ids
+          if (!existingEvent.patient_id.includes(patientId[i])) {
+            existingEvent.patient_id.push(patientId[i]);
+          }
+
+          // Merge other arrays
+          if (!existingEvent.dpheGroup.includes(dpheGroup[i])) {
+            existingEvent.dpheGroup.push(dpheGroup[i]);
+          }
+          if (!existingEvent.conceptId.includes(conceptId[i])) {
+            existingEvent.conceptId.push(conceptId[i]);
+          }
+        } else {
+          // Create new event entry
+          eventMap.set(key, {
+            start: startDate[i],
+            end: endDate[i],
+            patient_id: [patientId[i]], // Convert to array for merged events
+            laneGroup: laneGroup[i],
+            relation1: startRelation[i],
+            relation2: endRelation[i],
+            dpheGroup: [dpheGroup[i]],
+            conceptId: [conceptId[i]],
+          });
+        }
       }
 
-      return eventData;
+      const result = Array.from(eventMap.values());
+      console.log("Total events after merging:", result.length);
+      console.log("Sample event:", result[0]); // Check structure
+      return result;
     }
 
     function removeDuplicatesFromDpheAndLane() {
@@ -399,29 +443,46 @@ export default function EventRelationTimeline(props) {
 
     // Convert string to date
     if (eventData !== null) {
+      console.log("eventData length:", eventData.length);
+      console.log("First few events:", eventData.slice(0, 3));
+
       const minStartDate = new Date(
-        startDate.reduce((min, date) => (new Date(date) < new Date(min) ? date : min))
+        eventData.reduce(
+          (min, d) => (new Date(d.start) < new Date(min) ? d.start : min),
+          eventData[0].start
+        )
       );
       const maxEndDate = new Date(
-        endDate.reduce((max, date) => (new Date(date) > new Date(max) ? date : max))
+        eventData.reduce(
+          (max, d) => (new Date(d.end) > new Date(max) ? d.end : max),
+          eventData[0].end
+        )
       );
+
+      console.log("minStartDate:", minStartDate);
+      console.log("maxEndDate:", maxEndDate);
 
       minStartDate.setDate(minStartDate.getDate() - marginOfDays);
       maxEndDate.setDate(maxEndDate.getDate() + marginOfDays);
 
       let mainX = d3.scaleTime().domain([minStartDate, maxEndDate]).range([0, svgWidth]);
+      console.log("svgWidth:", svgWidth);
+
       const allDates = new Set();
 
-      eventData.forEach(function (d) {
+      eventData.forEach(function (d, i) {
         const startDate = new Date(d.start);
         const endDate = new Date(d.end);
 
-        // Add timestamps to Set for uniqueness
         allDates.add(startDate.getTime());
         allDates.add(endDate.getTime());
 
         d.formattedStartDate = mainX(startDate);
         d.formattedEndDate = mainX(endDate);
+
+        if (i < 3) {
+          console.log(`Event ${i} formatted:`, d.formattedStartDate, d.formattedEndDate);
+        }
       });
 
       // Convert timestamps back to Date objects and sort
@@ -683,8 +744,8 @@ export default function EventRelationTimeline(props) {
         });
 
         // Update x-axis
-        d3.select(".main-ER-x-axis-bottom").call(xAxis);
-        d3.select(".main-ER-x-axis-top").call(xAxis);
+        d3.select(".main-ER-x-axis-bottom").call(xAxisBottom);
+        d3.select(".main-ER-x-axis-top").call(xAxisTop);
       }
 
       // Function expression to handle mouse wheel zoom or drag on main area
@@ -1075,7 +1136,10 @@ export default function EventRelationTimeline(props) {
         mainReports.selectAll(".main_report_group").each(function (d, i) {
           const group = d3.select(this);
           const isExpanded = expandedState[d.laneGroup];
-          const elementId = `${d.laneGroup}_${i}_${d.conceptId}`;
+
+          // Handle conceptId as array or single value
+          const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
+          const elementId = `${d.laneGroup}_${i}_${conceptId}`;
 
           // Get the relative Y position (stored relative to base)
           const relativeY = originalYPositions.get(elementId) || 0;
@@ -1476,7 +1540,7 @@ export default function EventRelationTimeline(props) {
         .attr("x1", (d) => mainX(d))
         .attr("x2", (d) => mainX(d))
         .attr("y1", 0)
-        .attr("y2", svgTotalHeight) // spans all lanes
+        .attr("y2", height) // spans all lanes
         .style("stroke", "#d3d3d3") // light gray
         .style("stroke-width", 2)
         .style("stroke-dasharray", "3,3") // dashed line
@@ -1500,21 +1564,37 @@ export default function EventRelationTimeline(props) {
           eventData
             .slice() // avoid mutating the original
             .sort((a, b) => {
-              // Count how often each conceptID appears
+              // Count how often each conceptID appears (handling arrays)
               const countMap = {};
               eventData.forEach((item) => {
-                countMap[item.conceptId] = (countMap[item.conceptId] || 0) + 1;
+                // Handle both single values and arrays
+                const conceptIds = Array.isArray(item.conceptId)
+                  ? item.conceptId
+                  : [item.conceptId];
+                conceptIds.forEach((id) => {
+                  countMap[id] = (countMap[id] || 0) + 1;
+                });
               });
 
+              // Get the primary (first) conceptId for sorting
+              const aConceptId = Array.isArray(a.conceptId) ? a.conceptId[0] : a.conceptId;
+              const bConceptId = Array.isArray(b.conceptId) ? b.conceptId[0] : b.conceptId;
+
               // Sort by count (descending)
-              return countMap[b.conceptId] - countMap[a.conceptId];
+              return countMap[bConceptId] - countMap[aConceptId];
             })
         )
         .enter()
         .append("g")
         .attr("class", "main_report_group")
         .each(function (d, i) {
-          const preferredText = concepts.find((c) => c.id === d.conceptId)?.preferredText;
+          console.log("Rendering event:", i, d); // Add this line
+
+          // Handle conceptId as array or single value
+          const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
+          const preferredText = concepts.find((c) => c.id === conceptId)?.preferredText;
+          console.log("Found preferredText:", preferredText); // And this line
+
           const group = d3.select(this);
           const x1 = d.formattedStartDate;
           const x2 = d.formattedEndDate;
@@ -1595,12 +1675,10 @@ export default function EventRelationTimeline(props) {
           occupiedSlots.set(y, slotList);
 
           // When storing, store relative to base
-          const elementId = `${d.laneGroup}_${i}_${d.conceptId}`;
+          // const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
+          const elementId = `${d.laneGroup}_${i}_${conceptId}`;
           const relativeY = y - baseY; // Store position relative to base!
           originalYPositions.set(elementId, relativeY);
-          // console.log(
-          //   `INITIAL STORE - Group: ${d.laneGroup}, Index: ${i}, ConceptId: ${d.conceptId}, Y: ${y}, BaseY: ${baseY}, RelativeY: ${relativeY}`
-          // );
 
           // Then set the parent group's position
           group.attr("transform", `translate(0, ${y})`);
@@ -1609,6 +1687,27 @@ export default function EventRelationTimeline(props) {
           const containsGroup = group.append("g").attr("class", "contains-group");
 
           function drawRelationLine({ group, d, x1, x2, markerStart, markerEnd, handleClick }) {
+            console.log("Drawing relation line:", d.conceptId, x1, x2); // Add this
+
+            // Handle arrays for display
+            const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
+            // Get concept names and count duplicates
+            const conceptNames = conceptIds.map(
+              (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
+            );
+            // Count occurrences of each concept name
+            const nameCounts = {};
+            conceptNames.forEach((name) => {
+              nameCounts[name] = (nameCounts[name] || 0) + 1;
+            });
+
+            // Format as "Name (x3), Other Name (x2)" or just "Name" if count is 1
+            const conceptNamesDisplay = Object.entries(nameCounts)
+              .map(([name, count]) => (count > 1 ? `${name} (x${count})` : name))
+              .join(", ");
+
+            const tooltipText = `${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}\nConcept Name: ${conceptNamesDisplay}\n`;
+
             group
               .append("line")
               .attr("class", "relation-outline")
@@ -1625,7 +1724,7 @@ export default function EventRelationTimeline(props) {
             const mainLine = group
               .append("line")
               .attr("class", "main_report_ER relation-icon")
-              .attr("data-concept-id", d.conceptId)
+              .attr("data-concept-id", conceptIds.join(","))
               .attr("data-line-type", "range")
               .attr("x1", x1)
               .attr("x2", x2)
@@ -1642,11 +1741,7 @@ export default function EventRelationTimeline(props) {
             if (markerEnd) {
               mainLine.attr("marker-end", markerEnd);
             }
-            mainLine
-              .append("title")
-              .text(
-                `Concept ID: ${d.conceptId}\nConcept Name: ${preferredText}\n${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}`
-              );
+            mainLine.append("title").text(tooltipText);
 
             group
               .append("circle")
@@ -1659,9 +1754,7 @@ export default function EventRelationTimeline(props) {
               .attr("pointer-events", "all")
               .on("click", (event) => handleClick(event, d))
               .append("title")
-              .text(
-                `Concept ID: ${d.conceptId}\nConcept Name: ${preferredText}\n${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}`
-              );
+              .text(tooltipText);
 
             group
               .append("circle")
@@ -1674,15 +1767,32 @@ export default function EventRelationTimeline(props) {
               .attr("pointer-events", "all")
               .on("click", (event) => handleClick(event, d))
               .append("title")
-              .text(
-                `Concept ID: ${d.conceptId}\nConcept Name: ${preferredText}\n${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}`
-              );
+              .text(tooltipText);
           }
 
           function drawSoloAfterRelation({ group, d, x, handleClick }) {
+            // Handle arrays for display
+            const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
+            // Get concept names and count duplicates
+            const conceptNames = conceptIds.map(
+              (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
+            );
+            // Count occurrences of each concept name
+            const nameCounts = {};
+            conceptNames.forEach((name) => {
+              nameCounts[name] = (nameCounts[name] || 0) + 1;
+            });
+
+            // Format as "Name (x3), Other Name (x2)" or just "Name" if count is 1
+            const conceptNamesDisplay = Object.entries(nameCounts)
+              .map(([name, count]) => (count > 1 ? `${name} (x${count})` : name))
+              .join(", ");
+
+            const tooltipText = `${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}\nConcept Name: ${conceptNamesDisplay}\n`;
+
             group
               .append("rect")
-              .attr("data-concept-id", d.conceptId)
+              .attr("data-concept-id", conceptIds.join(","))
               .attr("data-rect-type", "after")
               .attr("x", x - 5) // Align with arrow
               .attr("y", -5)
@@ -1692,15 +1802,32 @@ export default function EventRelationTimeline(props) {
               .style("cursor", "pointer")
               .on("click", (event) => handleClick(event, d))
               .append("title")
-              .text(
-                `Concept ID: ${d.conceptId}\nConcept Name: ${preferredText}\n${d.relation1}: ${d.start} - ${d.end}`
-              );
+              .text(tooltipText);
           }
 
           function drawSoloBeforeRelation({ group, d, x, handleClick }) {
+            // Handle arrays for display
+            const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
+            // Get concept names and count duplicates
+            const conceptNames = conceptIds.map(
+              (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
+            );
+            // Count occurrences of each concept name
+            const nameCounts = {};
+            conceptNames.forEach((name) => {
+              nameCounts[name] = (nameCounts[name] || 0) + 1;
+            });
+
+            // Format as "Name (x3), Other Name (x2)" or just "Name" if count is 1
+            const conceptNamesDisplay = Object.entries(nameCounts)
+              .map(([name, count]) => (count > 1 ? `${name} (x${count})` : name))
+              .join(", ");
+
+            const tooltipText = `${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}\nConcept Name: ${conceptNamesDisplay}\n`;
+
             group
               .append("rect")
-              .attr("data-concept-id", d.conceptId)
+              .attr("data-concept-id", conceptIds.join(","))
               .attr("data-rect-type", "before")
               .attr("x", x - 10) // Align with arrow
               .attr("y", -5)
@@ -1710,12 +1837,28 @@ export default function EventRelationTimeline(props) {
               .style("cursor", "pointer")
               .on("click", (event) => handleClick(event, d))
               .append("title")
-              .text(
-                `Concept ID: ${d.conceptId}\nConcept Name: ${preferredText}\n${d.relation1}: ${d.start} - ${d.end}`
-              );
+              .text(tooltipText);
           }
 
           function drawOnRelation({ group, d, x, lineType, handleClick }) {
+            // Handle arrays for display
+            const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
+            // Get concept names and count duplicates
+            const conceptNames = conceptIds.map(
+              (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
+            );
+            // Count occurrences of each concept name
+            const nameCounts = {};
+            conceptNames.forEach((name) => {
+              nameCounts[name] = (nameCounts[name] || 0) + 1;
+            });
+
+            // Format as "Name (x3), Other Name (x2)" or just "Name" if count is 1
+            const conceptNamesDisplay = Object.entries(nameCounts)
+              .map(([name, count]) => (count > 1 ? `${name} (x${count})` : name))
+              .join(", ");
+
+            const tooltipText = `${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}\nConcept Name: ${conceptNamesDisplay}\n`;
             group
               .append("line")
               .attr("class", "relation-outline")
@@ -1732,7 +1875,7 @@ export default function EventRelationTimeline(props) {
             group
               .append("line")
               .attr("class", "main_report_contains relation-icon")
-              .attr("data-concept-id", d.conceptId)
+              .attr("data-concept-id", conceptIds.join(", "))
               .attr("data-line-type", lineType)
               .attr("y1", -6) // Extends above
               .attr("y2", 6) // Extends below
@@ -1745,9 +1888,7 @@ export default function EventRelationTimeline(props) {
                 handleClick(event, d);
               })
               .append("title")
-              .text(
-                `Concept ID: ${d.conceptId}\nConcept Text: ${preferredText}\n${d.relation1}: ${d.start} - ${d.end}`
-              );
+              .text(tooltipText);
           }
 
           if (d.relation1 === "After" && d.relation2 === "After") {
@@ -1919,18 +2060,20 @@ export default function EventRelationTimeline(props) {
         });
 
       function handleClick(event, d) {
-        const clickedConceptId = d.conceptId;
+        const clickedConceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
         console.log(d);
-        if (!clickedConceptId) return;
+        if (!clickedConceptIds.length) return;
 
         setClickedTerms((prevTerms) => {
-          // Check if the term is already in the array
-          if (prevTerms.includes(clickedConceptId)) {
-            // Remove it if it's already in the array (unclick)
-            return prevTerms.filter((term) => term !== clickedConceptId);
+          // Check if ANY of the merged concept IDs are already clicked
+          const hasAnyClicked = clickedConceptIds.some((id) => prevTerms.includes(id));
+
+          if (hasAnyClicked) {
+            // Remove ALL concept IDs from this merged event
+            return prevTerms.filter((term) => !clickedConceptIds.includes(term));
           } else {
-            // Add it if it's not in the array (click)
-            return [...prevTerms, clickedConceptId];
+            // Add ALL concept IDs from this merged event
+            return [...prevTerms, ...clickedConceptIds];
           }
         });
 
@@ -2036,28 +2179,25 @@ export default function EventRelationTimeline(props) {
         });
       }
 
-      // Main area x axis
-      // https://github.com/d3/d3-axis#axisBottom
-      let xAxis = d3
-        .axisBottom(mainX)
-        // https://github.com/d3/d3-axis#axis_tickSizeInner
-        .tickSizeInner(5)
-        .tickSizeOuter(0);
-      // Abbreviated month format
-      // .tickFormat(d3.timeFormat("%b"));
+      // Bottom axis
+      const xAxisBottom = d3.axisBottom(mainX).tickSizeInner(5).tickSizeOuter(0);
 
-      // Append x axis to the bottom of main area
+      // Top axis (same ticks, but labels on top)
+      const xAxisTop = d3.axisTop(mainX).tickSizeInner(5).tickSizeOuter(0);
+
+      // Append x axis to bottom
       main_ER_svg
         .append("g")
         .attr("class", "main-ER-x-axis-bottom")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+        .attr("transform", `translate(0, ${height})`)
+        .call(xAxisBottom);
 
+      // Append x axis to top
       main_ER_svg
         .append("g")
         .attr("class", "main-ER-x-axis-top")
-        .attr("transform", "translate(0,-28)")
-        .call(xAxis);
+        .attr("transform", "translate(0, 0)") // or tweak the Y offset if needed
+        .call(xAxisTop);
 
       // Encounter ages
       age_ER
