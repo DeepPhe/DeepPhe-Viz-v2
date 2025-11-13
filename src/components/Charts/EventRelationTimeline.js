@@ -2102,9 +2102,8 @@ export default function EventRelationTimeline(props) {
         };
 
         // Emphasize matching relations
-        document
-          .querySelectorAll(`.relation-icon[data-concept-id="${clickedConceptId}"]`)
-          .forEach((el) => {
+        clickedConceptIds.forEach((id) => {
+          document.querySelectorAll(`.relation-icon[data-concept-id="${id}"]`).forEach((el) => {
             skipNextEffect.current = true;
             // console.log(clickedConceptId);
 
@@ -2143,9 +2142,10 @@ export default function EventRelationTimeline(props) {
               }
             }
           });
+        });
 
         const matchingNotes = Object.entries(conceptsPerDocument)
-          .filter(([_, objArray]) => objArray.some((obj) => obj.id === clickedConceptId))
+          .filter(([_, objArray]) => objArray.some((obj) => clickedConceptIds.includes(obj.id)))
           .map(([note]) => note);
 
         matchingNotes.forEach((reportId) => {
