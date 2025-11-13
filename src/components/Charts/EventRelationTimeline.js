@@ -68,6 +68,8 @@ export default function EventRelationTimeline(props) {
   const clickedTerms = props.clickedTerms;
   const setClickedTerms = props.setClickedTerms;
   const conceptsPerDocument = props.conceptsPerDocument;
+  const [isFilterOn, setIsFilterOn] = useState(false);
+
 
   useEffect(() => {
     if (clickedTerms.length === 0) {
@@ -81,14 +83,12 @@ export default function EventRelationTimeline(props) {
   const fetchTXTData = async () => {
     try {
       const response = await fetch("/docs/Patient01_times.txt");
-      console.log("Fetch response status:", response.status);
-      console.log("Fetch response headers:", response.headers);
+      // console.log("Fetch response status:", response.status);
+      // console.log("Fetch response headers:", response.headers);
 
       if (!response.ok) throw new Error("Failed to load file");
 
       const text = await response.text();
-      console.log("Raw text from fetch:", text); // This will show you what's actually being fetched
-
       return parseTXT(text);
     } catch (error) {
       console.error("Error loading TSV:", error);
@@ -139,7 +139,7 @@ export default function EventRelationTimeline(props) {
   const transformTXTData = (data) => {
     return {
       patientId: data.map((d) => d.PatientID),
-      conceptId: data.map((d) => d.ConceptID),
+      conceptIds: data.map((d) => d.ConceptID),
       startRelation: data.map((d) => d.Relation1),
       startDate: data.map((d) => d.Date1),
       endRelation: data.map((d) => d.Relation2),
@@ -158,23 +158,23 @@ export default function EventRelationTimeline(props) {
 
     fetchTXTData(conceptsPerDocument).then((data) => {
       if (!data) return;
-      // console.log("are we getting here");
       setJson(data);
       const transformedData = transformTXTData(data);
-      // console.log("transformed data:", transformedData);
       const container = document.getElementById(svgContainerId);
       if (container) {
         container.innerHTML = "";
       }
       const filteredDpheGroup = transformedData.dpheGroup.filter((item) => item != null);
       const filteredLaneGroup = transformedData.laneGroup.filter((item) => item != null);
-      // console.log("filteredDpheGroup", filteredDpheGroup);
-      // console.log("filteredLaneGroup", filteredLaneGroup);
+
+      console.log("patiendID:", transformedData.patientId);
+      console.log("conceptId:", transformedData.conceptIds);
+
       if (filteredDpheGroup.length !== 0 && filteredLaneGroup.length !== 0) {
         renderTimeline(
           svgContainerId,
           transformedData.patientId,
-          transformedData.conceptId,
+          transformedData.conceptIds,
           transformedData.startRelation,
           transformedData.startDate,
           transformedData.endRelation,
@@ -216,7 +216,7 @@ export default function EventRelationTimeline(props) {
 
     document.querySelectorAll(`.relation-icon`).forEach((el) => {
       const conceptId = el.getAttribute("data-concept-id");
-      console.log(conceptId);
+      // console.log(conceptId);
 
       if (clickedTerms.includes(conceptId)) {
         if (el.hasAttribute("marker-end")) {
@@ -261,7 +261,7 @@ export default function EventRelationTimeline(props) {
   const renderTimeline = (
     svgContainerId,
     patientId,
-    conceptId,
+    conceptIds,
     startRelation,
     startDate,
     endRelation,
@@ -271,41 +271,7 @@ export default function EventRelationTimeline(props) {
     dpheGroupCount,
     laneGroupCount
   ) => {
-    // Vertical count position of each report type
-    // E.g., "Progress Note" has max 6 vertical reports, "Surgical Pathology Report" has 3
-    // then the vertical position of "Progress Note" bottom line is 6, and "Surgical Pathology Report" is 6+3=9
     let verticalPositions = {};
-    // Vertical max counts from top to bottom
-    // This is used to decide the domain range of mainY and overviewY
-    // console.log(
-    //   svgContainerId,
-    //   patientId,
-    //   startRelation,
-    //   endDate,
-    //   endDate,
-    //   laneGroup,
-    //   dpheGroupCount,
-    //   laneGroupCount
-    // );
-
-    // function createEventData() {
-    //   const eventData = [];
-    //
-    //   for (let i = 0; i < startDate.length; i++) {
-    //     eventData.push({
-    //       start: startDate[i],
-    //       end: endDate[i],
-    //       patient_id: patientId[i], // Use patientId as unique identifier
-    //       laneGroup: laneGroup[i],
-    //       relation1: startRelation[i],
-    //       relation2: endRelation[i],
-    //       dpheGroup: dpheGroup[i],
-    //       conceptId: conceptId[i],
-    //     });
-    //   }
-    //
-    //   return eventData;
-    // }
 
     function createEventData() {
       const eventMap = new Map(); // To track events by lane + start + end
@@ -315,7 +281,7 @@ export default function EventRelationTimeline(props) {
 
         if (eventMap.has(key)) {
           // Merge with existing event
-          console.log("Merging event:", key); // Check if merging is happening
+          // console.log("Merging event:", key); // Check if merging is happening
           const existingEvent = eventMap.get(key);
 
           // Merge patient_ids
@@ -327,8 +293,8 @@ export default function EventRelationTimeline(props) {
           if (!existingEvent.dpheGroup.includes(dpheGroup[i])) {
             existingEvent.dpheGroup.push(dpheGroup[i]);
           }
-          if (!existingEvent.conceptId.includes(conceptId[i])) {
-            existingEvent.conceptId.push(conceptId[i]);
+          if (!existingEvent.conceptIds.includes(conceptIds[i])) {
+            existingEvent.conceptIds.push(conceptIds[i]);
           }
         } else {
           // Create new event entry
@@ -340,15 +306,14 @@ export default function EventRelationTimeline(props) {
             relation1: startRelation[i],
             relation2: endRelation[i],
             dpheGroup: [dpheGroup[i]],
-            conceptId: [conceptId[i]],
+            conceptIds: [conceptIds[i]],
           });
         }
       }
 
-      const result = Array.from(eventMap.values());
-      console.log("Total events after merging:", result.length);
-      console.log("Sample event:", result[0]); // Check structure
-      return result;
+      // console.log("Total events after merging:", result.length);
+      // console.log("Sample event:", result[0]); // Check structure
+      return Array.from(eventMap.values());
     }
 
     function removeDuplicatesFromDpheAndLane() {
@@ -443,8 +408,8 @@ export default function EventRelationTimeline(props) {
 
     // Convert string to date
     if (eventData !== null) {
-      console.log("eventData length:", eventData.length);
-      console.log("First few events:", eventData.slice(0, 3));
+      // console.log("eventData length:", eventData.length);
+      // console.log("First few events:", eventData.slice(0, 3));
 
       const minStartDate = new Date(
         eventData.reduce(
@@ -459,14 +424,14 @@ export default function EventRelationTimeline(props) {
         )
       );
 
-      console.log("minStartDate:", minStartDate);
-      console.log("maxEndDate:", maxEndDate);
+      // console.log("minStartDate:", minStartDate);
+      // console.log("maxEndDate:", maxEndDate);
 
       minStartDate.setDate(minStartDate.getDate() - marginOfDays);
       maxEndDate.setDate(maxEndDate.getDate() + marginOfDays);
 
       let mainX = d3.scaleTime().domain([minStartDate, maxEndDate]).range([0, svgWidth]);
-      console.log("svgWidth:", svgWidth);
+      // console.log("svgWidth:", svgWidth);
 
       const allDates = new Set();
 
@@ -481,7 +446,7 @@ export default function EventRelationTimeline(props) {
         d.formattedEndDate = mainX(endDate);
 
         if (i < 3) {
-          console.log(`Event ${i} formatted:`, d.formattedStartDate, d.formattedEndDate);
+          // console.log(`Event ${i} formatted:`, d.formattedStartDate, d.formattedEndDate);
         }
       });
 
@@ -684,7 +649,7 @@ export default function EventRelationTimeline(props) {
         .attr("class", "episode_legend_text")
         .text((d) => `${d}`)
         .each(function (d) {
-          console.log(d);
+          // console.log(d);
           d3.select(this)
             .append("title")
             .text(() => {
@@ -699,6 +664,92 @@ export default function EventRelationTimeline(props) {
       // Specify a specific region of an element to display, rather than showing the complete area
       // Any parts of the drawing that lie outside of the region bounded by the currently active clipping path are not drawn.
       const topPadding = 15;
+
+      // --- Add toggle group ---
+      const toggleGroup = legendSvg
+        .append("g")
+        .attr("class", "filter-toggle-group")
+        .attr("transform", `translate(${containerWidth - 40})`)
+        .style("cursor", "pointer");
+
+      let toggleState = false; // false = show all, true = filter selected
+
+      // Label text
+      const toggleLabel = toggleGroup
+        .append("text")
+        .attr("x", -10)
+        .attr("y", 15)
+        .attr("alignment-baseline", "middle")
+        .attr("text-anchor", "end")
+        .attr("font-size", "12px")
+        .text("Showing: All patients");
+
+      // Background (toggle track)
+      const toggleBg = toggleGroup
+        .append("rect")
+        .attr("class", "toggle-bg")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", 40)
+        .attr("height", 20)
+        .attr("rx", 10)
+        .attr("ry", 10)
+        .attr("fill", "#ccc");
+
+      // Circle (toggle knob)
+      const knob = toggleGroup
+        .append("circle")
+        .attr("class", "toggle-knob")
+        .attr("cx", 10)
+        .attr("cy", 10)
+        .attr("r", 8)
+        .attr("fill", "white")
+        .style("stroke", "#888");
+
+      // Click interaction
+      toggleGroup.on("click", function () {
+        toggleState = !toggleState;
+
+        // Animate visual change
+        knob
+          .transition()
+          .duration(200)
+          .attr("cx", toggleState ? 30 : 10);
+        // Animate background color
+        toggleBg
+          .transition()
+          .duration(200)
+          .attr("fill", toggleState ? "#007bff" : "#ccc");
+        toggleLabel.text(
+          toggleState ? "Showing: Filtered by selected patients" : "Showing: All patients"
+        );
+
+        // Call your update logic
+        if (toggleState) {
+          // const filteredEvents = filterTimelineByPatients(selectedPatients, allTimelineEvents);
+          // renderTimeline(filteredEvents);
+          console.log("toggle on");
+        } else {
+          console.log("toggle off");
+          // renderTimeline(allTimelineEvents);
+        }
+      });
+
+      // After defining everything:
+      function updateTogglePosition() {
+        const containerWidth = document
+          .getElementById(svgContainerId)
+          .getBoundingClientRect().width;
+
+        // Keep it 40px from the right edge and some padding from the top
+        toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
+      }
+
+      // Call it initially
+      updateTogglePosition();
+
+      // Also call on resize
+      window.addEventListener("resize", updateTogglePosition);
 
       svg
         .append("defs")
@@ -1588,12 +1639,12 @@ export default function EventRelationTimeline(props) {
         .append("g")
         .attr("class", "main_report_group")
         .each(function (d, i) {
-          console.log("Rendering event:", i, d); // Add this line
+          // console.log("Rendering event:", i, d); // Add this line
 
           // Handle conceptId as array or single value
           const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
           const preferredText = concepts.find((c) => c.id === conceptId)?.preferredText;
-          console.log("Found preferredText:", preferredText); // And this line
+          // console.log("Found preferredText:", preferredText); // And this line
 
           const group = d3.select(this);
           const x1 = d.formattedStartDate;
@@ -1687,7 +1738,7 @@ export default function EventRelationTimeline(props) {
           const containsGroup = group.append("g").attr("class", "contains-group");
 
           function drawRelationLine({ group, d, x1, x2, markerStart, markerEnd, handleClick }) {
-            console.log("Drawing relation line:", d.conceptId, x1, x2); // Add this
+            // console.log("Drawing relation line:", d.conceptId, x1, x2); // Add this
 
             // Handle arrays for display
             const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
@@ -2156,12 +2207,10 @@ export default function EventRelationTimeline(props) {
             const existingRing = svg.querySelector(`#highlight-ring-${reportId}`);
 
             if (existingRing) {
-              // 🔹 If it's already highlighted, remove the ring (toggle off)
               existingRing.remove();
               return;
             }
 
-            // 🔹 Otherwise, create a slightly larger ring behind the circle
             const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             ring.setAttribute("cx", circle.getAttribute("cx"));
             ring.setAttribute("cy", circle.getAttribute("cy"));

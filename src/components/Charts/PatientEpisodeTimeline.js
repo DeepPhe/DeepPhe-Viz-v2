@@ -315,22 +315,22 @@ const PatientEpisodeTimeline = ({
         let obj = {};
         let datesArr = episodeDates[episode];
         let newDatesArr = [];
-        console.log(episodeDates);
+        // console.log(episodeDates);
 
         datesArr.forEach(function (d) {
-          console.log("Original date string:", d);
+          // console.log("Original date string:", d);
 
           // The date is already in YYYY/MM/DD format, which JavaScript can parse directly
           let date = new Date(d);
-          console.log("Parsed Date object:", date);
+          // console.log("Parsed Date object:", date);
 
           // Now format and parse if needed
           let formattedTimeStr = formatTime(date);
-          console.log("Formatted time string:", formattedTimeStr);
+          // console.log("Formatted time string:", formattedTimeStr);
 
           let finalDate = parseTime(formattedTimeStr);
-          console.log("Final parsed date:", finalDate);
-          console.log("---");
+          // console.log("Final parsed date:", finalDate);
+          // console.log("---");
 
           newDatesArr.push(finalDate);
         });
