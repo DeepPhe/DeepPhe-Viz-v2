@@ -59,6 +59,7 @@ function Patient(props) {
     if (hasDocuments(fullJson)) {
       setPatientDocument(getPatientDocument(currDocId, fullJson));
     }
+    console.log(currDocId);
   }, [currDocId, fullJson]);
 
   useEffect(() => {
@@ -152,6 +153,7 @@ function Patient(props) {
               setReportId={setReportId}
               conceptsPerDocument={conceptsPerDocumentRef.current}
               expandedPatientID={expandedPatientID}
+              currDocId={currDocId}
             />
           </CardBody>
         )}

@@ -767,6 +767,7 @@ const PatientEpisodeTimeline = ({
           .on("click", function (d) {
             const $circle = $("#main_" + d.id);
             const isSelected = $circle.hasClass("selected_report");
+            console.log("data: ", d);
 
             // Always clear previous selections first
             $(".main_report_PE").removeClass("selected_report");
@@ -774,14 +775,12 @@ const PatientEpisodeTimeline = ({
             $(".selected_report_icon").remove();
 
             if (isSelected) {
-              // 🔹 User clicked the same circle again — deselect it
               removeFactBasedHighlighting(d.id);
               $("#docs").hide();
               $("#report_instance").hide();
               return;
             }
 
-            // 🔹 Otherwise, highlight the newly clicked circle
             $("#docs").show();
 
             if (Object.keys(factBasedReports).indexOf(d.id) === -1) {

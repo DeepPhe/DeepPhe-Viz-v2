@@ -68,6 +68,7 @@ export default function EventRelationTimeline(props) {
   const clickedTerms = props.clickedTerms;
   const setClickedTerms = props.setClickedTerms;
   const conceptsPerDocument = props.conceptsPerDocument;
+  // const currDocId = props.currDocId;
   const [isFilterOn, setIsFilterOn] = useState(false);
 
   useEffect(() => {
@@ -163,7 +164,6 @@ export default function EventRelationTimeline(props) {
       if (!data) return;
       // setJson(data);
       const transformedData = transformTXTData(data);
-      console.log(transformedData);
       const container = document.getElementById(svgContainerId);
       if (container) {
         container.innerHTML = "";
@@ -216,8 +216,12 @@ export default function EventRelationTimeline(props) {
     };
 
     document.querySelectorAll(`.relation-icon`).forEach((el) => {
-      const conceptId = el.getAttribute("data-concept-id");
-      // console.log(conceptId);
+      const conceptIds = el.dataset.conceptIds.split(",").map((s) => s.trim());
+      console.log(clickedTerms);
+      console.log(conceptIds);
+      if (clickedTerms.includes(conceptIds)) {
+        console.log("match");
+      }
 
       if (clickedTerms.includes(conceptId)) {
         if (el.hasAttribute("marker-end")) {
@@ -259,6 +263,11 @@ export default function EventRelationTimeline(props) {
     });
   }, [clickedTerms]);
 
+  const currDocRef = useRef(props.currDocId);
+  useEffect(() => {
+    currDocRef.current = props.currDocId;
+  }, [props.currDocId]);
+
   const renderTimeline = (
     svgContainerId,
     patientId,
@@ -282,7 +291,6 @@ export default function EventRelationTimeline(props) {
 
         if (eventMap.has(key)) {
           // Merge with existing event
-          // console.log("Merging event:", key); // Check if merging is happening
           const existingEvent = eventMap.get(key);
 
           // Merge patient_ids
@@ -312,8 +320,6 @@ export default function EventRelationTimeline(props) {
         }
       }
 
-      // console.log("Total events after merging:", result.length);
-      // console.log("Sample event:", result[0]); // Check structure
       return Array.from(eventMap.values());
     }
 
@@ -399,19 +405,10 @@ export default function EventRelationTimeline(props) {
 
     // Gap between texts and mian area left border
     const textMargin = 10;
-
-    // let eventData = null;
-
-    // Need to create EventData before removing duplicates !IMPORTANT!
-    // if (startDate && endDate && patientId && dpheGroup && laneGroup){
     const eventData = createEventData();
-    // }
 
     // Convert string to date
     if (eventData !== null) {
-      // console.log("eventData length:", eventData.length);
-      // console.log("First few events:", eventData.slice(0, 3));
-
       const minStartDate = new Date(
         eventData.reduce(
           (min, d) => (new Date(d.start) < new Date(min) ? d.start : min),
@@ -425,15 +422,10 @@ export default function EventRelationTimeline(props) {
         )
       );
 
-      // console.log("minStartDate:", minStartDate);
-      // console.log("maxEndDate:", maxEndDate);
-
       minStartDate.setDate(minStartDate.getDate() - marginOfDays);
       maxEndDate.setDate(maxEndDate.getDate() + marginOfDays);
 
       let mainX = d3.scaleTime().domain([minStartDate, maxEndDate]).range([0, svgWidth]);
-      // console.log("svgWidth:", svgWidth);
-
       const allDates = new Set();
 
       eventData.forEach(function (d, i) {
@@ -445,10 +437,6 @@ export default function EventRelationTimeline(props) {
 
         d.formattedStartDate = mainX(startDate);
         d.formattedEndDate = mainX(endDate);
-
-        if (i < 3) {
-          // console.log(`Event ${i} formatted:`, d.formattedStartDate, d.formattedEndDate);
-        }
       });
 
       // Convert timestamps back to Date objects and sort
@@ -498,8 +486,6 @@ export default function EventRelationTimeline(props) {
         groupLaneHeights[group] = slots.length;
       });
 
-      // console.log(groupLaneHeights);
-
       // Dynamic height based on vertical counts
       const totalGroupLaneHeights = Object.values(groupLaneHeights).reduce(
         (acc, val) => acc + val,
@@ -518,7 +504,6 @@ export default function EventRelationTimeline(props) {
       let mainY = d3.scaleLinear().domain([0, totalGroupLaneHeights]).range([0, height]);
 
       // Y scale to handle overview area
-      // console.log("blash", overviewHeight, height)
       let overviewY = d3
         .scaleLinear()
         .domain([0, totalGroupLaneHeights])
@@ -529,7 +514,6 @@ export default function EventRelationTimeline(props) {
 
       // Create the container if it doesn't exist
       if (!document.getElementById(svgContainerId)) {
-        console.log(svgContainerId);
         const container = document.createElement("div");
         container.id = svgContainerId;
         document.body.appendChild(container); // Append to the desired parent (body, or other parent element)
@@ -650,7 +634,6 @@ export default function EventRelationTimeline(props) {
         .attr("class", "episode_legend_text")
         .text((d) => `${d}`)
         .each(function (d) {
-          // console.log(d);
           d3.select(this)
             .append("title")
             .text(() => {
@@ -661,6 +644,32 @@ export default function EventRelationTimeline(props) {
               return "Unspecified temporal relation.";
             });
         });
+
+      function filterRelationsByConceptIds(conceptIdsFromDoc) {
+        if (!conceptIdsFromDoc || !conceptIdsFromDoc.length) return;
+
+        document.querySelectorAll(".relation-icon").forEach((el) => {
+          const elConceptIds = el.dataset.conceptIds
+            ? el.dataset.conceptIds
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean)
+            : [];
+
+          // Show the relation if any of its concept IDs match the selected doc's concepts
+          const matches = elConceptIds.some((id) => conceptIdsFromDoc.includes(id));
+
+          el.style.display = matches ? null : "none";
+
+          // Also hide/show outlines
+          const group = el.closest("g");
+          if (group) {
+            group.querySelectorAll(".relation-outline").forEach((outline) => {
+              outline.style.display = matches ? null : "none";
+            });
+          }
+        });
+      }
 
       // Specify a specific region of an element to display, rather than showing the complete area
       // Any parts of the drawing that lie outside of the region bounded by the currently active clipping path are not drawn.
@@ -710,6 +719,7 @@ export default function EventRelationTimeline(props) {
       // Click interaction
       toggleGroup.on("click", function () {
         toggleState = !toggleState;
+        const docId = currDocRef.current; // always latest
 
         // Animate visual change
         knob
@@ -725,13 +735,24 @@ export default function EventRelationTimeline(props) {
           toggleState ? "Showing: Filtered by selected patients" : "Showing: All patients"
         );
 
+        const docKey = Object.keys(conceptsPerDocument).find((key) => key.endsWith(`_${docId}`));
+        const conceptsForDoc = conceptsPerDocument[docKey] || [];
+        const conceptIdsFromDoc = conceptsForDoc.map((concept) => concept.id);
+
         // Call your update logic
         if (toggleState) {
-          // const filteredEvents = filterTimelineByPatients(selectedPatients, allTimelineEvents);
-          // renderTimeline(filteredEvents);
-          console.log("toggle on");
+          filterRelationsByConceptIds(conceptIdsFromDoc);
         } else {
-          console.log("toggle off");
+          // Show all relations
+          document.querySelectorAll(".relation-icon").forEach((el) => {
+            el.style.display = null;
+            const group = el.closest("g");
+            if (group) {
+              group.querySelectorAll(".relation-outline").forEach((outline) => {
+                outline.style.display = null;
+              });
+            }
+          });
           // renderTimeline(allTimelineEvents);
         }
       });
@@ -954,18 +975,15 @@ export default function EventRelationTimeline(props) {
           // Calculate bin indices using millisecond timestamps
           const startBin = Math.floor((startDate.getTime() - domain[0].getTime()) / binWidth);
           const endBin = Math.floor((endDate.getTime() - domain[0].getTime()) / binWidth);
-          // console.log("Bins:", startBin, endBin);
 
           // Increment bins
           for (let i = Math.max(0, startBin); i <= Math.min(numBins - 1, endBin); i++) {
             bins[i]++;
           }
         });
-        // console.log("Bins:", bins);
 
         // Find max count for color scaling
         const maxCount = Math.max(...bins);
-        // console.log("Max Count:", maxCount);
 
         // Create color scale
         const colorScale = d3
@@ -979,7 +997,6 @@ export default function EventRelationTimeline(props) {
           count: count,
           color: count > 0 ? colorScale(count) : "#ffffff",
         }));
-        console.log("Heatmap Data:", heatmapData);
 
         return heatmapData;
       }
@@ -1640,12 +1657,9 @@ export default function EventRelationTimeline(props) {
         .append("g")
         .attr("class", "main_report_group")
         .each(function (d, i) {
-          // console.log("Rendering event:", i, d); // Add this line
-
           // Handle conceptId as array or single value
           const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
           const preferredText = concepts.find((c) => c.id === conceptId)?.preferredText;
-          // console.log("Found preferredText:", preferredText); // And this line
 
           const group = d3.select(this);
           const x1 = d.formattedStartDate;
@@ -1739,10 +1753,8 @@ export default function EventRelationTimeline(props) {
           const containsGroup = group.append("g").attr("class", "contains-group");
 
           function drawRelationLine({ group, d, x1, x2, markerStart, markerEnd, handleClick }) {
-            // console.log("Drawing relation line:", d.conceptId, x1, x2); // Add this
-
             // Handle arrays for display
-            const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
+            const conceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
             // Get concept names and count duplicates
             const conceptNames = conceptIds.map(
               (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
@@ -1776,7 +1788,7 @@ export default function EventRelationTimeline(props) {
             const mainLine = group
               .append("line")
               .attr("class", "main_report_ER relation-icon")
-              .attr("data-concept-id", conceptIds.join(","))
+              .attr("data-concept-ids", d.conceptIds.join(","))
               .attr("data-line-type", "range")
               .attr("x1", x1)
               .attr("x2", x2)
@@ -1824,7 +1836,7 @@ export default function EventRelationTimeline(props) {
 
           function drawSoloAfterRelation({ group, d, x, handleClick }) {
             // Handle arrays for display
-            const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
+            const conceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
             // Get concept names and count duplicates
             const conceptNames = conceptIds.map(
               (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
@@ -1844,7 +1856,7 @@ export default function EventRelationTimeline(props) {
 
             group
               .append("rect")
-              .attr("data-concept-id", conceptIds.join(","))
+              .attr("data-concept-ids", d.conceptIds.join(","))
               .attr("data-rect-type", "after")
               .attr("x", x - 5) // Align with arrow
               .attr("y", -5)
@@ -1859,7 +1871,7 @@ export default function EventRelationTimeline(props) {
 
           function drawSoloBeforeRelation({ group, d, x, handleClick }) {
             // Handle arrays for display
-            const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
+            const conceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
             // Get concept names and count duplicates
             const conceptNames = conceptIds.map(
               (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
@@ -1879,7 +1891,7 @@ export default function EventRelationTimeline(props) {
 
             group
               .append("rect")
-              .attr("data-concept-id", conceptIds.join(","))
+              .attr("data-concept-ids", d.conceptIds.join(","))
               .attr("data-rect-type", "before")
               .attr("x", x - 10) // Align with arrow
               .attr("y", -5)
@@ -1894,7 +1906,7 @@ export default function EventRelationTimeline(props) {
 
           function drawOnRelation({ group, d, x, lineType, handleClick }) {
             // Handle arrays for display
-            const conceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
+            const conceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
             // Get concept names and count duplicates
             const conceptNames = conceptIds.map(
               (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
@@ -1927,7 +1939,7 @@ export default function EventRelationTimeline(props) {
             group
               .append("line")
               .attr("class", "main_report_contains relation-icon")
-              .attr("data-concept-id", conceptIds.join(", "))
+              .attr("data-concept-ids", d.conceptIds.join(","))
               .attr("data-line-type", lineType)
               .attr("y1", -6) // Extends above
               .attr("y2", 6) // Extends below
@@ -1936,7 +1948,6 @@ export default function EventRelationTimeline(props) {
               .attr("stroke-opacity", 0.75)
               .style("cursor", "pointer")
               .on("click", (event) => {
-                console.log("Data bound to this line:", d);
                 handleClick(event, d);
               })
               .append("title")
@@ -2112,10 +2123,9 @@ export default function EventRelationTimeline(props) {
         });
 
       function handleClick(event, d) {
-        const clickedConceptIds = Array.isArray(d.conceptId) ? d.conceptId : [d.conceptId];
-        console.log(d);
-        if (!clickedConceptIds.length) return;
+        const clickedConceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
 
+        if (!clickedConceptIds.length) return;
         setClickedTerms((prevTerms) => {
           // Check if ANY of the merged concept IDs are already clicked
           const hasAnyClicked = clickedConceptIds.some((id) => prevTerms.includes(id));
@@ -2155,42 +2165,48 @@ export default function EventRelationTimeline(props) {
 
         // Emphasize matching relations
         clickedConceptIds.forEach((id) => {
-          document.querySelectorAll(`.relation-icon[data-concept-id="${id}"]`).forEach((el) => {
-            skipNextEffect.current = true;
-            // console.log(clickedConceptId);
+          console.log(id);
+          document.querySelectorAll(".relation-icon").forEach((el) => {
+            const ids = el.dataset.conceptIds
+              ? el.dataset.conceptIds.split(",").map((s) => s.trim())
+              : [];
+            if (ids.includes(id)) {
+              console.log(ids, id);
+              skipNextEffect.current = true;
 
-            if (el.hasAttribute("marker-end")) {
-              const currentMarker = el.getAttribute("marker-end");
-              if (markerToggleMap[currentMarker]) {
-                el.setAttribute("marker-end", markerToggleMap[currentMarker]);
+              if (el.hasAttribute("marker-end")) {
+                const currentMarker = el.getAttribute("marker-end");
+                if (markerToggleMap[currentMarker]) {
+                  el.setAttribute("marker-end", markerToggleMap[currentMarker]);
+                }
               }
-            }
 
-            if (el.hasAttribute("marker-start")) {
-              const currentMarker = el.getAttribute("marker-start");
-              if (markerToggleMap[currentMarker]) {
-                el.setAttribute("marker-start", markerToggleMap[currentMarker]);
+              if (el.hasAttribute("marker-start")) {
+                const currentMarker = el.getAttribute("marker-start");
+                if (markerToggleMap[currentMarker]) {
+                  el.setAttribute("marker-start", markerToggleMap[currentMarker]);
+                }
               }
-            }
 
-            if (el.classList.contains("selected")) {
-              el.classList.remove("selected");
-              el.classList.add("unselected");
-            } else {
-              el.classList.remove("unselected");
-              el.classList.add("selected");
-            }
+              if (el.classList.contains("selected")) {
+                el.classList.remove("selected");
+                el.classList.add("unselected");
+              } else {
+                el.classList.remove("unselected");
+                el.classList.add("selected");
+              }
 
-            // Show/hide the black outline line
-            const group = el.closest("g");
-            const isNowSelected = el.classList.contains("selected");
-            if (group) {
-              const outlines = group.querySelectorAll(".relation-outline");
-              if (outlines.length) {
-                outlines.forEach((outline) => {
-                  // Do something with the outlines, like showing or hiding
-                  outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
-                });
+              // Show/hide the black outline line
+              const group = el.closest("g");
+              const isNowSelected = el.classList.contains("selected");
+              if (group) {
+                const outlines = group.querySelectorAll(".relation-outline");
+                if (outlines.length) {
+                  outlines.forEach((outline) => {
+                    // Do something with the outlines, like showing or hiding
+                    outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
+                  });
+                }
               }
             }
           });
