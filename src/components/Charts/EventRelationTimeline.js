@@ -58,7 +58,7 @@ export { mentionedTerms };
 export { reportTextRight };
 
 export default function EventRelationTimeline(props) {
-  const [json, setJson] = useState(undefined);
+  // const [json, setJson] = useState(undefined);
   const [patientId, setPatientId] = useState(props.patientId);
   const setReportId = props.setReportId;
   const patientJson = props.patientJson;
@@ -69,7 +69,6 @@ export default function EventRelationTimeline(props) {
   const setClickedTerms = props.setClickedTerms;
   const conceptsPerDocument = props.conceptsPerDocument;
   const [isFilterOn, setIsFilterOn] = useState(false);
-
 
   useEffect(() => {
     if (clickedTerms.length === 0) {
@@ -83,8 +82,6 @@ export default function EventRelationTimeline(props) {
   const fetchTXTData = async () => {
     try {
       const response = await fetch("/docs/Patient01_times.txt");
-      // console.log("Fetch response status:", response.status);
-      // console.log("Fetch response headers:", response.headers);
 
       if (!response.ok) throw new Error("Failed to load file");
 
@@ -101,13 +98,20 @@ export default function EventRelationTimeline(props) {
     return concept ? concept.dpheGroup : null;
   }
 
+  /**
+   * Parse TXT into structured fields.
+   * @param {string} txt - Raw text to parse
+   * @returns {Object} Parsed info about the patient and concepts
+   */
   const parseTXT = (txt) => {
     const lines = txt.trim().split("\n");
     const headers = lines[0].split("\t").map((h) => h.trim());
     const dpheGroupCounts = {};
     const laneGroupCounts = {};
-    // const tLinkCounts = {};
 
+    /**
+     * Creates a dataset with all relations, dpheCounts, and laneGroupCounts
+     */
     const data = lines.slice(1).map((line) => {
       const values = line.split("\t");
       const obj = headers.reduce((acc, header, index) => {
@@ -119,15 +123,13 @@ export default function EventRelationTimeline(props) {
       const dpheGroup = getDpheGroupByConceptId(obj.ConceptID);
       obj.dpheGroup = dpheGroup;
 
-      // Optionally count occurrences
+      // Assign laneGroup and count occurrences
       if (dpheGroup) {
         dpheGroupCounts[dpheGroup] = (dpheGroupCounts[dpheGroup] || 0) + 1;
-
         const laneGroup = laneGroups[dpheGroup.toLowerCase()] || "Uncategorized";
         obj.laneGroup = laneGroup;
         laneGroupCounts[laneGroup] = (laneGroupCounts[laneGroup] || 0) + 1;
       }
-
       return obj;
     });
 
@@ -138,7 +140,8 @@ export default function EventRelationTimeline(props) {
 
   const transformTXTData = (data) => {
     return {
-      patientId: data.map((d) => d.PatientID),
+      //PatientID is same for every instance
+      patientId: data[0].PatientID,
       conceptIds: data.map((d) => d.ConceptID),
       startRelation: data.map((d) => d.Relation1),
       startDate: data.map((d) => d.Date1),
@@ -158,17 +161,15 @@ export default function EventRelationTimeline(props) {
 
     fetchTXTData(conceptsPerDocument).then((data) => {
       if (!data) return;
-      setJson(data);
+      // setJson(data);
       const transformedData = transformTXTData(data);
+      console.log(transformedData);
       const container = document.getElementById(svgContainerId);
       if (container) {
         container.innerHTML = "";
       }
       const filteredDpheGroup = transformedData.dpheGroup.filter((item) => item != null);
       const filteredLaneGroup = transformedData.laneGroup.filter((item) => item != null);
-
-      console.log("patiendID:", transformedData.patientId);
-      console.log("conceptId:", transformedData.conceptIds);
 
       if (filteredDpheGroup.length !== 0 && filteredLaneGroup.length !== 0) {
         renderTimeline(
