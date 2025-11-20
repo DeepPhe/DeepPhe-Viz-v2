@@ -60,6 +60,7 @@ export { reportTextRight };
 export default function EventRelationTimeline(props) {
   // const [json, setJson] = useState(undefined);
   const [patientId, setPatientId] = useState(props.patientId);
+  const [toggleState, setToggleState] = useState(false);
   const setReportId = props.setReportId;
   const patientJson = props.patientJson;
   const reportId = props.reportId;
@@ -267,6 +268,61 @@ export default function EventRelationTimeline(props) {
   useEffect(() => {
     currDocRef.current = props.currDocId;
   }, [props.currDocId]);
+
+  useEffect(() => {
+    console.log("togglestate", toggleState);
+    if (!toggleState) return;
+    applyDocumentFilter();
+  }, [currDocRef.current, toggleState]);
+
+  function applyDocumentFilter() {
+    const docKey = Object.keys(conceptsPerDocument).find((key) =>
+      key.endsWith(`_${currDocRef.current}`)
+    );
+    const conceptsForDoc = conceptsPerDocument[docKey] || [];
+    const conceptIdsFromDoc = conceptsForDoc.map((concept) => concept.id);
+    // Call your update logic
+    if (toggleState) {
+      filterRelationsByConceptIds(conceptIdsFromDoc);
+    } else {
+      // Show all relations
+      document.querySelectorAll(".relation-icon").forEach((el) => {
+        el.style.display = null;
+        const group = el.closest("g");
+        if (group) {
+          group.querySelectorAll(".relation-outline").forEach((outline) => {
+            outline.style.display = null;
+          });
+        }
+      });
+    }
+  }
+
+  function filterRelationsByConceptIds(conceptIdsFromDoc) {
+    if (!conceptIdsFromDoc || !conceptIdsFromDoc.length) return;
+
+    document.querySelectorAll(".relation-icon").forEach((el) => {
+      const elConceptIds = el.dataset.conceptIds
+        ? el.dataset.conceptIds
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
+      // Show the relation if any of its concept IDs match the selected doc's concepts
+      const matches = elConceptIds.some((id) => conceptIdsFromDoc.includes(id));
+
+      el.style.display = matches ? null : "none";
+
+      // Also hide/show outlines
+      const group = el.closest("g");
+      if (group) {
+        group.querySelectorAll(".relation-outline").forEach((outline) => {
+          outline.style.display = matches ? null : "none";
+        });
+      }
+    });
+  }
 
   const renderTimeline = (
     svgContainerId,
@@ -645,32 +701,6 @@ export default function EventRelationTimeline(props) {
             });
         });
 
-      function filterRelationsByConceptIds(conceptIdsFromDoc) {
-        if (!conceptIdsFromDoc || !conceptIdsFromDoc.length) return;
-
-        document.querySelectorAll(".relation-icon").forEach((el) => {
-          const elConceptIds = el.dataset.conceptIds
-            ? el.dataset.conceptIds
-                .split(",")
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [];
-
-          // Show the relation if any of its concept IDs match the selected doc's concepts
-          const matches = elConceptIds.some((id) => conceptIdsFromDoc.includes(id));
-
-          el.style.display = matches ? null : "none";
-
-          // Also hide/show outlines
-          const group = el.closest("g");
-          if (group) {
-            group.querySelectorAll(".relation-outline").forEach((outline) => {
-              outline.style.display = matches ? null : "none";
-            });
-          }
-        });
-      }
-
       // Specify a specific region of an element to display, rather than showing the complete area
       // Any parts of the drawing that lie outside of the region bounded by the currently active clipping path are not drawn.
       const topPadding = 15;
@@ -682,8 +712,6 @@ export default function EventRelationTimeline(props) {
         .attr("transform", `translate(${containerWidth - 40})`)
         .style("cursor", "pointer");
 
-      let toggleState = false; // false = show all, true = filter selected
-
       // Label text
       const toggleLabel = toggleGroup
         .append("text")
@@ -692,7 +720,7 @@ export default function EventRelationTimeline(props) {
         .attr("alignment-baseline", "middle")
         .attr("text-anchor", "end")
         .attr("font-size", "12px")
-        .text("Showing: All patients");
+        .text("Showing: All Patient Events");
 
       // Background (toggle track)
       const toggleBg = toggleGroup
@@ -718,43 +746,32 @@ export default function EventRelationTimeline(props) {
 
       // Click interaction
       toggleGroup.on("click", function () {
-        toggleState = !toggleState;
-        const docId = currDocRef.current; // always latest
+        setToggleState((prev) => {
+          const newState = !prev; // this is the updated value
+          if (!newState) {
+            currDocRef.current = 0; // update the ref
+          }
 
-        // Animate visual change
-        knob
-          .transition()
-          .duration(200)
-          .attr("cx", toggleState ? 30 : 10);
-        // Animate background color
-        toggleBg
-          .transition()
-          .duration(200)
-          .attr("fill", toggleState ? "#007bff" : "#ccc");
-        toggleLabel.text(
-          toggleState ? "Showing: Filtered by selected patients" : "Showing: All patients"
-        );
+          // Animate visual change
+          knob
+            .transition()
+            .duration(200)
+            .attr("cx", newState ? 30 : 10);
+          toggleBg
+            .transition()
+            .duration(200)
+            .attr("fill", newState ? "#007bff" : "#ccc");
+          toggleLabel.text(
+            newState
+              ? "Showing: Filtered Patient Events by Patient Doc"
+              : "Showing: All Patient Events"
+          );
 
-        const docKey = Object.keys(conceptsPerDocument).find((key) => key.endsWith(`_${docId}`));
-        const conceptsForDoc = conceptsPerDocument[docKey] || [];
-        const conceptIdsFromDoc = conceptsForDoc.map((concept) => concept.id);
+          // Apply the filter with the new state
+          applyDocumentFilter(newState);
 
-        // Call your update logic
-        if (toggleState) {
-          filterRelationsByConceptIds(conceptIdsFromDoc);
-        } else {
-          // Show all relations
-          document.querySelectorAll(".relation-icon").forEach((el) => {
-            el.style.display = null;
-            const group = el.closest("g");
-            if (group) {
-              group.querySelectorAll(".relation-outline").forEach((outline) => {
-                outline.style.display = null;
-              });
-            }
-          });
-          // renderTimeline(allTimelineEvents);
-        }
+          return newState;
+        });
       });
 
       // After defining everything:
@@ -2163,50 +2180,75 @@ export default function EventRelationTimeline(props) {
           "url(#selectedLeftArrow)": "url(#leftArrow)",
         };
 
+        // 1. Find all elements that should toggle
+        const toToggle = new Set();
+
         // Emphasize matching relations
         clickedConceptIds.forEach((id) => {
-          console.log(id);
           document.querySelectorAll(".relation-icon").forEach((el) => {
             const ids = el.dataset.conceptIds
               ? el.dataset.conceptIds.split(",").map((s) => s.trim())
               : [];
-            if (ids.includes(id)) {
-              console.log(ids, id);
-              skipNextEffect.current = true;
 
-              if (el.hasAttribute("marker-end")) {
-                const currentMarker = el.getAttribute("marker-end");
+            if (clickedConceptIds.some((id) => ids.includes(id))) {
+              toToggle.add(el);
+            }
+            console.log(toToggle);
+          });
+
+          // 2. Toggle each element exactly once
+          toToggle.forEach((el) => {
+            skipNextEffect.current = true;
+
+            // marker toggle
+            ["marker-start", "marker-end"].forEach((attr) => {
+              if (el.hasAttribute(attr)) {
+                const currentMarker = el.getAttribute(attr);
                 if (markerToggleMap[currentMarker]) {
-                  el.setAttribute("marker-end", markerToggleMap[currentMarker]);
+                  el.setAttribute(attr, markerToggleMap[currentMarker]);
                 }
               }
+            });
 
-              if (el.hasAttribute("marker-start")) {
-                const currentMarker = el.getAttribute("marker-start");
-                if (markerToggleMap[currentMarker]) {
-                  el.setAttribute("marker-start", markerToggleMap[currentMarker]);
-                }
-              }
+            // class toggle
+            el.classList.toggle("selected");
+            el.classList.toggle("unselected");
 
-              if (el.classList.contains("selected")) {
-                el.classList.remove("selected");
-                el.classList.add("unselected");
-              } else {
-                el.classList.remove("unselected");
-                el.classList.add("selected");
-              }
+            // if (ids.includes(id)) {
+            //   skipNextEffect.current = true;
+            //
+            //   if (el.hasAttribute("marker-end")) {
+            //     const currentMarker = el.getAttribute("marker-end");
+            //     if (markerToggleMap[currentMarker]) {
+            //       el.setAttribute("marker-end", markerToggleMap[currentMarker]);
+            //     }
+            //   }
+            //
+            //   if (el.hasAttribute("marker-start")) {
+            //     const currentMarker = el.getAttribute("marker-start");
+            //     if (markerToggleMap[currentMarker]) {
+            //       el.setAttribute("marker-start", markerToggleMap[currentMarker]);
+            //     }
+            //   }
 
-              // Show/hide the black outline line
-              const group = el.closest("g");
-              const isNowSelected = el.classList.contains("selected");
-              if (group) {
-                const outlines = group.querySelectorAll(".relation-outline");
-                if (outlines.length) {
-                  outlines.forEach((outline) => {
-                    // Do something with the outlines, like showing or hiding
-                    outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
-                  });
-                }
+            // if (el.classList.contains("selected")) {
+            //   el.classList.remove("selected");
+            //   el.classList.add("unselected");
+            // } else {
+            //   el.classList.remove("unselected");
+            //   el.classList.add("selected");
+            // }
+
+            // Show/hide the black outline line
+            const group = el.closest("g");
+            const isNowSelected = el.classList.contains("selected");
+            if (group) {
+              const outlines = group.querySelectorAll(".relation-outline");
+              if (outlines.length) {
+                outlines.forEach((outline) => {
+                  // Do something with the outlines, like showing or hiding
+                  outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
+                });
               }
             }
           });
