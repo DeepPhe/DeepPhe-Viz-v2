@@ -118,10 +118,6 @@ function Patient(props) {
   };
 
   const getComponentEventRelationTimeline = () => {
-    // console.log("Component rendering", {
-    //   isLoading: isLoading(),
-    // });
-
     if (isLoading()) {
       return <div>Loading Event Relation Table...</div>;
     }

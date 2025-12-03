@@ -217,7 +217,9 @@ export default function EventRelationTimeline(props) {
     };
 
     document.querySelectorAll(`.relation-icon`).forEach((el) => {
-      const conceptIds = el.dataset.conceptIds.split(",").map((s) => s.trim());
+      const conceptIds = el.dataset.conceptIds
+        ? el.dataset.conceptIds.split(",").map((s) => s.trim())
+        : [];
       console.log(clickedTerms);
       console.log(conceptIds);
       if (clickedTerms.includes(conceptIds)) {
@@ -1443,85 +1445,83 @@ export default function EventRelationTimeline(props) {
         .style("stroke", "black")
         .style("stroke-width", 1);
 
-      const rightCap = defs
-        .append("marker")
-        .attr("id", "rightCap")
-        .attr("viewBox", "0 0 20 12")
-        .attr("refX", 8)
-        .attr("refY", 6)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 4)
-        .attr("orient", "auto");
+      // const rightCap = defs
+      //   .append("marker")
+      //   .attr("id", "rightCap")
+      //   .attr("viewBox", "0 0 20 12")
+      //   .attr("refX", 8)
+      //   .attr("refY", 6)
+      //   .attr("markerWidth", 6)
+      //   .attr("markerHeight", 4)
+      //   .attr("orient", "auto");
+      //
+      // rightCap.append("path").attr("d", "M 0 6 L 8 6");
+      // .style("stroke", "rgb(49, 163, 84)")
+      // .style("stroke-width", 4);
 
-      rightCap
-        .append("path")
-        .attr("d", "M 0 6 L 8 6")
-        .style("stroke", "rgb(49, 163, 84)")
-        .style("stroke-width", 4);
+      // const selectedRightCap = defs
+      //   .append("marker")
+      //   .attr("id", "selectedRightCap")
+      //   .attr("viewBox", "0 0 20 12")
+      //   .attr("refX", 8)
+      //   .attr("refY", 6)
+      //   .attr("markerWidth", 6)
+      //   .attr("markerHeight", 4)
+      //   .attr("orient", "auto");
+      //
+      // // Add black outline stroke (slightly wider)
+      // selectedRightCap
+      //   .append("path")
+      //   .attr("d", "M 0 6 L 8 6")
+      //   .style("stroke", "black")
+      //   .style("stroke-width", 6); // wider for outline
+      //
+      // // Add green stroke on top
+      // selectedRightCap
+      //   .append("path")
+      //   .attr("d", "M 0 6 L 8 6")
+      //   .style("stroke", "rgb(49, 163, 84)")
+      //   .style("stroke-width", 4);
 
-      const selectedRightCap = defs
-        .append("marker")
-        .attr("id", "selectedRightCap")
-        .attr("viewBox", "0 0 20 12")
-        .attr("refX", 8)
-        .attr("refY", 6)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 4)
-        .attr("orient", "auto");
-
-      // Add black outline stroke (slightly wider)
-      selectedRightCap
-        .append("path")
-        .attr("d", "M 0 6 L 8 6")
-        .style("stroke", "black")
-        .style("stroke-width", 6); // wider for outline
-
-      // Add green stroke on top
-      selectedRightCap
-        .append("path")
-        .attr("d", "M 0 6 L 8 6")
-        .style("stroke", "rgb(49, 163, 84)")
-        .style("stroke-width", 4);
-
-      const leftCap = defs
-        .append("marker")
-        .attr("id", "leftCap")
-        .attr("viewBox", "0 0 20 12")
-        .attr("refX", 12) // Position at the start of the line
-        .attr("refY", 6)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 4)
-        .attr("orient", "auto");
-
-      leftCap
-        .append("path")
-        .attr("d", "M 12 6 L 20 6") // horizontal line extending leftward from the line start
-        .style("stroke", "rgb(49, 163, 84)")
-        .style("stroke-width", 4);
-
-      const selectedLeftCap = defs
-        .append("marker")
-        .attr("id", "selectedLeftCap")
-        .attr("viewBox", "0 0 20 12")
-        .attr("refX", 12) // Position at the start of the line
-        .attr("refY", 6)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 4)
-        .attr("orient", "auto");
-
-      // Black outline (wider stroke underneath)
-      selectedLeftCap
-        .append("path")
-        .attr("d", "M 12 6 L 20 6")
-        .style("stroke", "black")
-        .style("stroke-width", 6);
-
-      // Green line on top
-      selectedLeftCap
-        .append("path")
-        .attr("d", "M 12 6 L 20 6")
-        .style("stroke", "rgb(49, 163, 84)")
-        .style("stroke-width", 4);
+      // const leftCap = defs
+      //   .append("marker")
+      //   .attr("id", "leftCap")
+      //   .attr("viewBox", "0 0 20 12")
+      //   .attr("refX", 12) // Position at the start of the line
+      //   .attr("refY", 6)
+      //   .attr("markerWidth", 6)
+      //   .attr("markerHeight", 4)
+      //   .attr("orient", "auto");
+      //
+      // leftCap
+      //   .append("path")
+      //   .attr("d", "M 12 6 L 20 6") // horizontal line extending leftward from the line start
+      //   .style("stroke", "rgb(49, 163, 84)")
+      //   .style("stroke-width", 4);
+      //
+      // const selectedLeftCap = defs
+      //   .append("marker")
+      //   .attr("id", "selectedLeftCap")
+      //   .attr("viewBox", "0 0 20 12")
+      //   .attr("refX", 12) // Position at the start of the line
+      //   .attr("refY", 6)
+      //   .attr("markerWidth", 6)
+      //   .attr("markerHeight", 4)
+      //   .attr("orient", "auto");
+      //
+      // // Black outline (wider stroke underneath)
+      // selectedLeftCap
+      //   .append("path")
+      //   .attr("d", "M 12 6 L 20 6")
+      //   .style("stroke", "black")
+      //   .style("stroke-width", 6);
+      //
+      // // Green line on top
+      // selectedLeftCap
+      //   .append("path")
+      //   .attr("d", "M 12 6 L 20 6")
+      //   .style("stroke", "rgb(49, 163, 84)")
+      //   .style("stroke-width", 4);
 
       // Define the left arrow marker
       const leftArrow = defs
@@ -1769,6 +1769,30 @@ export default function EventRelationTimeline(props) {
 
           // Adjust line thickness if it's an overlap
           const containsGroup = group.append("g").attr("class", "contains-group");
+          function timeBetween(dateStr1, dateStr2) {
+            const d1 = new Date(dateStr1);
+            const d2 = new Date(dateStr2);
+
+            let diffMs = d2 - d1;
+
+            const units = [
+              { label: "year", ms: 1000 * 60 * 60 * 24 * 365 },
+              { label: "month", ms: 1000 * 60 * 60 * 24 * 30 },
+              { label: "day", ms: 1000 * 60 * 60 * 24 },
+            ];
+
+            const parts = [];
+
+            for (const u of units) {
+              if (diffMs >= u.ms) {
+                const amount = Math.floor(diffMs / u.ms);
+                diffMs -= amount * u.ms;
+                parts.push(`${amount} ${u.label}${amount !== 1 ? "s" : ""}`);
+              }
+            }
+
+            return parts.join(", ");
+          }
 
           function drawRelationLine({ group, d, x1, x2, markerStart, markerEnd, handleClick }) {
             // Handle arrays for display
@@ -1788,7 +1812,9 @@ export default function EventRelationTimeline(props) {
               .map(([name, count]) => (count > 1 ? `${name} (x${count})` : name))
               .join(", ");
 
-            const tooltipText = `${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}\nConcept Name: ${conceptNamesDisplay}\n`;
+            const tooltipText = `Duration: ${timeBetween(d.start, d.end)}\n${d.relation1}: ${
+              d.start
+            }\n${d.relation2}: ${d.end}\nConcept Name: ${conceptNamesDisplay}\n`;
 
             group
               .append("line")
@@ -1824,6 +1850,8 @@ export default function EventRelationTimeline(props) {
               mainLine.attr("marker-end", markerEnd);
             }
             mainLine.append("title").text(tooltipText);
+
+            const tooltip = d3.select("#tooltip");
 
             group
               .append("circle")
@@ -1996,7 +2024,6 @@ export default function EventRelationTimeline(props) {
               x1,
               x2,
               markerStart: "url(#rightArrow)",
-              markerEnd: "url(#rightCap)",
               handleClick,
             });
             // TODO: ADD A rightArrowLeft option >----- in defs
@@ -2056,7 +2083,6 @@ export default function EventRelationTimeline(props) {
               x1,
               x2,
               markerStart: "url(#verticalLineCap)",
-              markerEnd: "url(#rightCap)",
               handleClick,
             });
           }
@@ -2097,7 +2123,6 @@ export default function EventRelationTimeline(props) {
               x1,
               x2,
               markerStart: "url(#leftArrow)",
-              markerEnd: "url(#rightCap)",
               handleClick,
             });
           }
@@ -2108,7 +2133,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              markerStart: "url(#leftCap)",
               markerEnd: "url(#leftArrow)",
               handleClick,
             });
@@ -2121,7 +2145,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              markerStart: "url(#leftCap)",
               markerEnd: "url(#verticalLineCap)",
               handleClick,
             });
@@ -2133,8 +2156,6 @@ export default function EventRelationTimeline(props) {
               d,
               x1,
               x2,
-              markerStart: "url(#leftCap)",
-              markerEnd: "url(#rightCap)",
               handleClick,
             });
           }
@@ -2308,52 +2329,99 @@ export default function EventRelationTimeline(props) {
         .attr("transform", "translate(0, 0)") // or tweak the Y offset if needed
         .call(xAxisTop);
 
-      // Encounter ages
+      // Encounter ages label
       age_ER
         .append("text")
         .attr("x", -textMargin)
-        .attr("y", ageAreaHeight / 2) // Relative to the overview area
+        .attr("y", ageAreaHeight / 2)
         .attr("dy", ".5ex")
         .attr("class", "age_label")
         .text("Patient Age");
 
-      // Patient's first and last encounter dates and corresponding ages
-      // We use the dates to render x position
+      // Start and end dates (date objects)
       let encounterDates = [minStartDate, maxEndDate];
-      // We use the calculated ages to render the text of age
-      // TODO: NEED TO MAKE ENCOUNTER AGE DYNAMIC
-      let encounterAges = [53, 56];
 
+      // Start and end ages (numbers) — replace with dynamic calculation when ready
+      let encounterAges = [53, 56];
+      let startAge = encounterAges[0];
+      let endAge = encounterAges[1];
+
+      // Draw start + end ages
       age_ER
         .selectAll(".encounter_age")
         .data(encounterDates)
         .enter()
         .append("text")
-        .attr("x", function (d) {
-          return mainX(d);
-        })
+        .attr("x", (d) => mainX(d))
         .attr("y", ageAreaHeight / 2)
         .attr("dy", ".5ex")
         .attr("class", "encounter_age")
-        .text(function (d, i) {
-          return encounterAges[i];
-        });
+        .text((d, i) => encounterAges[i]);
 
-      // Vertical guidelines based on min and max dates (date objects)
+      // Start + end guideline lines
       age_ER
         .selectAll(".encounter_age_guideline")
         .data(encounterDates)
         .enter()
         .append("line")
-        .attr("x1", function (d) {
-          return mainX(d);
-        })
+        .attr("x1", (d) => mainX(d))
         .attr("y1", 12)
-        .attr("x2", function (d) {
-          return mainX(d);
-        })
+        .attr("x2", (d) => mainX(d))
         .attr("y2", 25)
         .attr("class", "encounter_age_guideline");
+
+      // Compute interior ages (full years between startAge and endAge)
+      const interiorAges = d3.range(startAge + 1, endAge);
+      // Example: [54, 55]
+
+      // Convert those ages to actual Date positions
+      function ageToDate(age, startAge, startDate) {
+        const diffYears = age - startAge;
+        const d = new Date(startDate);
+        d.setFullYear(d.getFullYear() + diffYears);
+        return d;
+      }
+
+      const interiorDates = interiorAges.map((a) => ageToDate(a, startAge, minStartDate));
+
+      // Draw interior ages
+      // age_ER
+      //   .selectAll(".interior_age")
+      //   .data(interiorDates)
+      //   .enter()
+      //   .append("text")
+      //   .attr("x", (d) => mainX(d))
+      //   .attr("y", ageAreaHeight / 2)
+      //   .attr("dy", ".5ex") // below the main age labels
+      //   .attr("class", "interior_age")
+      //   .text((d, i) => interiorAges[i]); // 54, 55...
+
+      // Draw guideline lines for intermediate ages
+      age_ER
+        .selectAll(".interior_age_guideline")
+        .data(interiorDates)
+        .enter()
+        .append("line")
+        .attr("x1", (d) => mainX(d))
+        .attr("y1", 12)
+        .attr("x2", (d) => mainX(d))
+        .attr("y2", 25)
+        .attr("class", "interior_age_guideline");
+
+      // Compute "years since diagnosis" numbers
+      // e.g. if startAge = 53 → [1, 2] for ages [54, 55]
+      const yearsSinceDiagnosis = interiorAges.map((a) => a - startAge);
+
+      // Draw the “year since diagnosis” labels (1, 2, 3…)
+      age_ER
+        .selectAll(".years_since_label")
+        .data(interiorDates)
+        .enter()
+        .append("text")
+        .attr("x", (d) => mainX(d))
+        .attr("y", ageAreaHeight / 2) // below everything else
+        .attr("class", "years_since_label")
+        .text((d, i) => `Year ${yearsSinceDiagnosis[i]}`);
 
       let overViewScrollerHeight = overviewHeight / 18;
 
