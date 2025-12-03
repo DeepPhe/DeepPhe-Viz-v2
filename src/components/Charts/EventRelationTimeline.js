@@ -6,13 +6,13 @@ const transitionDuration = 800; // time in ms
 
 const laneGroups = {
   // Severity
-  behavior: "Severity",
-  "disease stage qualifier": "Severity",
-  "disease grade qualifier": "Severity",
-  "temporal qualifier": "Severity",
-  severity: "Severity",
-  "pathologic tnm finding": "Severity",
-  "generic tnm finding": "Severity",
+  behavior: "Stage, Grade",
+  "disease stage qualifier": "Stage, Grade",
+  "disease grade qualifier": "Stage, Grade",
+  "temporal qualifier": "Stage, Grade",
+  severity: "Stage, Grade",
+  "pathologic tnm finding": "Stage, Grade",
+  "generic tnm finding": "Stage, Grade",
 
   // Qualifier
   // 'disease qualifier': 'Qualifier',
@@ -501,7 +501,7 @@ export default function EventRelationTimeline(props) {
         .sort((a, b) => a - b);
 
       removeDuplicatesFromDpheAndLane();
-      const desiredOrder = ["Finding", "Disease", "Severity", "Treatment"];
+      const desiredOrder = ["Finding", "Disease", "Stage, Grade", "Treatment"];
 
       const groupLaneHeights = {}; // e.g., { 'AC': 2, 'Taxol': 3, ... }
       desiredOrder.forEach((group) => {
@@ -1376,12 +1376,13 @@ export default function EventRelationTimeline(props) {
       labelGroup.each(function (d) {
         const group = d3.select(this);
         const label = group.select(".report_type_label");
+        console.log(d);
 
         // Add a <title> to the label itself to show tooltip on hover
         label.append("title").text(() => {
           const definitions = {
             Finding: "(symptoms, test results)",
-            Severity: "(stage, grade, tnm)",
+            "Stage, Grade": "(stage, grade, tnm)",
             Disease: "(neoplasm, disease, disorder)",
             Treatment: "(procedure, medication)",
           };
@@ -2366,12 +2367,9 @@ export default function EventRelationTimeline(props) {
         .text("Date");
 
       // Overview x axis
-      let overviewXAxis = d3
-        .axisBottom(overviewX)
-        .tickSizeInner(5)
-        .tickSizeOuter(0)
-        // Abbreviated month format
-        .tickFormat(d3.timeFormat("%b"));
+      let overviewXAxis = d3.axisBottom(overviewX).tickSizeInner(5).tickSizeOuter(0);
+      // Abbreviated month format
+      // .tickFormat(d3.timeFormat("%b"));
 
       // Append x axis to the bottom of overview area
       overview
