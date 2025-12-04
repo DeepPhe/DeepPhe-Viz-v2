@@ -7,7 +7,7 @@ import CardBody from "components/Card/CardBody.js";
 import CustomTable from "../../components/CustomTables/CustomTable";
 import CancerAndTumorSummary from "../../components/Summaries/CancerAndTumorSummary";
 import PatientEpisodeTimeline from "../../components/Charts/PatientEpisodeTimeline";
-import EventRelationTimeline from "../../components/Charts/EventRelationTimeline";
+import EventRelationTimeline from "../../components/Charts/EventRelationTimeline/EventRelationTimeline";
 import CardHeader from "../../components/Card/CardHeader";
 import { Col, Container, Nav, Navbar, Row } from "react-bootstrap";
 import { DocumentViewer } from "../../components/DocumentViewer/DocumentViewer";
