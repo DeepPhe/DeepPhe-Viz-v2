@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import * as d3 from "d3v4";
+import * as d3 from "d3";
 import * as $ from "jquery";
 import "./PatientEpisodeTimeline.css";
 
@@ -521,12 +521,12 @@ const PatientEpisodeTimeline = ({
 
       // Function expression to handle mouse wheel zoom or drag on main area
       // Need to define this before defining zoom since it's function expression instead of function declariation
-      let zoomed = function () {
+      let zoomed = function (event) {
         // Ignore zoom-by-brush
-        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") {
+        if (event.sourceEvent && event.sourceEvent.type === "brush") {
           return;
         }
-        let transform = d3.event.transform;
+        let transform = event.transform;
 
         mainX.domain(transform.rescaleX(overviewX).domain());
 
@@ -978,13 +978,12 @@ const PatientEpisodeTimeline = ({
 
       // Function expression to create brush function redraw with selection
       // Need to define this before defining brush since it's function expression instead of function declariation
-      let brushed = function () {
+      let brushed = function (event) {
         // Ignore brush-by-zoom
-        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") {
+        if (event.sourceEvent && event.sourceEvent.type === "zoom") {
           return;
         }
 
-        // Can also use d3.event.selection as an alternative to d3.brushSelection(overviewBrush.node())
         let selection = d3.brushSelection(overviewBrush.node());
 
         // Update the position of custom brush handles

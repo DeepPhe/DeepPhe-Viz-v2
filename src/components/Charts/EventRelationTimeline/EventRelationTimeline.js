@@ -1,20 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import * as d3 from "d3v4";
-import {
-  TRANSITION_DURATION,
-  MARGINS,
-  LEGEND,
-  TEXT,
-  AGE_AREA,
-  GAPS,
-  TIMELINE_PADDING_DAYS,
-  MARKER_TOGGLE_MAP,
-} from "./timelineConstants";
+import { MARKER_TOGGLE_MAP } from "./timelineConstants";
 import { fetchTXTData } from "./data";
 import { renderTimeline } from "./render/renderTimeline";
 
 export default function EventRelationTimeline(props) {
-  // const [json, setJson] = useState(undefined);
   const [patientId, setPatientId] = useState(props.patientId);
   const [toggleState, setToggleState] = useState(false);
   const setReportId = props.setReportId;
@@ -29,6 +18,7 @@ export default function EventRelationTimeline(props) {
   const [isFilterOn, setIsFilterOn] = useState(false);
 
   useEffect(() => {
+    console.log("1. clickedTerms effect");
     if (clickedTerms.length === 0) {
       document.querySelectorAll("circle").forEach((circle) => {
         circle.style.fillOpacity = "0.3"; // Reset fill opacity to default
@@ -36,6 +26,40 @@ export default function EventRelationTimeline(props) {
       });
     }
   }, [clickedTerms]);
+
+  // In React component
+  const handleToggleClick = () => {
+    console.log("handleToggleClick called");
+    setToggleState((prev) => !prev);
+  };
+
+  // Click interaction
+  // toggleGroup.on("click", function () {
+  //   setToggleState((prev) => {
+  //     const newState = !prev; // this is the updated value
+  //     if (!newState) {
+  //       currDocRef.current = 0; // update the ref
+  //     }
+  //
+  //     // Animate visual change
+  //     knob
+  //       .transition()
+  //       .duration(200)
+  //       .attr("cx", newState ? 30 : 10);
+  //     toggleBg
+  //       .transition()
+  //       .duration(200)
+  //       .attr("fill", newState ? "#007bff" : "#ccc");
+  //     toggleLabel.text(
+  //       newState ? "Showing: Filtered Patient Events by Patient Doc" : "Showing: All Patient Events"
+  //     );
+  //
+  //     // Apply the filter with the new state
+  //     applyDocumentFilter(newState);
+  //
+  //     return newState;
+  //   });
+  // });
 
   const transformTXTData = (data) => {
     return {
@@ -60,40 +84,109 @@ export default function EventRelationTimeline(props) {
 
   const skipNextEffect = useRef(false);
 
+  // useEffect(() => {
+  //   if (!conceptsPerDocument) return;
+  //
+  //   fetchTXTData(getDpheGroupByConceptId).then((data) => {
+  //     if (!data) return;
+  //
+  //     const transformedData = transformTXTData(data);
+  //
+  //     const container = document.getElementById(svgContainerId);
+  //     if (container) container.innerHTML = "";
+  //
+  //     const filteredDpheGroup = transformedData.dpheGroup.filter(Boolean);
+  //     const filteredLaneGroup = transformedData.laneGroup.filter(Boolean);
+  //
+  //     if (filteredDpheGroup.length === 0 || filteredLaneGroup.length === 0) return;
+  //
+  //     renderTimeline({
+  //       svgContainerId,
+  //       patientId: transformedData.patientId,
+  //       conceptIds: transformedData.conceptIds,
+  //       startRelation: transformedData.startRelation,
+  //       startDate: transformedData.startDate,
+  //       endRelation: transformedData.endRelation,
+  //       endDate: transformedData.endDate,
+  //       dpheGroup: transformedData.dpheGroup,
+  //       laneGroup: transformedData.laneGroup,
+  //       dpheGroupCounts: transformedData.dpheGroupCounts,
+  //       laneGroupsCounts: transformedData.laneGroupsCounts,
+  //       concepts,
+  //       toggleState,
+  //       handleToggleClick: () => setToggleState((prev) => !prev),
+  //     });
+  //   });
+  // }, [
+  //   conceptsPerDocument,
+  //   toggleState, // ONLY IF D3 DEPENDS ON IT FOR VISUAL STATE
+  // ]);
+
   useEffect(() => {
+    console.log("2. Main render effect - conceptsPerDocument changed");
     if (!conceptsPerDocument) return;
+
+    console.log("useEffect running - about to fetch data");
 
     fetchTXTData(getDpheGroupByConceptId).then((data) => {
       if (!data) return;
-      // setJson(data);
-      const transformedData = transformTXTData(data);
-      const container = document.getElementById(svgContainerId);
-      if (container) {
-        container.innerHTML = "";
-      }
-      const filteredDpheGroup = transformedData.dpheGroup.filter((item) => item != null);
-      const filteredLaneGroup = transformedData.laneGroup.filter((item) => item != null);
 
-      if (filteredDpheGroup.length !== 0 && filteredLaneGroup.length !== 0) {
-        renderTimeline(
-          svgContainerId,
-          transformedData.patientId,
-          transformedData.conceptIds,
-          transformedData.startRelation,
-          transformedData.startDate,
-          transformedData.endRelation,
-          transformedData.endDate,
-          transformedData.dpheGroup,
-          transformedData.laneGroup,
-          transformedData.dpheGroupCounts,
-          transformedData.laneGroupsCounts,
-          concepts
-        );
-      }
+      const transformedData = transformTXTData(data);
+
+      const container = document.getElementById(svgContainerId);
+      if (container) container.innerHTML = "";
+
+      const filteredDpheGroup = transformedData.dpheGroup.filter(Boolean);
+      const filteredLaneGroup = transformedData.laneGroup.filter(Boolean);
+
+      if (filteredDpheGroup.length === 0 || filteredLaneGroup.length === 0) return;
+
+      console.log("About to call renderTimeline");
+      console.log("handleToggleClick is:", handleToggleClick);
+
+      renderTimeline({
+        svgContainerId,
+        patientId: transformedData.patientId,
+        conceptIds: transformedData.conceptIds,
+        startRelation: transformedData.startRelation,
+        startDate: transformedData.startDate,
+        endRelation: transformedData.endRelation,
+        endDate: transformedData.endDate,
+        dpheGroup: transformedData.dpheGroup,
+        laneGroup: transformedData.laneGroup,
+        dpheGroupCounts: transformedData.dpheGroupCounts,
+        laneGroupsCounts: transformedData.laneGroupsCounts,
+        concepts,
+        toggleState,
+        handleToggleClick: handleToggleClick,
+      });
+
+      console.log("renderTimeline called");
     });
   }, [conceptsPerDocument]);
 
   useEffect(() => {
+    console.log("3. toggleState effect, toggleState:", toggleState);
+    if (!conceptsPerDocument) return; // Add this guard
+
+    if (toggleState) {
+      applyDocumentFilter();
+    } else {
+      // Show all relations when toggle is off
+      document.querySelectorAll(".relation-icon").forEach((el) => {
+        el.style.display = null;
+        const group = el.closest("g");
+        if (group) {
+          group.querySelectorAll(".relation-outline").forEach((outline) => {
+            outline.style.display = null;
+          });
+        }
+      });
+    }
+  }, [toggleState, conceptsPerDocument]); // Add conceptsPerDocument as dependency
+
+  useEffect(() => {
+    console.log("4. clickedTerms relation effect");
     if (skipNextEffect.current) {
       skipNextEffect.current = false; // reset for next time
       return;
@@ -158,16 +251,18 @@ export default function EventRelationTimeline(props) {
 
   const currDocRef = useRef(props.currDocId);
   useEffect(() => {
+    console.log("5. currDocRef effect");
     currDocRef.current = props.currDocId;
   }, [props.currDocId]);
 
-  useEffect(() => {
-    console.log("togglestate", toggleState);
-    if (!toggleState) return;
-    applyDocumentFilter();
-  }, [currDocRef.current, toggleState]);
+  // useEffect(() => {
+  //   if (toggleState) {
+  //     applyDocumentFilter();
+  //   }
+  // }, [toggleState]);
 
   function applyDocumentFilter() {
+    if (!conceptsPerDocument) return; // Add this
     const docKey = Object.keys(conceptsPerDocument).find((key) =>
       key.endsWith(`_${currDocRef.current}`)
     );

@@ -8,9 +8,12 @@ import {
   TIMELINE_PADDING_DAYS,
   TRANSITION_DURATION,
 } from "../timelineConstants";
-import * as d3 from "d3v4";
+import * as d3 from "d3";
+import { createTimelineSvgs } from "./createTimelineSvgs";
+import { renderEpisodeLegend } from "./renderEpisodeLegend";
+import { computeEpisodeLegendLayout } from "./computeEpisodeLegendLayout";
 
-export function renderTimeline(
+export function renderTimeline({
   svgContainerId,
   patientId,
   conceptIds,
@@ -20,13 +23,19 @@ export function renderTimeline(
   endDate,
   dpheGroup,
   laneGroup,
-  dpheGroupCount,
-  laneGroupCount,
-  concepts
-) {
+  dpheGroupCounts,
+  laneGroupsCounts,
+  concepts,
+  toggleState,
+  handleToggleClick,
+}) {
+  console.log("renderTimeline started");
+  console.log("Received handleToggleClick:", handleToggleClick);
+
   let verticalPositions = {};
 
   function createEventData() {
+    console.log("createEventData called");
     const eventMap = new Map(); // To track events by lane + start + end
 
     for (let i = 0; i < startDate.length; i++) {
@@ -65,8 +74,8 @@ export function renderTimeline(
 
     return Array.from(eventMap.values());
   }
-
   function removeDuplicatesFromDpheAndLane() {
+    console.log("removingDuplicates");
     //REMOVING DUPLICATES from chemo_text and TLink
     const dpheGroupSet = new Set();
     const laneGroupSet = new Set();
@@ -94,11 +103,8 @@ export function renderTimeline(
     startRelation = Array.from(relation1Set);
     endRelation = Array.from(relation2Set);
   }
-
-  // Use the order in reportTypes to calculate totalMaxVerticalCounts of each report type
-  // to have a consistent report type order
-
   function getTotalMaxVertCount(dictionary) {
+    console.log("getting max Vert");
     let count = 0;
 
     for (let key in dictionary) {
@@ -112,7 +118,8 @@ export function renderTimeline(
     return count;
   }
 
-  let totalMaxVerticalCounts = getTotalMaxVertCount(laneGroupCount);
+  let totalMaxVerticalCounts = getTotalMaxVertCount(laneGroupsCounts);
+  console.log("getting max Vert complete");
 
   const container = document.getElementById(svgContainerId);
   const containerWidth = container.offsetWidth;
@@ -123,6 +130,7 @@ export function renderTimeline(
   const overviewHeight = totalMaxVerticalCounts * TEXT.overviewRowHeight;
 
   const eventData = createEventData();
+  console.log("eventData created, length:", eventData?.length);
 
   // Convert string to date
   if (eventData !== null) {
@@ -162,6 +170,7 @@ export function renderTimeline(
       .sort((a, b) => a - b);
 
     removeDuplicatesFromDpheAndLane();
+    console.log("removingDuplicates finished");
     const desiredOrder = ["Finding", "Disease", "Stage, Grade", "Treatment"];
 
     const groupLaneHeights = {}; // e.g., { 'AC': 2, 'Taxol': 3, ... }
@@ -232,7 +241,7 @@ export function renderTimeline(
       container.id = svgContainerId;
       document.body.appendChild(container); // Append to the desired parent (body, or other parent element)
     }
-
+    console.log("Checking");
     // SVG
     let svgTotalHeight =
       MARGINS.top +
@@ -245,119 +254,152 @@ export function renderTimeline(
       AGE_AREA.height +
       MARGINS.bottom;
 
-    // Append the legend SVG (on top)
-    let legendSvg = d3
-      .select("#" + svgContainerId)
-      .append("svg")
-      .attr("class", "legend_svg")
-      .attr("width", containerWidth)
-      .attr("height", LEGEND.height)
-      .style("display", "block");
+    // 1. Create SVGs
+    const { legendSvg, svg } = createTimelineSvgs({
+      containerId: svgContainerId,
+      containerWidth,
+      svgTotalHeight,
+      MARGINS,
+      LEGEND,
+    });
 
-    let svg = d3
-      .select("#" + svgContainerId)
-      .append("svg")
-      .attr("class", "timeline_svg")
-      .attr("viewBox", `0 0 ${containerWidth} ${svgTotalHeight}`)
-      .attr("preserveAspectRatio", "xMidYMid meet") // Optional
-      .style("width", "100%")
-      .style("height", "auto");
-
-    const arrowWidth = 20;
-    const arrowLabelGap = 5;
-    const labelPadding = 10;
-    let labelWidths = [];
+    // 2. Compute legend layout
     const allRelations = [...new Set([...startRelation, ...endRelation])];
-
-    // Temporarily render text to measure widths
-    let temp = legendSvg.append("g").attr("class", "tempTextMeasure");
-    allRelations.forEach((d, i) => {
-      const textEl = temp.append("text").text(d);
-      const width = textEl.node().getComputedTextLength();
-      labelWidths.push(width);
-    });
-    temp.remove(); // cleanup
-
-    // Now build an array of x positions
-    let episodeLegendX = [];
-    let currentX = LEGEND.anchorX + LEGEND.spacing;
-    labelWidths.forEach((labelWidth) => {
-      episodeLegendX.push(currentX);
-      currentX += arrowWidth + arrowLabelGap + labelWidth + labelPadding;
+    const episodeLegendX = computeEpisodeLegendLayout({
+      legendSvg,
+      allRelations,
+      arrowWidth: 20,
+      arrowLabelGap: 5,
+      labelPadding: 10,
+      LEGENDAnchorX: LEGEND.anchorX + LEGEND.spacing,
     });
 
-    // Add label first in its own position
-    legendSvg
-      .append("text")
-      .attr("x", 10) // or whatever left margin you want
-      .attr("y", MARGINS.top + LEGEND.anchorY)
-      .attr("dy", ".5ex")
-      .attr("class", "episode_legend_text")
-      .attr("text-anchor", "start")
-      .text("Event Occurrence:");
+    // 3. Call renderEpisodeLegend using these positions
+    renderEpisodeLegend({
+      legendSvg,
+      allRelations,
+      svgWidth: containerWidth,
+      MARGINS,
+      LEGEND,
+      GAPS,
+      episodeLegendX, // optional: pass if you want to reuse precomputed positions
+    });
 
-    legendSvg
-      .append("line")
-      .attr("x1", 10) // match the x of "Time Relation:"
-      .attr("y1", MARGINS.top + LEGEND.height)
-      .attr("x2", MARGINS.left + svgWidth)
-      .attr("y2", MARGINS.top + LEGEND.height)
-      .attr("class", "legend_group_divider");
+    console.log("Checking");
 
+    // // Append the legend SVG (on top)
+    // let legendSvg = d3
+    //   .select("#" + svgContainerId)
+    //   .append("svg")
+    //   .attr("class", "legend_svg")
+    //   .attr("width", containerWidth)
+    //   .attr("height", LEGEND.height)
+    //   .style("display", "block");
+    //
+    // let svg = d3
+    //   .select("#" + svgContainerId)
+    //   .append("svg")
+    //   .attr("class", "timeline_svg")
+    //   .attr("viewBox", `0 0 ${containerWidth} ${svgTotalHeight}`)
+    //   .attr("preserveAspectRatio", "xMidYMid meet") // Optional
+    //   .style("width", "100%")
+    //   .style("height", "auto");
+
+    // const arrowWidth = 20;
+    // const arrowLabelGap = 5;
+    // const labelPadding = 10;
+    // let labelWidths = [];
+    // const allRelations = [...new Set([...startRelation, ...endRelation])];
+    //
+    // // Temporarily render text to measure widths
+    // let temp = legendSvg.append("g").attr("class", "tempTextMeasure");
+    // allRelations.forEach((d, i) => {
+    //   const textEl = temp.append("text").text(d);
+    //   const width = textEl.node().getComputedTextLength();
+    //   labelWidths.push(width);
+    // });
+    // temp.remove(); // cleanup
+    //
+    // // Now build an array of x positions
+    // let episodeLegendX = [];
+    // let currentX = LEGEND.anchorX + LEGEND.spacing;
+    // labelWidths.forEach((labelWidth) => {
+    //   episodeLegendX.push(currentX);
+    //   currentX += arrowWidth + arrowLabelGap + labelWidth + labelPadding;
+    // });
+    //
+    // // Add label first in its own position
+    // legendSvg
+    //   .append("text")
+    //   .attr("x", 10) // or whatever left margin you want
+    //   .attr("y", MARGINS.top + LEGEND.anchorY)
+    //   .attr("dy", ".5ex")
+    //   .attr("class", "episode_legend_text")
+    //   .attr("text-anchor", "start")
+    //   .text("Event Occurrence:");
+    //
+    // legendSvg
+    //   .append("line")
+    //   .attr("x1", 10) // match the x of "Time Relation:"
+    //   .attr("y1", MARGINS.top + LEGEND.height)
+    //   .attr("x2", MARGINS.left + svgWidth)
+    //   .attr("y2", MARGINS.top + LEGEND.height)
+    //   .attr("class", "legend_group_divider");
+    //
     // Now episodeLegendGrp only contains the icons and labels
-    let episodeLegendGrp = legendSvg
-      .append("g")
-      .attr("class", "episode_legend_group")
-      .attr("transform", `translate(90, ${MARGINS.top})`); // shift it right to make room for "Time Relation:"
-
-    // Container group for each legend item
-    let episodeLegend = episodeLegendGrp
-      .selectAll(".episode_legend")
-      .data(allRelations)
-      .enter()
-      .append("g")
-      .attr("class", "episode_legend")
-      .attr("transform", (d, i) => `translate(${episodeLegendX[i]}, 0)`);
-
-    // Arrow paths
-    episodeLegend
-      .append("path")
-      .attr("class", "episode_legend_arrow")
-      .attr("d", function (d) {
-        if (d === "On") {
-          return "M 6 0 L 6 12";
-        } else if (d === "Before") {
-          return "M 12 0 L 0 6 L 12 12";
-        } else if (d === "Overlaps") {
-          return "M 0 6 L 12 6";
-        } else {
-          return "M 0 0 L 12 6 L 0 12";
-        }
-      })
-      .attr("transform", "translate(0, 0)") // put at baseline
-      .style("fill", "rgb(49, 163, 84)")
-      .style("stroke", "rgb(49, 163, 84)")
-      .style("stroke-width", (d) => (d === "Overlaps" ? 4 : 2));
-
-    // Legend labels (shifted slightly to the right and vertically aligned)
-    episodeLegend
-      .append("text")
-      .attr("x", 20) // give space between arrow and label
-      .attr("y", 10) // visually center with the arrow
-      .attr("alignment-baseline", "middle") // better vertical alignment
-      .attr("class", "episode_legend_text")
-      .text((d) => `${d}`)
-      .each(function (d) {
-        d3.select(this)
-          .append("title")
-          .text(() => {
-            if (d === "Before") return "Event occurs *before* time/date";
-            if (d === "On") return "Event occurs *within* time span";
-            if (d === "Overlaps") return "Event *overlaps* time span";
-            if (d === "After") return "Event occurs *after* time/date";
-            return "Unspecified temporal relation.";
-          });
-      });
+    // let episodeLegendGrp = legendSvg
+    //   .append("g")
+    //   .attr("class", "episode_legend_group")
+    //   .attr("transform", `translate(90, ${MARGINS.top})`); // shift it right to make room for "Time Relation:"
+    //
+    // // Container group for each legend item
+    // let episodeLegend = episodeLegendGrp
+    //   .selectAll(".episode_legend")
+    //   .data(allRelations)
+    //   .enter()
+    //   .append("g")
+    //   .attr("class", "episode_legend")
+    //   .attr("transform", (d, i) => `translate(${episodeLegendX[i]}, 0)`);
+    //
+    // // Arrow paths
+    // episodeLegend
+    //   .append("path")
+    //   .attr("class", "episode_legend_arrow")
+    //   .attr("d", function (d) {
+    //     if (d === "On") {
+    //       return "M 6 0 L 6 12";
+    //     } else if (d === "Before") {
+    //       return "M 12 0 L 0 6 L 12 12";
+    //     } else if (d === "Overlaps") {
+    //       return "M 0 6 L 12 6";
+    //     } else {
+    //       return "M 0 0 L 12 6 L 0 12";
+    //     }
+    //   })
+    //   .attr("transform", "translate(0, 0)") // put at baseline
+    //   .style("fill", "rgb(49, 163, 84)")
+    //   .style("stroke", "rgb(49, 163, 84)")
+    //   .style("stroke-width", (d) => (d === "Overlaps" ? 4 : 2));
+    //
+    // // Legend labels (shifted slightly to the right and vertically aligned)
+    // episodeLegend
+    //   .append("text")
+    //   .attr("x", 20) // give space between arrow and label
+    //   .attr("y", 10) // visually center with the arrow
+    //   .attr("alignment-baseline", "middle") // better vertical alignment
+    //   .attr("class", "episode_legend_text")
+    //   .text((d) => `${d}`)
+    //   .each(function (d) {
+    //     d3.select(this)
+    //       .append("title")
+    //       .text(() => {
+    //         if (d === "Before") return "Event occurs *before* time/date";
+    //         if (d === "On") return "Event occurs *within* time span";
+    //         if (d === "Overlaps") return "Event *overlaps* time span";
+    //         if (d === "After") return "Event occurs *after* time/date";
+    //         return "Unspecified temporal relation.";
+    //       });
+    //   });
 
     // Specify a specific region of an element to display, rather than showing the complete area
     // Any parts of the drawing that lie outside of the region bounded by the currently active clipping path are not drawn.
@@ -402,38 +444,22 @@ export function renderTimeline(
       .attr("fill", "white")
       .style("stroke", "#888");
 
-    // Click interaction
-    toggleGroup.on("click", function () {
-      setToggleState((prev) => {
-        const newState = !prev; // this is the updated value
-        if (!newState) {
-          currDocRef.current = 0; // update the ref
-        }
-
-        // Animate visual change
-        knob
-          .transition()
-          .duration(200)
-          .attr("cx", newState ? 30 : 10);
-        toggleBg
-          .transition()
-          .duration(200)
-          .attr("fill", newState ? "#007bff" : "#ccc");
-        toggleLabel.text(
-          newState
-            ? "Showing: Filtered Patient Events by Patient Doc"
-            : "Showing: All Patient Events"
-        );
-
-        // Apply the filter with the new state
-        applyDocumentFilter(newState);
-
-        return newState;
-      });
+    // Click → notify React
+    toggleGroup.on("click", () => {
+      console.log("Toggle clicked in D3, handleToggleClick is:", handleToggleClick);
+      if (handleToggleClick) {
+        console.log("Calling handleToggleClick");
+        handleToggleClick();
+      } else {
+        console.log("handleToggleClick is undefined!");
+      }
     });
+    console.log("Checking");
 
     // After defining everything:
     function updateTogglePosition() {
+      console.log("updateTogglePosition");
+
       const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
 
       // Keep it 40px from the right edge and some padding from the top
@@ -443,8 +469,14 @@ export function renderTimeline(
     // Call it initially
     updateTogglePosition();
 
+    console.log("Done updating toggle position");
+
     // Also call on resize
-    window.addEventListener("resize", updateTogglePosition);
+    // window.addEventListener("resize", updateTogglePosition);
+    // PUT AT END OF RENDERTIMELINE IF NEEDED
+    // return () => {
+    //   window.removeEventListener("resize", updateTogglePosition);
+    // };
 
     svg
       .append("defs")
@@ -457,6 +489,8 @@ export function renderTimeline(
       .attr("height", height + GAPS.legendToMain + topPadding);
 
     function updateMainReports() {
+      console.log("Checking update main report");
+
       // Re-bind data to existing groups
       const groups = d3
         .selectAll('g[clip-path="url(#secondary_area_clip)"]')
@@ -494,31 +528,42 @@ export function renderTimeline(
       d3.select(".main-ER-x-axis-top").call(xAxisTop);
     }
 
+    let isUpdating = false; // Add this flag at the top level of renderTimeline
+
     // Function expression to handle mouse wheel zoom or drag on main area
-    let zoomed = function () {
+    let zoomed = function (event) {
+      console.log("zoomed called, isUpdating:", isUpdating);
       // Ignore zoom triggered by brushing
-      if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
 
-      let transform = d3.event.transform;
+      if (isUpdating) {
+        console.log("Already updating, skipping");
+        return;
+      }
+      if (event.sourceEvent && event.sourceEvent.type === "brush") return;
 
-      // Rescale the main X-axis based on zoom transform
-      let newDomain = transform.rescaleX(overviewX).domain();
-      mainX.domain(newDomain);
+      isUpdating = true; // Set flag
 
-      // Redraw all reports using new mainX scale
-      updateMainReports();
-      updateHeatmaps();
-      updateDateAnchors();
+      try {
+        let transform = event.transform;
 
-      // Sync brush with zoom
-      // let newBrushSelection = mainX.range().map(transform.invertX, transform);
-      // overview.select(".brush").call(brush.move, newBrushSelection);
-      overview.select(".brush").call(brush.move, mainX.range().map(transform.invertX, transform));
+        // Rescale the main X-axis based on zoom transform
+        let newDomain = transform.rescaleX(overviewX).domain();
+        mainX.domain(newDomain);
 
-      // Update custom brush handles (if selection exists)
-      let selection = d3.brushSelection(overviewBrush.node());
+        // Redraw all reports using new mainX scale
+        updateMainReports();
+        updateHeatmaps();
+        updateDateAnchors();
 
-      showAndMoveCustomBrushHandles(selection);
+        // Sync brush with zoom
+        overview.select(".brush").call(brush.move, mainX.range().map(transform.invertX, transform));
+
+        // Update custom brush handles (if selection exists)
+        let selection = d3.brushSelection(overviewBrush.node());
+        showAndMoveCustomBrushHandles(selection);
+      } finally {
+        isUpdating = false; // Reset flag
+      }
     };
 
     // Track expanded/collapsed state for each group
@@ -870,6 +915,8 @@ export function renderTimeline(
         groupOffsets[pos.group] = newBaseY - oldBaseY;
       });
 
+      console.log("About to create mainReports");
+
       // Update data elements
       mainReports.selectAll(".main_report_group").each(function (d, i) {
         const group = d3.select(this);
@@ -979,7 +1026,7 @@ export function renderTimeline(
       .attr("class", "report_type_label")
       .attr("dy", ".5ex")
       .attr("x", -TEXT.marginLeft)
-      .text((d) => `${d} (${laneGroupCount[d]}):`);
+      .text((d) => `${d} (${laneGroupsCounts[d]}):`);
 
     // Create toggle buttons in the separate container
     const toggleButtonGroup = toggleButtonContainer
@@ -990,8 +1037,8 @@ export function renderTimeline(
       .attr("class", "toggle_button")
       .attr("transform", (d, i) => `translate(0, ${labelPositions[i].y})`)
       .style("cursor", "pointer")
-      .on("click", function (d) {
-        d3.event.stopPropagation(); // Use event.stopPropagation() for D3 v6+
+      .on("click", function (event, d) {
+        event.stopPropagation(); // Use event.stopPropagation() for D3 v6+
         expandedState[d] = !expandedState[d];
         updateLayout(true);
       });
@@ -1028,7 +1075,6 @@ export function renderTimeline(
     labelGroup.each(function (d) {
       const group = d3.select(this);
       const label = group.select(".report_type_label");
-      console.log(d);
 
       // Add a <title> to the label itself to show tooltip on hover
       label.append("title").text(() => {
@@ -1807,7 +1853,7 @@ export function renderTimeline(
 
     function handleClick(event, d) {
       const clickedConceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
-
+      console.log("handleClick called during render!", event, d);
       if (!clickedConceptIds.length) return;
       setClickedTerms((prevTerms) => {
         // Check if ANY of the merged concept IDs are already clicked
@@ -2151,9 +2197,9 @@ export function renderTimeline(
 
     // Function expression to create brush function redraw with selection
     // Need to define this before defining brush since it's function expression instead of function declaration
-    let brushed = function () {
+    let brushed = function (event) {
       // Ignore brush triggered by zooming
-      if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return;
+      if (event.sourceEvent && event.sourceEvent.type === "zoom") return;
 
       let selection = d3.brushSelection(overviewBrush.node());
       if (!selection) return;
@@ -2202,6 +2248,9 @@ export function renderTimeline(
       // call brush.move and pass overviewX.range() as argument
       // https://github.com/d3/d3-brush#brush_move
       .call(brush.move, overviewX.range());
+
+    console.log("mainReports complete");
+    console.log("renderTimeline complete");
 
     // Reset button
     svg
