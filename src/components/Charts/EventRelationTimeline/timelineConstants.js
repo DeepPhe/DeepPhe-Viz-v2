@@ -32,6 +32,8 @@ export const LANE_GROUPS = {
 // Layout -------------------------------------------------------
 export const MARGINS = { top: 5, right: 20, bottom: 5, left: 200 };
 
+export const ARROW = { width: 20, LabelGap: 5, labelPadding: 10 };
+
 export const LEGEND = {
   height: 22,
   spacing: 2,

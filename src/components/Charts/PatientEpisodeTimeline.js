@@ -142,6 +142,7 @@ const PatientEpisodeTimeline = ({
 
     function highlightSelectedTimelineReport(reportId) {
       // Remove previous added highlighting classes
+      console.log("reportID:", reportId);
       const css = "selected_report";
       $(".main_report").removeClass(css);
       $(".overview_report").removeClass(css);
@@ -764,10 +765,10 @@ const PatientEpisodeTimeline = ({
             return color(d.episode);
           })
           .style("cursor", "pointer")
-          .on("click", function (d) {
+          .on("click", function (event, d) {
             const $circle = $("#main_" + d.id);
             const isSelected = $circle.hasClass("selected_report");
-            console.log("data: ", d);
+            console.log("data: ", d.id);
 
             // Always clear previous selections first
             $(".main_report_PE").removeClass("selected_report");
@@ -796,6 +797,7 @@ const PatientEpisodeTimeline = ({
             if (docIndex !== -1) {
               setCurrDocId(docIndex);
             } else {
+              console.log(docIndex, d.id);
               console.warn("❗Could not find document for reportId:", d.id);
             }
           });

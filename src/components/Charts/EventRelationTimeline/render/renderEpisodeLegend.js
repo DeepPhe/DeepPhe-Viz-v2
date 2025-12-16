@@ -1,4 +1,4 @@
-import { MARGINS, LEGEND } from "../timelineConstants";
+import { MARGINS, LEGEND, ARROW } from "../timelineConstants";
 import * as d3 from "d3";
 /**
  * Renders the episode legend on a given legendSvg
@@ -6,18 +6,13 @@ import * as d3 from "d3";
  * @param {d3.Selection} params.legendSvg - The D3 selection of the legend SVG
  * @param {Array<string>} params.allRelations - List of relation labels (e.g., ["On", "Before"])
  * @param {Array<number>} params.episodeLegendX - Precomputed x positions for each legend item
- * @param {number} params.arrowWidth
- * @param {number} params.arrowLabelGap
- * @param {number} params.labelPadding
  * @param {Function} [params.onClick] - Optional click handler for legend items
  */
 export function renderEpisodeLegend({
   legendSvg,
   allRelations,
   episodeLegendX,
-  arrowWidth = 20,
-  arrowLabelGap = 5,
-  labelPadding = 10,
+  containerWidth,
   onClick = null,
 }) {
   // Clean previous legend if it exists
@@ -37,10 +32,12 @@ export function renderEpisodeLegend({
   legendSvg
     .append("line")
     .attr("x1", 10)
-    .attr("y1", MARGINS.top + LEGEND.height)
-    .attr("x2", 800) // adjust as needed or pass as param
-    .attr("y2", MARGINS.top + LEGEND.height)
-    .attr("class", "legend_group_divider");
+    .attr("y1", LEGEND.height) // Bottom of THIS svg (not MARGINS.top + height)
+    .attr("x2", containerWidth)
+    .attr("y2", LEGEND.height) // Bottom of THIS svg
+    .attr("class", "legend_group_divider")
+    .attr("stroke", "black")
+    .attr("stroke-width", 1);
 
   // Container for episode legend items
   const episodeLegendGrp = legendSvg
@@ -79,7 +76,7 @@ export function renderEpisodeLegend({
   // Text labels
   episodeLegend
     .append("text")
-    .attr("x", arrowWidth + arrowLabelGap)
+    .attr("x", ARROW.width + ARROW.LabelGap)
     .attr("y", 10)
     .attr("alignment-baseline", "middle")
     .attr("class", "episode_legend_text")

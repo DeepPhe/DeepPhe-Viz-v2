@@ -17,6 +17,7 @@ export function DocumentPanel(props) {
   const filterLabel = props.filterLabel;
   const reportId = props.reportId;
   const containerRef = useRef(null);
+  const onMentionClick = props.onMentionClick;
 
   useEffect(() => {
     if (Array.isArray(filteredConcepts) && filteredConcepts.length > 0) {
@@ -28,6 +29,7 @@ export function DocumentPanel(props) {
     const handleSpanClick = (event) => {
       const span = event.target.closest(".span-info");
       if (span) {
+        console.log(span.dataset);
         const mentionIndex = span.dataset.mentionIndex;
         const conceptId = span.dataset.conceptId;
         const begin = span.dataset.begin;

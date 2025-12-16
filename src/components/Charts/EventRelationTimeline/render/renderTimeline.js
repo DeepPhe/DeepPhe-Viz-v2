@@ -28,10 +28,11 @@ export function renderTimeline({
   concepts,
   toggleState,
   handleToggleClick,
+  setClickedTerms,
+  skipNextEffect,
+  conceptsPerDocument,
+  reportId,
 }) {
-  console.log("renderTimeline started");
-  console.log("Received handleToggleClick:", handleToggleClick);
-
   let verticalPositions = {};
 
   function createEventData() {
@@ -241,7 +242,6 @@ export function renderTimeline({
       container.id = svgContainerId;
       document.body.appendChild(container); // Append to the desired parent (body, or other parent element)
     }
-    console.log("Checking");
     // SVG
     let svgTotalHeight =
       MARGINS.top +
@@ -278,131 +278,12 @@ export function renderTimeline({
     renderEpisodeLegend({
       legendSvg,
       allRelations,
-      svgWidth: containerWidth,
-      MARGINS,
-      LEGEND,
-      GAPS,
-      episodeLegendX, // optional: pass if you want to reuse precomputed positions
+      episodeLegendX,
+      containerWidth,
     });
 
-    console.log("Checking");
-
-    // // Append the legend SVG (on top)
-    // let legendSvg = d3
-    //   .select("#" + svgContainerId)
-    //   .append("svg")
-    //   .attr("class", "legend_svg")
-    //   .attr("width", containerWidth)
-    //   .attr("height", LEGEND.height)
-    //   .style("display", "block");
-    //
-    // let svg = d3
-    //   .select("#" + svgContainerId)
-    //   .append("svg")
-    //   .attr("class", "timeline_svg")
-    //   .attr("viewBox", `0 0 ${containerWidth} ${svgTotalHeight}`)
-    //   .attr("preserveAspectRatio", "xMidYMid meet") // Optional
-    //   .style("width", "100%")
-    //   .style("height", "auto");
-
-    // const arrowWidth = 20;
-    // const arrowLabelGap = 5;
-    // const labelPadding = 10;
-    // let labelWidths = [];
-    // const allRelations = [...new Set([...startRelation, ...endRelation])];
-    //
-    // // Temporarily render text to measure widths
-    // let temp = legendSvg.append("g").attr("class", "tempTextMeasure");
-    // allRelations.forEach((d, i) => {
-    //   const textEl = temp.append("text").text(d);
-    //   const width = textEl.node().getComputedTextLength();
-    //   labelWidths.push(width);
-    // });
-    // temp.remove(); // cleanup
-    //
-    // // Now build an array of x positions
-    // let episodeLegendX = [];
-    // let currentX = LEGEND.anchorX + LEGEND.spacing;
-    // labelWidths.forEach((labelWidth) => {
-    //   episodeLegendX.push(currentX);
-    //   currentX += arrowWidth + arrowLabelGap + labelWidth + labelPadding;
-    // });
-    //
-    // // Add label first in its own position
-    // legendSvg
-    //   .append("text")
-    //   .attr("x", 10) // or whatever left margin you want
-    //   .attr("y", MARGINS.top + LEGEND.anchorY)
-    //   .attr("dy", ".5ex")
-    //   .attr("class", "episode_legend_text")
-    //   .attr("text-anchor", "start")
-    //   .text("Event Occurrence:");
-    //
-    // legendSvg
-    //   .append("line")
-    //   .attr("x1", 10) // match the x of "Time Relation:"
-    //   .attr("y1", MARGINS.top + LEGEND.height)
-    //   .attr("x2", MARGINS.left + svgWidth)
-    //   .attr("y2", MARGINS.top + LEGEND.height)
-    //   .attr("class", "legend_group_divider");
-    //
-    // Now episodeLegendGrp only contains the icons and labels
-    // let episodeLegendGrp = legendSvg
-    //   .append("g")
-    //   .attr("class", "episode_legend_group")
-    //   .attr("transform", `translate(90, ${MARGINS.top})`); // shift it right to make room for "Time Relation:"
-    //
-    // // Container group for each legend item
-    // let episodeLegend = episodeLegendGrp
-    //   .selectAll(".episode_legend")
-    //   .data(allRelations)
-    //   .enter()
-    //   .append("g")
-    //   .attr("class", "episode_legend")
-    //   .attr("transform", (d, i) => `translate(${episodeLegendX[i]}, 0)`);
-    //
-    // // Arrow paths
-    // episodeLegend
-    //   .append("path")
-    //   .attr("class", "episode_legend_arrow")
-    //   .attr("d", function (d) {
-    //     if (d === "On") {
-    //       return "M 6 0 L 6 12";
-    //     } else if (d === "Before") {
-    //       return "M 12 0 L 0 6 L 12 12";
-    //     } else if (d === "Overlaps") {
-    //       return "M 0 6 L 12 6";
-    //     } else {
-    //       return "M 0 0 L 12 6 L 0 12";
-    //     }
-    //   })
-    //   .attr("transform", "translate(0, 0)") // put at baseline
-    //   .style("fill", "rgb(49, 163, 84)")
-    //   .style("stroke", "rgb(49, 163, 84)")
-    //   .style("stroke-width", (d) => (d === "Overlaps" ? 4 : 2));
-    //
-    // // Legend labels (shifted slightly to the right and vertically aligned)
-    // episodeLegend
-    //   .append("text")
-    //   .attr("x", 20) // give space between arrow and label
-    //   .attr("y", 10) // visually center with the arrow
-    //   .attr("alignment-baseline", "middle") // better vertical alignment
-    //   .attr("class", "episode_legend_text")
-    //   .text((d) => `${d}`)
-    //   .each(function (d) {
-    //     d3.select(this)
-    //       .append("title")
-    //       .text(() => {
-    //         if (d === "Before") return "Event occurs *before* time/date";
-    //         if (d === "On") return "Event occurs *within* time span";
-    //         if (d === "Overlaps") return "Event *overlaps* time span";
-    //         if (d === "After") return "Event occurs *after* time/date";
-    //         return "Unspecified temporal relation.";
-    //       });
-    //   });
-
     // Specify a specific region of an element to display, rather than showing the complete area
-    // Any parts of the drawing that lie outside of the region bounded by the currently active clipping path are not drawn.
+    // Any parts of the drawing that lie outside the region bounded by the currently active clipping path are not drawn.
     const topPadding = 15;
 
     // --- Add toggle group ---
@@ -410,7 +291,9 @@ export function renderTimeline({
       .append("g")
       .attr("class", "filter-toggle-group")
       .attr("transform", `translate(${containerWidth - 40})`)
-      .style("cursor", "pointer");
+      .style("cursor", "pointer")
+      .style("pointer-events", "all") // Ensure it can receive clicks
+      .raise(); // Move to front
 
     // Label text
     const toggleLabel = toggleGroup
@@ -444,22 +327,35 @@ export function renderTimeline({
       .attr("fill", "white")
       .style("stroke", "#888");
 
+    let localToggleState = toggleState; // Initialize with React state
+
     // Click → notify React
     toggleGroup.on("click", () => {
-      console.log("Toggle clicked in D3, handleToggleClick is:", handleToggleClick);
       if (handleToggleClick) {
-        console.log("Calling handleToggleClick");
         handleToggleClick();
-      } else {
-        console.log("handleToggleClick is undefined!");
+
+        // Toggle the LOCAL state
+        localToggleState = !localToggleState; // UPDATE the local state!
+
+        // Update visuals based on the NEW local state
+        knob
+          .transition()
+          .duration(200)
+          .attr("cx", localToggleState ? 30 : 10); // Use localToggleState, not isNowOn
+
+        toggleBg
+          .transition()
+          .duration(200)
+          .attr("fill", localToggleState ? "#007bff" : "#ccc");
+
+        toggleLabel.text(
+          localToggleState ? "Showing: Filtered Patient Events" : "Showing: All Patient Events"
+        );
       }
     });
-    console.log("Checking");
 
     // After defining everything:
     function updateTogglePosition() {
-      console.log("updateTogglePosition");
-
       const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
 
       // Keep it 40px from the right edge and some padding from the top
@@ -468,8 +364,6 @@ export function renderTimeline({
 
     // Call it initially
     updateTogglePosition();
-
-    console.log("Done updating toggle position");
 
     // Also call on resize
     // window.addEventListener("resize", updateTogglePosition);
@@ -489,8 +383,6 @@ export function renderTimeline({
       .attr("height", height + GAPS.legendToMain + topPadding);
 
     function updateMainReports() {
-      console.log("Checking update main report");
-
       // Re-bind data to existing groups
       const groups = d3
         .selectAll('g[clip-path="url(#secondary_area_clip)"]')
@@ -532,7 +424,6 @@ export function renderTimeline({
 
     // Function expression to handle mouse wheel zoom or drag on main area
     let zoomed = function (event) {
-      console.log("zoomed called, isUpdating:", isUpdating);
       // Ignore zoom triggered by brushing
 
       if (isUpdating) {

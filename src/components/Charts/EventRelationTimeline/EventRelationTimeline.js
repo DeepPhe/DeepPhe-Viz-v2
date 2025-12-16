@@ -18,7 +18,6 @@ export default function EventRelationTimeline(props) {
   const [isFilterOn, setIsFilterOn] = useState(false);
 
   useEffect(() => {
-    console.log("1. clickedTerms effect");
     if (clickedTerms.length === 0) {
       document.querySelectorAll("circle").forEach((circle) => {
         circle.style.fillOpacity = "0.3"; // Reset fill opacity to default
@@ -29,7 +28,6 @@ export default function EventRelationTimeline(props) {
 
   // In React component
   const handleToggleClick = () => {
-    console.log("handleToggleClick called");
     setToggleState((prev) => !prev);
   };
 
@@ -84,49 +82,8 @@ export default function EventRelationTimeline(props) {
 
   const skipNextEffect = useRef(false);
 
-  // useEffect(() => {
-  //   if (!conceptsPerDocument) return;
-  //
-  //   fetchTXTData(getDpheGroupByConceptId).then((data) => {
-  //     if (!data) return;
-  //
-  //     const transformedData = transformTXTData(data);
-  //
-  //     const container = document.getElementById(svgContainerId);
-  //     if (container) container.innerHTML = "";
-  //
-  //     const filteredDpheGroup = transformedData.dpheGroup.filter(Boolean);
-  //     const filteredLaneGroup = transformedData.laneGroup.filter(Boolean);
-  //
-  //     if (filteredDpheGroup.length === 0 || filteredLaneGroup.length === 0) return;
-  //
-  //     renderTimeline({
-  //       svgContainerId,
-  //       patientId: transformedData.patientId,
-  //       conceptIds: transformedData.conceptIds,
-  //       startRelation: transformedData.startRelation,
-  //       startDate: transformedData.startDate,
-  //       endRelation: transformedData.endRelation,
-  //       endDate: transformedData.endDate,
-  //       dpheGroup: transformedData.dpheGroup,
-  //       laneGroup: transformedData.laneGroup,
-  //       dpheGroupCounts: transformedData.dpheGroupCounts,
-  //       laneGroupsCounts: transformedData.laneGroupsCounts,
-  //       concepts,
-  //       toggleState,
-  //       handleToggleClick: () => setToggleState((prev) => !prev),
-  //     });
-  //   });
-  // }, [
-  //   conceptsPerDocument,
-  //   toggleState, // ONLY IF D3 DEPENDS ON IT FOR VISUAL STATE
-  // ]);
-
   useEffect(() => {
-    console.log("2. Main render effect - conceptsPerDocument changed");
     if (!conceptsPerDocument) return;
-
-    console.log("useEffect running - about to fetch data");
 
     fetchTXTData(getDpheGroupByConceptId).then((data) => {
       if (!data) return;
@@ -140,9 +97,6 @@ export default function EventRelationTimeline(props) {
       const filteredLaneGroup = transformedData.laneGroup.filter(Boolean);
 
       if (filteredDpheGroup.length === 0 || filteredLaneGroup.length === 0) return;
-
-      console.log("About to call renderTimeline");
-      console.log("handleToggleClick is:", handleToggleClick);
 
       renderTimeline({
         svgContainerId,
@@ -159,14 +113,15 @@ export default function EventRelationTimeline(props) {
         concepts,
         toggleState,
         handleToggleClick: handleToggleClick,
+        setClickedTerms,
+        skipNextEffect: skipNextEffect,
+        conceptsPerDocument,
+        reportId,
       });
-
-      console.log("renderTimeline called");
     });
   }, [conceptsPerDocument]);
 
   useEffect(() => {
-    console.log("3. toggleState effect, toggleState:", toggleState);
     if (!conceptsPerDocument) return; // Add this guard
 
     if (toggleState) {
@@ -186,19 +141,15 @@ export default function EventRelationTimeline(props) {
   }, [toggleState, conceptsPerDocument]); // Add conceptsPerDocument as dependency
 
   useEffect(() => {
-    console.log("4. clickedTerms relation effect");
     if (skipNextEffect.current) {
       skipNextEffect.current = false; // reset for next time
       return;
     }
-    // if (!clickedTerms || clickedTerms.length === 0) return;
-
     document.querySelectorAll(".relation-icon").forEach((el) => {
       if (!el.classList.contains("selected")) {
         el.classList.add("unselected");
       }
     });
-
     document.querySelectorAll(`.relation-icon`).forEach((el) => {
       const conceptIds = el.dataset.conceptIds
         ? el.dataset.conceptIds.split(",").map((s) => s.trim())
@@ -208,15 +159,13 @@ export default function EventRelationTimeline(props) {
       if (clickedTerms.includes(conceptIds)) {
         console.log("match");
       }
-
-      if (clickedTerms.includes(conceptId)) {
+      if (clickedTerms.includes(conceptIds)) {
         if (el.hasAttribute("marker-end")) {
           const currentMarker = el.getAttribute("marker-end");
           if (MARKER_TOGGLE_MAP[currentMarker]) {
             el.setAttribute("marker-end", MARKER_TOGGLE_MAP[currentMarker]);
           }
         }
-
         if (el.hasAttribute("marker-start")) {
           const currentMarker = el.getAttribute("marker-start");
           if (MARKER_TOGGLE_MAP[currentMarker]) {
@@ -231,7 +180,6 @@ export default function EventRelationTimeline(props) {
           el.classList.remove("unselected");
           el.classList.add("selected");
         }
-      } else {
       }
 
       // Show/hide the black outline line
@@ -251,15 +199,8 @@ export default function EventRelationTimeline(props) {
 
   const currDocRef = useRef(props.currDocId);
   useEffect(() => {
-    console.log("5. currDocRef effect");
     currDocRef.current = props.currDocId;
   }, [props.currDocId]);
-
-  // useEffect(() => {
-  //   if (toggleState) {
-  //     applyDocumentFilter();
-  //   }
-  // }, [toggleState]);
 
   function applyDocumentFilter() {
     if (!conceptsPerDocument) return; // Add this
