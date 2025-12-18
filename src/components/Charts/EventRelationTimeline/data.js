@@ -1,12 +1,12 @@
 import { LANE_GROUPS } from "./timelineConstants";
 
-export const fetchTXTData = async (getDpheGroupByConceptId) => {
+export const fetchTXTData = async (getDpheGroupByConceptId, getNegatedByConceptId) => {
   try {
     const response = await fetch("/docs/Patient01_times.txt");
     if (!response.ok) throw new Error("Failed to load file");
 
     const text = await response.text();
-    return parseTXT(text, getDpheGroupByConceptId);
+    return parseTXT(text, getDpheGroupByConceptId, getNegatedByConceptId);
   } catch (error) {
     console.error("Error loading TSV:", error);
     return null;
@@ -19,7 +19,7 @@ export const fetchTXTData = async (getDpheGroupByConceptId) => {
  * @param getDpheGroupByConceptId
  * @returns {Object} Parsed info about the patient and concepts
  */
-export const parseTXT = (txt, getDpheGroupByConceptId) => {
+export const parseTXT = (txt, getDpheGroupByConceptId, getNegatedByConceptId) => {
   const lines = txt.trim().split("\n");
   const headers = lines[0].split("\t").map((h) => h.trim());
   const dpheGroupCounts = {};
@@ -38,6 +38,8 @@ export const parseTXT = (txt, getDpheGroupByConceptId) => {
     // Get and assign dpheGroup
     const dpheGroup = getDpheGroupByConceptId(obj.ConceptID);
     obj.dpheGroup = dpheGroup;
+
+    obj.negated = getNegatedByConceptId(obj.ConceptID);
 
     // Assign laneGroup and count occurrences
     if (dpheGroup) {

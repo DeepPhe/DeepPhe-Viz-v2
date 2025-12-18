@@ -31,34 +31,6 @@ export default function EventRelationTimeline(props) {
     setToggleState((prev) => !prev);
   };
 
-  // Click interaction
-  // toggleGroup.on("click", function () {
-  //   setToggleState((prev) => {
-  //     const newState = !prev; // this is the updated value
-  //     if (!newState) {
-  //       currDocRef.current = 0; // update the ref
-  //     }
-  //
-  //     // Animate visual change
-  //     knob
-  //       .transition()
-  //       .duration(200)
-  //       .attr("cx", newState ? 30 : 10);
-  //     toggleBg
-  //       .transition()
-  //       .duration(200)
-  //       .attr("fill", newState ? "#007bff" : "#ccc");
-  //     toggleLabel.text(
-  //       newState ? "Showing: Filtered Patient Events by Patient Doc" : "Showing: All Patient Events"
-  //     );
-  //
-  //     // Apply the filter with the new state
-  //     applyDocumentFilter(newState);
-  //
-  //     return newState;
-  //   });
-  // });
-
   const transformTXTData = (data) => {
     return {
       //PatientID is same for every instance
@@ -72,6 +44,7 @@ export default function EventRelationTimeline(props) {
       laneGroup: data.map((d) => d.laneGroup),
       dpheGroupCounts: data.dpheGroupCounts,
       laneGroupsCounts: data.laneGroupsCounts,
+      negated: data.map((d) => d.negated),
     };
   };
 
@@ -80,15 +53,23 @@ export default function EventRelationTimeline(props) {
     return concept ? concept.dpheGroup : null;
   }
 
+  function getNegatedByConceptId(conceptId) {
+    const concept = concepts.find((concept) => concept.id === conceptId);
+    return concept ? concept.negated : null;
+  }
+
   const skipNextEffect = useRef(false);
 
   useEffect(() => {
     if (!conceptsPerDocument) return;
 
-    fetchTXTData(getDpheGroupByConceptId).then((data) => {
+    fetchTXTData(getDpheGroupByConceptId, getNegatedByConceptId).then((data) => {
       if (!data) return;
 
       const transformedData = transformTXTData(data);
+      console.log(data);
+      console.log(transformedData.negated);
+      // console.log(concepts);
 
       const container = document.getElementById(svgContainerId);
       if (container) container.innerHTML = "";
@@ -110,6 +91,7 @@ export default function EventRelationTimeline(props) {
         laneGroup: transformedData.laneGroup,
         dpheGroupCounts: transformedData.dpheGroupCounts,
         laneGroupsCounts: transformedData.laneGroupsCounts,
+        negated: transformedData.negated,
         concepts,
         toggleState,
         handleToggleClick: handleToggleClick,

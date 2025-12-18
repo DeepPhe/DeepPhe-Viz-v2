@@ -25,6 +25,7 @@ export function renderTimeline({
   laneGroup,
   dpheGroupCounts,
   laneGroupsCounts,
+  negated,
   concepts,
   toggleState,
   handleToggleClick,
@@ -36,7 +37,6 @@ export function renderTimeline({
   let verticalPositions = {};
 
   function createEventData() {
-    console.log("createEventData called");
     const eventMap = new Map(); // To track events by lane + start + end
 
     for (let i = 0; i < startDate.length; i++) {
@@ -69,6 +69,7 @@ export function renderTimeline({
           relation2: endRelation[i],
           dpheGroup: [dpheGroup[i]],
           conceptIds: [conceptIds[i]],
+          negated: negated[i],
         });
       }
     }
@@ -1269,7 +1270,7 @@ export function renderTimeline({
         const x2 = d.formattedEndDate;
         const baseY = groupBaseYMap[d.laneGroup];
         let y = baseY;
-        const buffer = 15;
+        const buffer = 13;
 
         // const checkOverlap = (a, b) => Math.max(a[0], b[0]) <= Math.min(a[1], b[1]);
 
@@ -1377,6 +1378,7 @@ export function renderTimeline({
 
         function drawRelationLine({ group, d, x1, x2, markerStart, markerEnd, handleClick }) {
           // Handle arrays for display
+          console.log(d);
           const conceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
           // Get concept names and count duplicates
           const conceptNames = conceptIds.map(
@@ -1419,7 +1421,7 @@ export function renderTimeline({
             .attr("x2", x2)
             .attr("y1", 0)
             .attr("y2", 0)
-            .attr("stroke", "rgb(49, 163, 84)")
+            .attr("stroke", d.negated ? "rgb(255, 0, 0)" : "rgb(49, 163, 84)")
             .attr("stroke-width", 5)
             .attr("stroke-opacity", 0.75)
             .style("cursor", "pointer")
