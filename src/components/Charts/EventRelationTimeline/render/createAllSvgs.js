@@ -6,20 +6,13 @@ import * as d3 from "d3";
  * @param {string} params.containerId - The HTML container ID
  * @param {number} params.containerWidth - Width of the SVG
  * @param {number} params.svgTotalHeight - Total height for the timeline SVG
- * @param {Object} params.MARGINS - Margin constants
  * @param {Object} params.LEGEND - Legend constants
  * @returns {Object} - { legendSvg, svg }
  */
-export function createTimelineSvgs({
-  containerId,
-  containerWidth,
-  svgTotalHeight,
-  MARGINS,
-  LEGEND,
-}) {
+export function createAllSvgs({ containerId, containerWidth, svgTotalHeight, LEGEND }) {
   // Append the legend SVG
-  const legendSvg = d3
-    .select("#" + containerId)
+  const container = d3.select("#" + containerId);
+  const legendSvg = container
     .append("svg")
     .attr("class", "legend_svg")
     .attr("width", containerWidth)
@@ -27,14 +20,11 @@ export function createTimelineSvgs({
     .style("display", "block");
 
   // Append the main timeline SVG
-  const svg = d3
-    .select("#" + containerId)
+  const timelineSvg = container
     .append("svg")
     .attr("class", "timeline_svg")
     .attr("viewBox", `0 0 ${containerWidth} ${svgTotalHeight}`)
-    .attr("preserveAspectRatio", "xMidYMid meet")
-    .style("width", "100%")
-    .style("height", "auto");
+    .attr("preserveAspectRatio", "xMidYMid meet");
 
-  return { legendSvg, svg };
+  return { legendSvg, timelineSvg };
 }

@@ -67,10 +67,6 @@ export default function EventRelationTimeline(props) {
       if (!data) return;
 
       const transformedData = transformTXTData(data);
-      console.log(data);
-      console.log(transformedData.negated);
-      // console.log(concepts);
-
       const container = document.getElementById(svgContainerId);
       if (container) container.innerHTML = "";
 
@@ -136,8 +132,8 @@ export default function EventRelationTimeline(props) {
       const conceptIds = el.dataset.conceptIds
         ? el.dataset.conceptIds.split(",").map((s) => s.trim())
         : [];
-      console.log(clickedTerms);
-      console.log(conceptIds);
+      // console.log(clickedTerms);
+      // console.log(conceptIds);
       if (clickedTerms.includes(conceptIds)) {
         console.log("match");
       }

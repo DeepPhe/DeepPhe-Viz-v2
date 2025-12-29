@@ -1,6 +1,5 @@
 // API ---------------------------------------------------------
 export const BASE_URI = "http://localhost:3001/api";
-export const TRANSITION_DURATION = 800;
 
 // Domain mapping ----------------------------------------------
 export const LANE_GROUPS = {
@@ -30,6 +29,8 @@ export const LANE_GROUPS = {
 };
 
 // Layout -------------------------------------------------------
+export const PADDING = { top: 15 };
+
 export const MARGINS = { top: 5, right: 20, bottom: 5, left: 200 };
 
 export const ARROW = { width: 20, LabelGap: 5, labelPadding: 10 };
@@ -46,6 +47,19 @@ export const TEXT = {
   marginLeft: 10,
   mainRowHeight: 10,
   overviewRowHeight: 3,
+};
+
+export const TIMESPAN = {
+  padding: 8,
+};
+
+export const LANE = {
+  height: 15,
+  GROUP_TOP_PADDING: 10,
+};
+
+export const OVERVIEW = {
+  height: 10,
 };
 
 export const AGE_AREA = {

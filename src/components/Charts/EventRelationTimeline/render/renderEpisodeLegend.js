@@ -43,7 +43,7 @@ export function renderEpisodeLegend({
   const episodeLegendGrp = legendSvg
     .append("g")
     .attr("class", "episode_legend_group")
-    .attr("transform", `translate(90, ${MARGINS.top})`);
+    .attr("transform", `translate(130, ${MARGINS.top})`);
 
   // Bind data
   const episodeLegend = episodeLegendGrp
