@@ -41,33 +41,33 @@ export function renderTimeline({
 }) {
   let verticalPositions = {};
 
-  function mergeEventData(existingEvent, i) {
+  function mergeSpanData(existingSpan, i) {
     // Merge patient_ids
-    if (!existingEvent.patient_id.includes(patientId[i])) {
-      existingEvent.patient_id.push(patientId[i]);
+    if (!existingSpan.patient_id.includes(patientId[i])) {
+      existingSpan.patient_id.push(patientId[i]);
     }
     // Merge other arrays
-    if (!existingEvent.dpheGroup.includes(dpheGroup[i])) {
-      existingEvent.dpheGroup.push(dpheGroup[i]);
+    if (!existingSpan.dpheGroup.includes(dpheGroup[i])) {
+      existingSpan.dpheGroup.push(dpheGroup[i]);
     }
-    if (!existingEvent.conceptIds.includes(conceptIds[i])) {
-      existingEvent.conceptIds.push(conceptIds[i]);
+    if (!existingSpan.conceptIds.includes(conceptIds[i])) {
+      existingSpan.conceptIds.push(conceptIds[i]);
     }
   }
 
-  function createEventData() {
-    const eventMap = new Map(); // To track events by lane + start + end
+  function createSpanData() {
+    const spanMap = new Map(); // To track events by lane + start + end
 
     for (let i = 0; i < startDate.length; i++) {
       const key = `${laneGroup[i]}_${startDate[i]}_${endDate[i]}`;
 
-      if (eventMap.has(key)) {
+      if (spanMap.has(key)) {
         // Merge with existing event
-        const existingEvent = eventMap.get(key);
-        mergeEventData(existingEvent, i);
+        const existingEvent = spanMap.get(key);
+        mergeSpanData(existingEvent, i);
       } else {
         // Create new event entry
-        eventMap.set(key, {
+        spanMap.set(key, {
           start: startDate[i],
           end: endDate[i],
           patient_id: [patientId[i]], // Convert to array for merged events
@@ -80,7 +80,7 @@ export function renderTimeline({
         });
       }
     }
-    return Array.from(eventMap.values());
+    return Array.from(spanMap.values());
   }
 
   function removeDuplicatesFromDpheAndLane() {
@@ -133,11 +133,17 @@ export function renderTimeline({
   const container = document.getElementById(svgContainerId);
   const containerWidth = container.offsetWidth;
   const svgWidth = containerWidth - MARGINS.left - 25; // TODO: replace 25 with a constant
-  const eventData = createEventData();
+  const spanData = createSpanData();
 
   // Convert string to date
-  const minStartDate = new Date(d3.min(eventData, (d) => new Date(d.start)));
-  const maxEndDate = new Date(d3.max(eventData, (d) => new Date(d.end)));
+  const minStartDate = new Date(d3.min(spanData, (d) => new Date(d.start)));
+  const maxEndDate = new Date(d3.max(spanData, (d) => new Date(d.end)));
+
+  const expandedState = {};
+  const desiredOrder = ["Finding", "Disease", "Stage, Grade", "Treatment"];
+
+  // Track expanded/collapsed state for each group
+  desiredOrder.forEach((d) => (expandedState[d] = true));
 
   // Add padding
   minStartDate.setDate(minStartDate.getDate() - TIMELINE_PADDING_DAYS);
@@ -148,13 +154,12 @@ export function renderTimeline({
   const allDates = new Set();
 
   // Populate allDates with start and end dates of each event
-  eventData.forEach(function (d, i) {
+  spanData.forEach(function (d, i) {
     const startDate = new Date(d.start);
     const endDate = new Date(d.end);
 
     allDates.add(startDate.getTime());
     allDates.add(endDate.getTime());
-    // console.log(startDate);
     d.formattedStartDate = mainX(startDate);
     // console.log("formattedStartDate", d.formattedStartDate);
     d.formattedEndDate = mainX(endDate);
@@ -174,20 +179,19 @@ export function renderTimeline({
   }
 
   removeDuplicatesFromDpheAndLane();
-  const desiredOrder = ["Finding", "Disease", "Stage, Grade", "Treatment"];
   const allGroupLanes = [];
 
   const groupLaneCounts = {}; // e.g., { 'AC': 2, 'Taxol': 3, ... }
   desiredOrder.forEach((group) => {
     const groupLane = [];
-    const eventsInGroup = eventData.filter((d) => d.laneGroup === group);
+    const spansInGroup = spanData.filter((d) => d.laneGroup === group);
 
-    eventsInGroup.forEach((d) => {
+    spansInGroup.forEach((d) => {
       const x1 = +d.formattedStartDate;
       const x2 = +d.formattedEndDate;
       let laneNumber = 0;
 
-      while (laneNumber < eventsInGroup.length) {
+      while (laneNumber < spansInGroup.length) {
         if (!groupLane[laneNumber]) groupLane[laneNumber] = [];
         const hasOverlap = groupLane[laneNumber].some((lane) =>
           checkOverlapWithPadding([x1, x2], lane, TIMESPAN.padding)
@@ -205,9 +209,6 @@ export function renderTimeline({
     allGroupLanes.push(groupLane);
   });
 
-  // console.log(groupLaneCounts);
-  // console.log(allGroupLanes);
-
   // Get the sum of grouplanecounts
   const totalGroupLaneCounts = Object.values(groupLaneCounts).reduce((acc, val) => acc + val, 0);
   // console.log(totalGroupLaneCounts);
@@ -219,42 +220,25 @@ export function renderTimeline({
 
   // Compute group heights before setupTimelineLayout
   for (const key of desiredOrder) {
-    // Filter events that belong to this group
-    const eventsForGroup = eventData.filter((d) => d.laneGroup === key);
-    // Skip groups with no events
-    if (!eventsForGroup.length) continue;
-    const laneCount = assignLanes(eventsForGroup);
+    // Filter spans that belong to this group
+    const spansForGroup = spanData.filter((d) => d.laneGroup === key);
+    console.log(spansForGroup);
+    // Skip groups with no spans
+    if (!spansForGroup.length) continue;
+    const laneCount = getLaneCount(spansForGroup);
+    console.log(laneCount);
     const groupHeight = laneCount * LANE.height;
 
     groupLayouts.push({
       key,
-      events: eventsForGroup,
+      spans: spansForGroup,
       height: groupHeight,
       yOffset: yGroupOffset,
     });
-    // const groupG = drawGroup(main_ER_svg, key, yGroupOffset, groupHeight, svgWidth);
-    // drawLanes(groupG, eventsForGroup);
     yGroupOffset += groupHeight + LANE.GROUP_TOP_PADDING;
   }
   const totalContentHeight = yGroupOffset;
 
-  // Y scale to handle main area
-  // let mainY = d3.scaleLinear().domain([0, totalGroupLaneCounts]).range([0, height]);
-  //
-  // // Y scale to handle overview area
-  // let overviewY = d3.scaleLinear().domain([0, totalGroupLaneCounts]).range([0, overviewHeight]);
-  //
-  // // Process episode dates
-  // let episodeSpansData = [];
-  // Create the container if it doesn't exist
-  // if (!document.getElementById(svgContainerId)) {
-  //   console.log("Do we exist?", svgContainerId);
-  //   const container = document.createElement("div");
-  //   container.id = svgContainerId;
-  //   document.body.appendChild(container); // Append to the desired parent (body, or other parent element)
-  // } else {
-  //   console.log("we exist");
-  // }
   // SVG
   let svgTotalHeight =
     MARGINS.top +
@@ -293,58 +277,6 @@ export function renderTimeline({
     episodeLegendX,
     containerWidth,
   });
-
-  // const labelGroup = timelineSvg
-  //   .append("g")
-  //   .attr("class", "group-labels")
-  //   .attr(
-  //     "transform",
-  //     `translate(${MARGINS.left - TEXT.marginLeft}, ${
-  //       MARGINS.top + LEGEND.height + GAPS.legendToMain
-  //     })`
-  //   );
-  //
-  // const labels = labelGroup
-  //   .selectAll(".report_type_label_group")
-  //   .data(groupLayouts)
-  //   .enter()
-  //   .append("g")
-  //   .attr("class", "report_type_label_group")
-  //   .attr("transform", (d) => `translate(0, ${d.yOffset})`);
-  //
-  // labels
-  //   .append("text")
-  //   .attr("class", "report_type_label")
-  //   .attr("x", 0)
-  //   .attr("y", (d) => d.height / 2)
-  //   .attr("dy", "0.35em");
-
-  function drawGroupLabels(svg, groupLayouts) {
-    const labelGroup = svg
-      .append("g")
-      .attr("class", "group-labels")
-      .attr(
-        "transform",
-        `translate(${MARGINS.left - TEXT.marginLeft}, ${
-          MARGINS.top + LEGEND.height + GAPS.legendToMain
-        })`
-      );
-
-    const labels = labelGroup
-      .selectAll(".report_type_label_group")
-      .data(groupLayouts)
-      .enter()
-      .append("g")
-      .attr("class", "report_type_label_group")
-      .attr("transform", (d) => `translate(0, ${d.yOffset})`);
-
-    labels
-      .append("text")
-      .attr("class", "report_type_label")
-      .attr("y", (d) => d.height / 2)
-      .attr("dy", "0.35em")
-      .text((d) => `${d.key} (${d.events.length}):`);
-  }
 
   // Add toggle group to legendSvg
   const toggleGroup = legendSvg
@@ -417,7 +349,6 @@ export function renderTimeline({
   // After defining everything:
   function updateTogglePosition() {
     const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
-
     // Keep it 40px from the right edge and some padding from the top
     toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
   }
@@ -446,7 +377,7 @@ export function renderTimeline({
       // Redraw all reports using new mainX scale
       updateMainReports();
       updateHeatmaps();
-      // updateDateAnchors();
+      updateDateAnchors();
 
       // Sync brush with zoom
       overview.select(".brush").call(brush.move, mainX.range().map(transform.invertX, transform));
@@ -472,6 +403,9 @@ export function renderTimeline({
     ])
     .on("zoom", zoomed);
 
+  // const timelineWidth = svgWidth + MARGINS.left;
+  console.log(svgWidth);
+
   // make main_ER_svg and Age_ER (ER = event relation)
   const { main_ER_svg, age_ER, axisLayer } = setupTimelineLayout(
     timelineSvg,
@@ -479,14 +413,17 @@ export function renderTimeline({
     totalContentHeight,
     zoom
   );
+  const caretPath = "M -4 -2.67 L 0 1.33 L 4 -2.67";
+  const caretRight = "M 0 0 L 10 5 L 0 10"; // triangle pointing right
+  const caretDown = "M 0 0 L 10 0 L 5 10 Z"; // triangle pointing down
 
-  drawGroupLabels(timelineSvg, groupLayouts);
   groupLayouts.forEach((layout, i) => {
     // isLastGroup is used to ensure divider line is not used after last group
     const isLastGroup = i === groupLayouts.length - 1;
 
-    const groupG = drawGroup(
+    const groupG = drawCaretAndLabelForGroup(
       main_ER_svg,
+      layout.spans,
       layout.key,
       layout.yOffset,
       layout.height,
@@ -494,7 +431,7 @@ export function renderTimeline({
       !isLastGroup
     );
 
-    drawLanes(groupG, layout.events);
+    drawLanes(groupG, layout.spans, layout.key);
   });
 
   const xAxisTop = d3.axisTop(mainX).tickSizeInner(5).tickSizeOuter(0);
@@ -510,13 +447,65 @@ export function renderTimeline({
     .attr("transform", `translate(0, ${totalContentHeight})`)
     .call(xAxisBottom);
 
-  function drawGroup(parent, groupKey, yOffset, height, width, showDivider = true) {
+  function drawCaretAndLabelForGroup(
+    parent,
+    spans,
+    groupKey,
+    yOffset,
+    height,
+    width,
+    showDivider = true
+  ) {
+    const collapsedHeight = 10; // minimal height when collapsed
     const groupG = parent
       .append("g")
       .attr("class", `group group-${groupKey.replace(/\s+/g, "-")}`)
+      .attr("data-expanded-height", height)
+      .attr("data-collapsed-height", collapsedHeight)
+      .attr("data-group-key", groupKey)
       .attr("transform", `translate(0, ${yOffset + LANE.GROUP_TOP_PADDING})`);
 
-    // divider at bottom of lanes
+    groupG.append("g").attr("class", "heatmap").style("display", "none");
+
+    const labelG = groupG
+      .append("g")
+      .attr("class", "group-label")
+      .attr("transform", `translate(${-TEXT.marginLeft}, ${height / 2})`);
+
+    labelG
+      .append("text")
+      .attr("class", "report_type_label")
+      .attr("dy", "0.35em")
+      .text(`${groupKey} (${spans.length}):`);
+
+    // ---------- TOGGLE ----------
+    const toggleG = groupG
+      .append("g")
+      .attr("class", "group-toggle")
+      .attr("transform", `translate(${svgWidth}, ${height / 2})`)
+      .style("cursor", "pointer")
+      .on("click", (event) => {
+        event.stopPropagation();
+        expandedState[groupKey] = !expandedState[groupKey];
+        updateLayout(true, groupKey, spans);
+      });
+
+    // hit area
+    toggleG.append("circle").attr("r", 10).attr("fill", "transparent");
+
+    // caret
+    toggleG
+      .append("path")
+      .attr("class", "toggle-icon")
+      .attr("d", caretPath)
+      .attr("transform", expandedState[groupKey] ? "rotate(0)" : "rotate(-90)")
+      .attr("fill", "none")
+      .attr("stroke", "#666")
+      .attr("stroke-width", 2)
+      .attr("stroke-linecap", "round")
+      .attr("stroke-linejoin", "round");
+
+    // Divider
     if (showDivider) {
       groupG
         .append("line")
@@ -532,28 +521,34 @@ export function renderTimeline({
     return groupG;
   }
 
-  function assignLanes(events, padding = 0) {
-    const lanes = []; // array of arrays, each array = events in that lane
+  function getLaneCount(spans, padding = 0) {
+    const lanes = []; // array of arrays, each array = spans in that lane
 
-    // Sort events by start date
-    events.sort((a, b) => a.start - b.start);
+    const expanded = expandedState[spans[0].laneGroup];
 
-    events.forEach((event) => {
+    if (!expanded) {
+      return 1;
+    }
+
+    // Sort spans by start date
+    spans.sort((a, b) => a.start - b.start);
+
+    spans.forEach((span) => {
       let placed = false;
 
       for (let i = 0; i < lanes.length; i++) {
-        // Check if event overlaps anything in lane i
+        // Check if spans overlaps anything in lane i
         if (
           !lanes[i].some((e) =>
             checkOverlapWithPadding(
               [e.formattedStartDate, e.formattedEndDate],
-              [event.formattedStartDate, event.formattedEndDate],
+              [span.formattedStartDate, span.formattedEndDate],
               padding
             )
           )
         ) {
-          event.laneIndex = i;
-          lanes[i].push(event);
+          span.laneIndex = i;
+          lanes[i].push(span);
           placed = true;
           break;
         }
@@ -561,8 +556,8 @@ export function renderTimeline({
 
       if (!placed) {
         // No lane found → create new lane
-        event.laneIndex = lanes.length;
-        lanes.push([event]);
+        span.laneIndex = lanes.length;
+        lanes.push([span]);
       }
     });
 
@@ -587,6 +582,7 @@ export function renderTimeline({
           AGE_AREA.bottomPad) +
         ")"
     );
+  console.log("totalContentHeight", totalContentHeight);
 
   // Specify a specific region of an element to display, rather than showing the complete area
   // Any parts of the drawing that lie outside the region bounded by the currently active clipping path are not drawn.
@@ -600,45 +596,34 @@ export function renderTimeline({
 
   function updateMainReports() {
     // Re-bind data to existing groups
-    const groups = d3
-      .selectAll('g[clip-path="url(#secondary_area_clip)"]')
-      .selectAll(".main_report_group");
+    const lanes = d3.select(".main_ER_svg").selectAll(".contains-group");
 
-    // ENTER + UPDATE
-    groups.each(function (d, i) {
-      const group = d3.select(this);
-      const startDate = new Date(d.start);
-      const endDate = new Date(d.end);
+    lanes.each(function (d) {
+      const g = d3.select(this);
 
-      d.formattedStartDate = mainX(startDate);
-      d.formattedEndDate = mainX(endDate);
-      const x1 = d.formattedStartDate;
-      const x2 = d.formattedEndDate;
+      const x1 = mainX(new Date(d.start));
+      const x2 = mainX(new Date(d.end));
 
-      // Update report lines
-      group.selectAll('line[data-line-type="x1-only"]').attr("x1", x1).attr("x2", x1);
+      // Update vertical lines
+      g.selectAll('line[data-line-type="x1-only"]').attr("x1", x1).attr("x2", x1);
 
-      group.selectAll('line[data-line-type="x2-only"]').attr("x1", x2).attr("x2", x2);
+      g.selectAll('line[data-line-type="x2-only"]').attr("x1", x2).attr("x2", x2);
 
-      group.selectAll('circle[data-marker-type="start"]').attr("cx", x1);
+      // Update range lines
+      g.selectAll('line[data-line-type="range"]').attr("x1", x1).attr("x2", x2);
 
-      group.selectAll('circle[data-marker-type="end"]').attr("cx", x2);
+      // Update markers
+      g.selectAll('circle[data-marker-type="start"]').attr("cx", x1);
+      g.selectAll('circle[data-marker-type="end"]').attr("cx", x2);
 
-      group.selectAll('line[data-line-type="range"]').attr("x1", x1).attr("x2", x2);
-
-      group.selectAll('rect[data-rect-type="before"]').attr("x", x1);
-
-      group.selectAll('rect[data-rect-type="after"]').attr("x", x2);
+      // Update rects if present
+      g.selectAll('rect[data-rect-type="before"]').attr("x", x1);
+      g.selectAll('rect[data-rect-type="after"]').attr("x", x2);
     });
 
-    // Update x-axis
     d3.select(".main-ER-x-axis-bottom").call(xAxisBottom);
     d3.select(".main-ER-x-axis-top").call(xAxisTop);
   }
-
-  // Track expanded/collapsed state for each group
-  const expandedState = {};
-  desiredOrder.forEach((d) => (expandedState[d] = true)); // Start with all expanded
 
   // Function to calculate lane positions based on expanded state
   function calculateLanePositions() {
@@ -669,11 +654,9 @@ export function renderTimeline({
   const originalYPositions = new Map();
 
   // Function to create a heatmap for collapsed lanes
-  function createLaneHeatmap(laneGroup, width, height = 15) {
+  function createLaneHeatmap(laneGroup) {
     // Filter data for this lane group
-    const laneData = eventData.filter((d) => d.laneGroup === laneGroup);
-    // console.log("Lane Data:", laneData);
-
+    const laneData = spanData.filter((d) => d.laneGroup === laneGroup);
     if (laneData.length === 0) return null;
 
     // Get the domain from your x scale
@@ -721,7 +704,7 @@ export function renderTimeline({
   }
 
   function updateHeatmaps() {
-    const laneGroups = [...new Set(eventData.map((d) => d.laneGroup))];
+    const laneGroups = [...new Set(spanData.map((d) => d.laneGroup))];
 
     laneGroups.forEach((laneGroup) => {
       const heatmapClass = `heatmap-${laneGroup.replace(/\s+/g, "-")}`;
@@ -773,333 +756,216 @@ export function renderTimeline({
     });
   }
 
-  // Down arrow
-  const zoomIn = "M4 6 L12 6 L12 10 L16 10 L8 18 L0 10 L4 10 Z";
-
-  // Right arrow
-  const zoomOut = "M6 4 L6 12 L10 12 L10 16 L18 8 L10 0 L10 4 Z";
-
-  // Function to update the layout
-  function updateLayout(animate = true) {
-    const positions = calculateLanePositions();
-
-    // Update label groups
+  function updateLayout(animate = true, activeGroupKey = null, spans) {
+    main_ER_svg.selectAll(".group").remove();
     const duration = animate ? 600 : 0;
+    let currentY = LANE.GROUP_TOP_PADDING;
+    let variableTotalContentHeight = 0;
+    let groupNToggleY = 0;
+    // height of last divider line + 10
+    let yGroupOffset = 0;
+    const updatedGroupLayout = [];
 
-    // Calculate total height needed
-    const totalHeight = positions.length > 0 ? positions[positions.length - 1].endY : 0;
+    // Compute group heights before setupTimelineLayout
+    for (const key of desiredOrder) {
+      // Filter spans that belong to this group
+      const spansForGroup = spanData.filter((d) => d.laneGroup === key);
+      console.log(spansForGroup);
+      // Skip groups with no spans
+      if (!spansForGroup.length) continue;
+      const laneCount = getLaneCount(spansForGroup);
+      console.log(laneCount);
+      const groupHeight = laneCount * LANE.height;
 
-    // Calculate new total SVG height
-    const newSvgHeight = totalHeight + OVERVIEW.height;
+      updatedGroupLayout.push({
+        key,
+        spans: spansForGroup,
+        height: groupHeight,
+        yOffset: yGroupOffset,
+      });
+      yGroupOffset += groupHeight + LANE.GROUP_TOP_PADDING;
+    }
+    const totalContentHeight = yGroupOffset;
 
-    // Get the parent of the SVG (which is the MUI Box)
-    const svgNode = timelineSvg.node();
-    const parentBox = d3.select(svgNode.parentNode);
-    // console.log(parentBox);
+    updatedGroupLayout.forEach((layout, i) => {
+      // isLastGroup is used to ensure divider line is not used after last group
+      const isLastGroup = i === updatedGroupLayout.length - 1;
 
-    parentBox
-      .transition()
-      .duration(duration)
-      .style("height", `${newSvgHeight}px`)
-      .style("min-height", "unset"); // Remove any min-height constraints
-
-    timelineSvg
-      .interrupt()
-      .transition()
-      .duration(duration)
-      .attr("viewBox", `0 0 ${containerWidth} ${newSvgHeight}`)
-      .style("height", `${newSvgHeight}px`);
-
-    // Inside updateLayout function, add:
-    main_ER_svg
-      .selectAll(".date-anchor-line")
-      .transition()
-      .duration(duration)
-      .attr("y2", totalHeight); // Update to new total height
-
-    // Update zoom rect height
-    timelineSvg
-      .select(".zoom_ER")
-      .transition()
-      .duration(duration)
-      .attr("height", totalHeight + GAPS.legendToMain);
-
-    // Update age_ER position
-    age_ER
-      .transition()
-      .duration(duration)
-      .attr(
-        "transform",
-        `translate(${MARGINS.left}, ${
-          MARGINS.top + LEGEND.height + GAPS.legendToMain + totalHeight + GAPS.pad
-        })`
+      const groupG = drawCaretAndLabelForGroup(
+        main_ER_svg,
+        layout.spans,
+        layout.key,
+        layout.yOffset,
+        layout.height,
+        svgWidth,
+        !isLastGroup
       );
 
-    // Update x-axis position (bottom of main area)
-    timelineSvg
-      .select(".main-ER-x-axis-bottom")
-      .transition()
-      .duration(duration)
-      .attr(
-        "transform",
-        `translate(0, ${MARGINS.top + LEGEND.height + GAPS.legendToMain + totalHeight})`
-      );
+      drawLanes(groupG, layout.spans, layout.key);
+    });
 
-    // Update overview position
-    overview
-      .transition()
-      .duration(duration)
-      .attr(
-        "transform",
-        `translate(${MARGINS.left}, ${
-          MARGINS.top +
-          MARGINS.bottom +
-          LEGEND.height +
-          GAPS.legendToMain +
-          totalHeight +
-          GAPS.pad +
-          AGE_AREA.height +
-          AGE_AREA.bottomPad
-        })`
-      );
+    axisLayer
+      .append("g")
+      .attr("class", "main-ER-x-axis-bottom")
+      .attr("transform", `translate(0, ${totalContentHeight})`)
+      .call(xAxisBottom);
 
-    // labelGroup
+    // Loop over all groups
+    // main_ER_svg.selectAll(".group").each(function () {
+    //   const groupG = d3.select(this);
+    //   const groupKey = groupG.attr("data-group-key");
+    //   const laneCount = getLaneCount(spans);
+    //   const groupHeight = laneCount * LANE.height;
+    //
+    //   const isExpanded = expandedState[groupKey];
+    //
+    //   // const laneCount = assignLanes(e)
+    //   // const fullHeight = +groupG.attr("data-expanded-height");
+    //   // const collapsedHeight = +groupG.attr("data-collapsed-height");
+    //   // const groupHeight = isExpanded ? fullHeight : collapsedHeight;
+    //   // const groupHeight =
+    //   // Move group to its new position
+    //   groupG.transition().duration(duration).attr("transform", `translate(0, ${currentY})`);
+    //
+    //   // Show/hide lanes
+    //   // groupG
+    //   //   .selectAll(".lane")
+    //   //   .transition()
+    //   //   .duration(duration)
+    //   //   .style("opacity", isExpanded ? 1 : 0)
+    //   //   .style("pointer-events", isExpanded ? "all" : "none");
+    //
+    //   // Remove any existing heatmap for this group
+    //   // groupG.selectAll(".heatmap").remove();
+    //
+    //   // const heatmapG = groupG.select(".heatmap");
+    //   // heatmapG.selectAll("*").remove(); // clear old
+    //   // if (!isExpanded) {
+    //   //   const heatmapData = createLaneHeatmap(groupKey, svgWidth);
+    //   //   if (heatmapData) {
+    //   //     heatmapG.style("display", null).attr("transform", "translate(0,-5)");
+    //   //     heatmapG
+    //   //       .selectAll("rect")
+    //   //       .data(heatmapData)
+    //   //       .enter()
+    //   //       .append("rect")
+    //   //       .attr("x", (d) => d.x)
+    //   //       .attr("y", 0)
+    //   //       .attr("width", (d) => Math.max(1, d.width))
+    //   //       .attr("height", LANE.height)
+    //   //       .attr("fill", (d) => d.color);
+    //   //   }
+    //   // } else {
+    //   //   heatmapG.style("display", "none");
+    //   // }
+    //
+    //   // let laneCount = 0;
+    //
+    //   // if (collapsed) {
+    //   //   laneCount = 1;
+    //   // } else {
+    //   //   laneCount = assignLanes();
+    //   // }
+    //
+    //   // const laneCount = assignLanes();
+    //
+    //   // console.log(currentY);
+    //   currentY += groupHeight + LANE.GROUP_TOP_PADDING;
+    //   groupNToggleY += groupHeight;
+    //
+    //   if (groupKey === activeGroupKey) {
+    //     // Rotate toggle caret
+    //     groupG
+    //       .select(".toggle-icon")
+    //       .transition()
+    //       .duration(duration)
+    //       .attr("transform", isExpanded ? "rotate(0)" : "rotate(-90)")
+    //       .attr("transform", `translate(0, ${groupNToggleY / 2})`);
+    //
+    //     // Move the label to the center of the visible height
+    //     groupG
+    //       .select(".group-label")
+    //       .transition()
+    //       .duration(duration)
+    //       .attr("transform", `translate(${-TEXT.marginLeft}, ${groupNToggleY / 2})`);
+    //   }
+    //
+    //   // Update dividers if you have them
+    //   groupG
+    //     .selectAll(".group-divider")
+    //     .transition()
+    //     .duration(duration)
+    //     .attr("y1", groupHeight)
+    //     .attr("y2", groupHeight);
+    //
+    //   // Increment currentY for the next group
+    //
+    //   // variableTotalContentHeight = currentY + LANE.GROUP_TOP_PADDING;
+    // });
+
+    // Update SVG total height
+    // const svgTotalHeight =
+    //   MARGINS.top +
+    //   LEGEND.height +
+    //   GAPS.legendToMain +
+    //   totalContentHeight +
+    //   GAPS.pad +
+    //   OVERVIEW.height +
+    //   GAPS.pad +
+    //   AGE_AREA.height +
+    //   MARGINS.bottom;
+
+    // timelineSvg
     //   .transition()
     //   .duration(duration)
-    //   .attr("transform", (d, i) => {
-    //     const offset = positions[i].isExpanded ? 0 : 10;
-    //     return `translate(0, ${positions[i].y + offset})`;
-    //   });
+    //   .attr("viewBox", `0 0 ${containerWidth} ${svgTotalHeight}`)
+    //   .style("height", `${svgTotalHeight}px`);
 
-    // Update toggle buttons position
-    toggleButtonGroup
-      .transition()
-      .duration(duration)
-      .attr("transform", (d, i) => {
-        const offset = positions[i].isExpanded ? 0 : 10;
-        return `translate(0, ${positions[i].y + offset})`;
-      });
+    // timelineSvg
+    //   .select(".zoom_ER")
+    //   .transition()
+    //   .duration(duration)
+    //   .attr("height", variableTotalContentHeight + GAPS.legendToMain);
 
-    // Update divider lines
-    const dividers = main_ER_svg.selectAll(".report_type_divider").data(positions.slice(0, -1));
+    // Update bottom x-axis
+    // timelineSvg
+    //   .select(".main-ER-x-axis-bottom")
+    //   .transition()
+    //   .duration(duration)
+    //   .attr(
+    //     "transform",
+    //     `translate(0, ${
+    //       MARGINS.top + LEGEND.height + GAPS.legendToMain + variableTotalContentHeight
+    //     })`
+    //   );
 
-    dividers
-      .transition()
-      .duration(duration)
-      .attr("y1", (d) => {
-        // If the lane is collapsed, position divider after the heatmap
-        // Otherwise position it at the end of the expanded lane
-        return d.isExpanded ? d.endY : d.y + 20;
-      })
-      .attr("y2", (d) => {
-        return d.isExpanded ? d.endY : d.y + 20;
-      });
+    // age_ER
+    //   .transition()
+    //   .duration(duration)
+    //   .attr(
+    //     "transform",
+    //     `translate(${MARGINS.left}, ${
+    //       MARGINS.top + LEGEND.height + GAPS.legendToMain + variableTotalContentHeight + GAPS.pad
+    //     })`
+    //   );
 
-    // Update toggle buttons text/icon - more specific selector
-    toggleButtonGroup.each(function (d) {
-      d3.select(this)
-        .select(".toggle-icon")
-        .transition()
-        .duration(duration)
-        .attr("d", expandedState[d] ? zoomOut : zoomIn);
-    });
-
-    // Recalculate groupBaseYMap based on new positions
-    const newGroupBaseYMap = {};
-    positions.forEach((pos) => {
-      newGroupBaseYMap[pos.group] =
-        pos.startY + (pos.isExpanded ? groupLaneCounts[pos.group] * 10 : 0);
-    });
-
-    // Calculate the offset for each group
-    const groupOffsets = {};
-    positions.forEach((pos) => {
-      const oldBaseY = desiredGroupLaneOrderStartY[pos.group];
-      const newBaseY = newGroupBaseYMap[pos.group];
-      groupOffsets[pos.group] = newBaseY - oldBaseY;
-    });
-
-    // Update data elements
-    mainReports.selectAll(".main_report_group").each(function (d, i) {
-      const group = d3.select(this);
-      const isExpanded = expandedState[d.laneGroup];
-
-      // Handle conceptId as array or single value
-      const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
-      const elementId = `${d.laneGroup}_${i}_${conceptId}`;
-
-      // Get the relative Y position (stored relative to base)
-      const relativeY = originalYPositions.get(elementId) || 0;
-
-      // Calculate new absolute Y position
-      const newBaseY = newGroupBaseYMap[d.laneGroup];
-      const newY = newBaseY + relativeY;
-
-      group
-        .transition()
-        .duration(duration)
-        .attr("transform", `translate(0, ${newY})`)
-        .style("opacity", isExpanded ? 1 : 0);
-
-      group.style("pointer-events", isExpanded ? "all" : "none");
-    });
-
-    // Update or create heatmaps for collapsed lanes
-    positions.forEach((pos) => {
-      const laneGroup = pos.group;
-      const isExpanded = pos.isExpanded;
-
-      // Remove existing heatmap if it exists
-      main_ER_svg.selectAll(`.heatmap-${laneGroup.replace(/\s+/g, "-")}`).remove();
-
-      if (!isExpanded) {
-        // Create heatmap for collapsed lane
-        const heatmapData = createLaneHeatmap(laneGroup, svgWidth);
-
-        if (heatmapData) {
-          const heatmapGroup = main_ER_svg
-            .append("g")
-            .attr("class", `heatmap-${laneGroup.replace(/\s+/g, "-")}`)
-            .attr("transform", `translate(0, ${pos.y + 5})`); // Position at lane location
-
-          heatmapGroup
-            .selectAll("rect")
-            .data(heatmapData)
-            .enter()
-            .append("rect")
-            .attr("x", (d) => d.x)
-            .attr("y", 0)
-            .attr("width", (d) => Math.max(1, d.width))
-            .attr("height", 10)
-            .attr("fill", (d) => d.color)
-            .attr("stroke", "none")
-            .style("opacity", 0)
-            .transition()
-            .duration(duration)
-            .style("opacity", 0.8);
-
-          // Add a border around the heatmap
-          heatmapGroup
-            .append("rect")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("width", svgWidth)
-            .attr("height", 10)
-            .attr("fill", "none")
-            .attr("stroke", "#ccc")
-            .attr("stroke-width", 1);
-        }
-      }
-    });
-
-    // Update the global groupBaseYMap
-    Object.assign(desiredGroupLaneOrderStartY, newGroupBaseYMap);
+    // Update overview position
+    // overview
+    //   .transition()
+    //   .duration(duration)
+    //   .attr(
+    //     "transform",
+    //     `translate(${MARGINS.left}, ${
+    //       MARGINS.top +
+    //       LEGEND.height +
+    //       GAPS.legendToMain +
+    //       variableTotalContentHeight +
+    //       GAPS.pad +
+    //       AGE_AREA.height +
+    //       AGE_AREA.bottomPad
+    //     })`
+    //   );
   }
-
-  // Create a group for toggle buttons (outside the main graph area)
-  let toggleButtonContainer = timelineSvg
-    .append("g")
-    .attr("class", "toggle_button_container")
-    .attr(
-      "transform",
-      "translate(" +
-        (MARGINS.left + svgWidth + 10) + // 10px to the right of the graph
-        "," +
-        (MARGINS.top + LEGEND.height + GAPS.legendToMain) +
-        ")"
-    );
-
-  // let groupOffset = 0;
-  // // Report types texts
-  // const labelPositions = calculateLanePositions(); // Store the y-coordinates
-  // let previousY = 0;
-  // // TODO: Should move label group out of main_ER_svg
-  // const labelGroup = main_ER_svg
-  //   .append("g")
-  //   .selectAll(".report_type_label_group")
-  //   .data([...new Set(desiredOrder)])
-  //   .enter()
-  //   .append("g")
-  //   .attr("class", "report_type_label_group")
-  //   .attr("transform", (d, i) => `translate(0, ${labelPositions[i].y})`);
-  //
-  // // Add the main text label
-  // labelGroup
-  //   .append("text")
-  //   .attr("class", "report_type_label")
-  //   .attr("dy", ".5ex")
-  //   .attr("x", -TEXT.marginLeft)
-  //   .text((d) => `${d} (${timeSpanCounts[d]}):`);
-
-  // Create toggle buttons in the separate container
-  // const toggleButtonGroup = toggleButtonContainer
-  //   .selectAll(".toggle_button")
-  //   .data([...new Set(desiredOrder)])
-  //   .enter()
-  //   .append("g")
-  //   .attr("class", "toggle_button")
-  //   .attr("transform", (d, i) => `translate(0, ${labelPositions[i].y})`)
-  //   .style("cursor", "pointer")
-  //   .on("click", function (event, d) {
-  //     event.stopPropagation(); // Use event.stopPropagation() for D3 v6+
-  //     expandedState[d] = !expandedState[d];
-  //     updateLayout(true);
-  //   });
-  //
-  // toggleButtonGroup.each(function () {
-  //   const btn = d3.select(this);
-  //
-  //   // Invisible hit area
-  //   btn
-  //     .append("circle")
-  //     .attr("r", 13) // adjust for click size
-  //     .attr("fill", "transparent")
-  //     .style("pointer-events", "all");
-  //
-  //   btn
-  //     .append("path")
-  //     .attr("class", "toggle-icon")
-  //     .attr("d", (d) => (expandedState[d] ? zoomOut : zoomIn))
-  //     .attr("transform", "translate(-8,-8)")
-  //     .attr("fill", "none")
-  //     .attr("stroke", "#666")
-  //     .attr("stroke-width", 2)
-  //     .attr("stroke-linecap", "round")
-  //     .attr("stroke-linejoin", "round")
-  //     .style("pointer-events", "none");
-  // });
-
-  // labelGroup.each(function (d) {
-  //   const group = d3.select(this);
-  //   const label = group.select(".report_type_label");
-  //
-  //   // Add a <title> to the label itself to show tooltip on hover
-  //   label.append("title").text(() => {
-  //     const definitions = {
-  //       Finding: "(symptoms, test results)",
-  //       "Stage, Grade": "(stage, grade, tnm)",
-  //       Disease: "(neoplasm, disease, disorder)",
-  //       Treatment: "(procedure, medication)",
-  //     };
-  //     return definitions[d] || "No definition available.";
-  //   });
-  // });
-
-  // TODO: Remove divider lines
-  // Initial divider lines
-  // main_ER_svg
-  //   .append("g")
-  //   .selectAll(".report_type_divider")
-  //   .data(labelPositions.slice(0, -1))
-  //   .enter()
-  //   .append("line")
-  //   .attr("class", "report_type_divider")
-  //   .attr("x1", 0)
-  //   .attr("x2", svgWidth)
-  //   .attr("y1", (d) => Math.round(d.endY))
-  //   .attr("y2", (d) => Math.round(d.endY))
-  //   .attr("stroke", "#666")
-  //   .attr("stroke-width", 2);
 
   const defs = d3.select("svg").append("defs");
 
@@ -1138,84 +1004,6 @@ export function renderTimeline({
     .style("fill", "rgb(49, 163, 84)")
     .style("stroke", "black")
     .style("stroke-width", 1);
-
-  // const rightCap = defs
-  //   .append("marker")
-  //   .attr("id", "rightCap")
-  //   .attr("viewBox", "0 0 20 12")
-  //   .attr("refX", 8)
-  //   .attr("refY", 6)
-  //   .attr("markerWidth", 6)
-  //   .attr("markerHeight", 4)
-  //   .attr("orient", "auto");
-  //
-  // rightCap.append("path").attr("d", "M 0 6 L 8 6");
-  // .style("stroke", "rgb(49, 163, 84)")
-  // .style("stroke-width", 4);
-
-  // const selectedRightCap = defs
-  //   .append("marker")
-  //   .attr("id", "selectedRightCap")
-  //   .attr("viewBox", "0 0 20 12")
-  //   .attr("refX", 8)
-  //   .attr("refY", 6)
-  //   .attr("markerWidth", 6)
-  //   .attr("markerHeight", 4)
-  //   .attr("orient", "auto");
-  //
-  // // Add black outline stroke (slightly wider)
-  // selectedRightCap
-  //   .append("path")
-  //   .attr("d", "M 0 6 L 8 6")
-  //   .style("stroke", "black")
-  //   .style("stroke-width", 6); // wider for outline
-  //
-  // // Add green stroke on top
-  // selectedRightCap
-  //   .append("path")
-  //   .attr("d", "M 0 6 L 8 6")
-  //   .style("stroke", "rgb(49, 163, 84)")
-  //   .style("stroke-width", 4);
-
-  // const leftCap = defs
-  //   .append("marker")
-  //   .attr("id", "leftCap")
-  //   .attr("viewBox", "0 0 20 12")
-  //   .attr("refX", 12) // Position at the start of the line
-  //   .attr("refY", 6)
-  //   .attr("markerWidth", 6)
-  //   .attr("markerHeight", 4)
-  //   .attr("orient", "auto");
-  //
-  // leftCap
-  //   .append("path")
-  //   .attr("d", "M 12 6 L 20 6") // horizontal line extending leftward from the line start
-  //   .style("stroke", "rgb(49, 163, 84)")
-  //   .style("stroke-width", 4);
-  //
-  // const selectedLeftCap = defs
-  //   .append("marker")
-  //   .attr("id", "selectedLeftCap")
-  //   .attr("viewBox", "0 0 20 12")
-  //   .attr("refX", 12) // Position at the start of the line
-  //   .attr("refY", 6)
-  //   .attr("markerWidth", 6)
-  //   .attr("markerHeight", 4)
-  //   .attr("orient", "auto");
-  //
-  // // Black outline (wider stroke underneath)
-  // selectedLeftCap
-  //   .append("path")
-  //   .attr("d", "M 12 6 L 20 6")
-  //   .style("stroke", "black")
-  //   .style("stroke-width", 6);
-  //
-  // // Green line on top
-  // selectedLeftCap
-  //   .append("path")
-  //   .attr("d", "M 12 6 L 20 6")
-  //   .style("stroke", "rgb(49, 163, 84)")
-  //   .style("stroke-width", 4);
 
   // Define the left arrow marker
   const leftArrow = defs
@@ -1298,45 +1086,35 @@ export function renderTimeline({
     .style("stroke-width", 3)
     .style("stroke-opacity", 0.75);
 
-  // function updateDateAnchors() {
-  //   d3.selectAll(".date-anchor-line")
-  //     .attr("x1", (d) => mainX(d))
-  //     .attr("x2", (d) => mainX(d));
-  // }
-  //
-  // // Add this BEFORE you create mainReports
-  // const dateAnchorGroup = main_ER_svg
-  //   .append("g")
-  //   .attr("class", "date-anchors")
-  //   .attr("clip-path", "url(#secondary_area_clip)")
-  //   .lower(); // Send to back so relations appear on top
-  //
-  // // Add vertical lines at each unique date
-  // dateAnchorGroup
-  //   .selectAll(".date-anchor-line")
-  //   .data(uniqueDates)
-  //   .enter()
-  //   .append("line")
-  //   .attr("class", "date-anchor-line")
-  //   .attr("x1", (d) => mainX(d))
-  //   .attr("x2", (d) => mainX(d))
-  //   .attr("y1", 0)
-  //   .attr("y2", totalGroupHeight) // spans all lanes
-  //   .style("stroke", "#d3d3d3") // light gray
-  //   .style("stroke-width", 2)
-  //   .style("stroke-dasharray", "3,3") // dashed line
-  //   .style("opacity", 0.9)
-  //   .style("pointer-events", "none"); // don't interfere with clicks
-  //
-  // let mainReports = main_ER_svg.append("g").attr("clip-path", "url(#secondary_area_clip)");
+  function updateDateAnchors() {
+    d3.selectAll(".date-anchor-line")
+      .attr("x1", (d) => mainX(d))
+      .attr("x2", (d) => mainX(d));
+  }
 
-  // groupOffset = 0;
-  // let desiredGroupLaneOrderStartY = {};
-  //
-  // [...new Set(desiredOrder)].forEach((group) => {
-  //   desiredGroupLaneOrderStartY[group] = groupOffset + 1; // Top of groupLane
-  //   groupOffset += groupLaneCounts[group] * LANE.height; // double it if each lane is that tall
-  // });
+  // Add this BEFORE you create mainReports
+  const dateAnchorGroup = main_ER_svg
+    .append("g")
+    .attr("class", "date-anchors")
+    .attr("clip-path", "url(#secondary_area_clip)")
+    .lower(); // Send to back so relations appear on top
+
+  // Add vertical lines at each unique date
+  dateAnchorGroup
+    .selectAll(".date-anchor-line")
+    .data(uniqueDates)
+    .enter()
+    .append("line")
+    .attr("class", "date-anchor-line")
+    .attr("x1", (d) => mainX(d))
+    .attr("x2", (d) => mainX(d))
+    .attr("y1", 0)
+    .attr("y2", totalContentHeight) // spans all lanes
+    .style("stroke", "#d3d3d3") // light gray
+    .style("stroke-width", 2)
+    .style("stroke-dasharray", "3,3") // dashed line
+    .style("opacity", 0.9)
+    .style("pointer-events", "none"); // don't interfere with clicks
 
   // const occupiedLanes = new Map(); // Key: base Y, Value: array of [x1, x2] pairs
 
@@ -1450,6 +1228,93 @@ export function renderTimeline({
       .on("click", (event) => handleClick(event, d))
       .append("title")
       .text(tooltipText);
+  }
+
+  function drawHeatSpan({ group, d, x1, x2, markerStart, markerEnd, handleClick }) {
+    // Handle arrays for display
+    // console.log(d);
+    const conceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
+    // Get concept names and count duplicates
+    const conceptNames = conceptIds.map(
+      (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
+    );
+    // Count occurrences of each concept name
+    const nameCounts = {};
+    conceptNames.forEach((name) => {
+      nameCounts[name] = (nameCounts[name] || 0) + 1;
+    });
+
+    // Format as "Name (x3), Other Name (x2)" or just "Name" if count is 1
+    const conceptNamesDisplay = Object.entries(nameCounts)
+      .map(([name, count]) => (count > 1 ? `${name} (x${count})` : name))
+      .join(", ");
+
+    const tooltipText = `Duration: ${timeBetween(d.start, d.end)}\n${d.relation1}: ${d.start}\n${
+      d.relation2
+    }: ${d.end}\nConcept Name: ${conceptNamesDisplay}\n`;
+
+    group
+      .append("line")
+      .attr("class", "relation-outline")
+      .attr("data-line-type", "range")
+      .attr("x1", x1)
+      .attr("y1", 0)
+      .attr("x2", x2)
+      .attr("y2", 0)
+      .attr("stroke", "black")
+      .attr("stroke-width", 7)
+      .style("cursor", "pointer")
+      .attr("stroke-opacity", 0);
+
+    const mainLine = group
+      .append("line")
+      .attr("class", "main_report_ER relation-icon")
+      .attr("data-concept-ids", d.conceptIds.join(","))
+      .attr("data-line-type", "range")
+      .attr("x1", x1)
+      .attr("x2", x2)
+      .attr("y1", 0)
+      .attr("y2", 0)
+      .attr("stroke", d.negated ? "rgb(255, 0, 0)" : "rgb(79, 33, 84)")
+      .attr("stroke-width", 5)
+      .attr("stroke-opacity", 0.75)
+      .style("cursor", "pointer")
+      .on("click", (event) => handleClick(event, d));
+    if (markerStart) {
+      mainLine.attr("marker-start", markerStart);
+    }
+    if (markerEnd) {
+      mainLine.attr("marker-end", markerEnd);
+    }
+    mainLine.append("title").text(tooltipText);
+
+    // const tooltip = d3.select("#tooltip");
+
+    // group
+    //   .append("circle")
+    //   .attr("cx", x2)
+    //   .attr("cy", 0)
+    //   .attr("data-marker-type", "end")
+    //   .attr("r", 8) // increase as needed to ensure easy hover/click
+    //   .style("fill", "transparent")
+    //   .style("cursor", "pointer")
+    //   .attr("pointer-events", "all")
+    //   .on("click", (event) => handleClick(event, d))
+    //   .append("title")
+    //   .text(tooltipText);
+    //
+    // group
+    //   .append("circle")
+    //   .attr("cx", x1)
+    //   .attr("cy", 0)
+    //   .attr("data-marker-type", "start")
+    //   .attr("r", 8) // increase as needed to ensure easy hover/click
+    //   .style("fill", "transparent")
+    //   .style("cursor", "pointer")
+    //   .attr("pointer-events", "all")
+    //   .on("click", (event) => handleClick(event, d))
+    //   .append("title")
+    //   .text(tooltipText);
   }
 
   function drawSoloAfterRelation({ group, d, x, handleClick }) {
@@ -1574,22 +1439,38 @@ export function renderTimeline({
       .text(tooltipText);
   }
 
-  function drawLanes(groupG, events) {
+  function drawLanes(groupG, spans, groupKey) {
     // Group events by lane index
-    const eventsByLane = d3.group(events, (d) => d.laneIndex);
+    const spansByLane = d3.group(spans, (d) => d.laneIndex);
+    console.log(groupKey);
+    console.log(expandedState);
+    console.log(expandedState[groupKey]);
 
-    for (const [laneIndex, laneEvents] of eventsByLane) {
+    const expanded = expandedState[groupKey];
+
+    for (const [laneIndex, spansInLane] of spansByLane) {
       const laneG = groupG
         .append("g")
         .attr("class", "lane")
-        .attr("transform", `translate(0, ${laneIndex * LANE.height})`);
+        .attr("transform", `translate(0, ${!expanded ? 0 : laneIndex * LANE.height})`);
 
       // Draw all timespans in this lane
-      laneEvents.forEach((d) => {
+      spansInLane.forEach((d) => {
         const x1 = d.formattedStartDate;
         const x2 = d.formattedEndDate;
 
-        const containsGroup = laneG.append("g").attr("class", "contains-group");
+        const containsGroup = laneG.append("g").attr("class", "contains-group").datum(d);
+
+        if (!expanded) {
+          drawHeatSpan({
+            group: containsGroup,
+            d,
+            x1,
+            x2,
+            handleClick,
+          });
+          return;
+        }
 
         if (d.relation1 === "After" && d.relation2 === "After") {
           //   >
@@ -1754,291 +1635,6 @@ export function renderTimeline({
     }
   }
 
-  // TODO: this needs to be converted to a lane writing function
-  // mainReports
-  //   .selectAll(".main_report_ER")
-  //   .data(
-  //     eventData
-  //     // .slice() // avoid mutating the original
-  //     // .sort((a, b) => {
-  //     //   // Count how often each conceptID appears (handling arrays)
-  //     //   const countMap = {};
-  //     //   eventData.forEach((item) => {
-  //     //     // Handle both single values and arrays
-  //     //     const conceptIds = Array.isArray(item.conceptId) ? item.conceptId : [item.conceptId];
-  //     //     conceptIds.forEach((id) => {
-  //     //       countMap[id] = (countMap[id] || 0) + 1;
-  //     //     });
-  //     //   });
-  //     //
-  //     //   // Get the primary (first) conceptId for sorting
-  //     //   const aConceptId = Array.isArray(a.conceptId) ? a.conceptId[0] : a.conceptId;
-  //     //   const bConceptId = Array.isArray(b.conceptId) ? b.conceptId[0] : b.conceptId;
-  //     //
-  //     //   // Sort by count (descending)
-  //     //   return countMap[bConceptId] - countMap[aConceptId];
-  //     // })
-  //   )
-  //   .enter()
-  //   .append("g")
-  //   .attr("class", "main_report_group")
-  //   .each(function (d, i) {
-  //     // Handle conceptId as array or single value
-  //     const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
-  //     // const preferredText = concepts.find((c) => c.id === conceptId)?.preferredText;
-  //
-  //     // const group = d3.select(this);
-  //     // const x1 = d.formattedStartDate;
-  //     // const x2 = d.formattedEndDate;
-  //     // const startY = desiredGroupLaneOrderStartY[d.laneGroup];
-  //     // let y = startY;
-  //     // const buffer = 13; // value that determines the padding between relations
-  //     //
-  //     // // const checkOverlap = (a, b) => Math.max(a[0], b[0]) <= Math.min(a[1], b[1]);
-  //     //
-  //     // const checkOverlapWithPadding = (a, b, padding) => {
-  //     //   const aStart = a[0] - padding;
-  //     //   const aEnd = a[1] + padding;
-  //     //   const bStart = b[0] - padding;
-  //     //   const bEnd = b[1] + padding;
-  //     //   return Math.max(aStart, bStart) <= Math.min(aEnd, bEnd);
-  //     // };
-  //     //
-  //     // const pixelPadding = 8; // or however much buffer you want
-  //     //
-  //     // // Check if base position is available first
-  //     // let laneList = occupiedLanes.get(startY) || [];
-  //     // console.log(occupiedLanes);
-  //     //
-  //     //
-  //     // if (
-  //     //   !laneList.some((slot) =>
-  //     //     checkOverlapWithPadding([d.formattedStartDate, d.formattedEndDate], slot, pixelPadding)
-  //     //   )
-  //     // ) {
-  //     //   y = startY;
-  //     // } else {
-  //     //   // Search for available slot by alternating up and down
-  //     //   let found = false;
-  //     //   let offset = buffer;
-  //     //
-  //     //   while (!found) {
-  //     //     // Try below first
-  //     //     let candidateY = startY + offset;
-  //     //     let candidateSlots = occupiedLanes.get(candidateY) || [];
-  //     //     if (
-  //     //       !candidateSlots.some((slot) =>
-  //     //         checkOverlapWithPadding(
-  //     //           [d.formattedStartDate, d.formattedEndDate],
-  //     //           slot,
-  //     //           pixelPadding
-  //     //         )
-  //     //       )
-  //     //     ) {
-  //     //       y = candidateY;
-  //     //       found = true;
-  //     //     } else {
-  //     //       // Try above
-  //     //       candidateY = startY - offset;
-  //     //       candidateSlots = occupiedLanes.get(candidateY) || [];
-  //     //       if (
-  //     //         !candidateSlots.some((slot) =>
-  //     //           checkOverlapWithPadding(
-  //     //             [d.formattedStartDate, d.formattedEndDate],
-  //     //             slot,
-  //     //             pixelPadding
-  //     //           )
-  //     //         )
-  //     //       ) {
-  //     //         y = candidateY;
-  //     //         found = true;
-  //     //       } else {
-  //     //         // Increase offset and try next level
-  //     //         offset += buffer;
-  //     //       }
-  //     //     }
-  //     //   }
-  //     // }
-  //
-  //     // Reserve this slot
-  //     // laneList = occupiedLanes.get(y) || [];
-  //     // laneList.push([d.formattedStartDate, d.formattedEndDate]);
-  //     // occupiedLanes.set(y, laneList);
-  //     // console.log(occupiedLanes);
-  //
-  //     // When storing, store relative to base
-  //     // const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
-  //     // const elementId = `${d.laneGroup}_${i}_${conceptId}`;
-  //     // const relativeY = y - startY; // Store position relative to base!
-  //     // originalYPositions.set(elementId, relativeY);
-  //
-  //     // Then set the parent group's position
-  //     group.attr("transform", `translate(0, ${y})`);
-  //
-  //     // Adjust line thickness if it's an overlap
-  //     const containsGroup = group.append("g").attr("class", "contains-group");
-  //
-  //     if (d.relation1 === "After" && d.relation2 === "After") {
-  //       //   >
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         handleClick,
-  //       });
-  //       drawSoloAfterRelation({
-  //         group: containsGroup,
-  //         d,
-  //         x: x2,
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "After" && d.relation2 === "Overlaps") {
-  //       // >------
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         markerStart: "url(#rightArrow)",
-  //         handleClick,
-  //       });
-  //       // TODO: ADD A rightArrowLeft option >----- in defs
-  //     }
-  //     // TODO: NO AFTER , ON to test on
-  //     if (d.relation1 === "After" && d.relation2 === "On") {
-  //       // >---|
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         markerStart: "url(#rightArrow)",
-  //         markerEnd: "url(#verticalLineCap)",
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "On" && d.relation2 === "On") {
-  //       // |----|
-  //       if (d.formattedStartDate === d.formattedEndDate) {
-  //         drawOnRelation({
-  //           group: containsGroup,
-  //           d,
-  //           x: x1,
-  //           lineType: "x1-only",
-  //           handleClick,
-  //         });
-  //       } else {
-  //         drawTimeSpan({
-  //           group: containsGroup,
-  //           d,
-  //           x1,
-  //           x2,
-  //           markerStart: "url(#verticalLineCap)",
-  //           markerEnd: "url(#verticalLineCap)",
-  //           handleClick,
-  //         });
-  //       }
-  //     }
-  //     if (d.relation1 === "On" && d.relation2 === "Before") {
-  //       // |-----<
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         markerStart: "url(#verticalLineCap)",
-  //         markerEnd: "url(#leftArrow)",
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "On" && d.relation2 === "Overlaps") {
-  //       // |----
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         markerStart: "url(#verticalLineCap)",
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "After" && d.relation2 === "Before") {
-  //       // >---<
-  //
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         markerStart: "url(#rightArrow)",
-  //         markerEnd: "url(#leftArrow)",
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "Before" && d.relation2 === "Before") {
-  //       //    <
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         handleClick,
-  //       });
-  //       drawSoloBeforeRelation({
-  //         group: containsGroup,
-  //         d,
-  //         x: x1,
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "Before" && d.relation2 === "Overlaps") {
-  //       // <-------
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         markerStart: "url(#leftArrow)",
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "Overlaps" && d.relation2 === "Before") {
-  //       // --------<
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         markerEnd: "url(#leftArrow)",
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "Overlaps" && d.relation2 === "On") {
-  //       // -----|
-  //
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         markerEnd: "url(#verticalLineCap)",
-  //         handleClick,
-  //       });
-  //     }
-  //     if (d.relation1 === "Overlaps" && d.relation2 === "Overlaps") {
-  //       // ------
-  //       drawTimeSpan({
-  //         group: containsGroup,
-  //         d,
-  //         x1,
-  //         x2,
-  //         handleClick,
-  //       });
-  //     }
-  //   });
-
   function handleClick(event, d) {
     const clickedConceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
     // console.log("handleClick called during render!", event, d);
@@ -2100,31 +1696,6 @@ export function renderTimeline({
         // class toggle
         el.classList.toggle("selected");
         el.classList.toggle("unselected");
-
-        // if (ids.includes(id)) {
-        //   skipNextEffect.current = true;
-        //
-        //   if (el.hasAttribute("marker-end")) {
-        //     const currentMarker = el.getAttribute("marker-end");
-        //     if (markerToggleMap[currentMarker]) {
-        //       el.setAttribute("marker-end", markerToggleMap[currentMarker]);
-        //     }
-        //   }
-        //
-        //   if (el.hasAttribute("marker-start")) {
-        //     const currentMarker = el.getAttribute("marker-start");
-        //     if (markerToggleMap[currentMarker]) {
-        //       el.setAttribute("marker-start", markerToggleMap[currentMarker]);
-        //     }
-        //   }
-
-        // if (el.classList.contains("selected")) {
-        //   el.classList.remove("selected");
-        //   el.classList.add("unselected");
-        // } else {
-        //   el.classList.remove("unselected");
-        //   el.classList.add("selected");
-        // }
 
         // Show/hide the black outline line
         const group = el.closest("g");
@@ -2228,18 +1799,6 @@ export function renderTimeline({
   }
 
   const interiorDates = interiorAges.map((a) => ageToDate(a, startAge, minStartDate));
-
-  // Draw interior ages
-  // age_ER
-  //   .selectAll(".interior_age")
-  //   .data(interiorDates)
-  //   .enter()
-  //   .append("text")
-  //   .attr("x", (d) => mainX(d))
-  //   .attr("y", ageAreaHeight / 2)
-  //   .attr("dy", ".5ex") // below the main age labels
-  //   .attr("class", "interior_age")
-  //   .text((d, i) => interiorAges[i]); // 54, 55...
 
   // Draw guideline lines for intermediate ages
   age_ER
@@ -2381,7 +1940,7 @@ export function renderTimeline({
     // Redraw reports
     updateMainReports();
     updateHeatmaps();
-    // updateDateAnchors();
+    updateDateAnchors();
 
     // Sync zoom with brush
     timelineSvg
@@ -2410,27 +1969,6 @@ export function renderTimeline({
     // For the first time of loading this page, no brush movement
     .call(brush)
     // We use overviewX.range() as the default selection
-    // https://github.com/d3/d3-selection#selection_call
-    // call brush.move and pass overviewX.range() as argument
-    // https://github.com/d3/d3-brush#brush_move
-    .call(brush.move, overviewX.range());
 
-  // Reset button
-  // timelineSvg
-  //   .append("foreignObject")
-  //   .attr("id", "reset")
-  //   .attr(
-  //     "transform",
-  //     "translate(10, " +
-  //       (MARGINS.top +
-  //         GAPS.pad +
-  //         totalGroupHeight +
-  //         GAPS.pad +
-  //         AGE_AREA.height +
-  //         AGE_AREA.bottomPad +
-  //         OVERVIEW.height) +
-  //       ")"
-  //   )
-  //   .append("xhtml:body")
-  //   .html("<button>Reset</button>");
+    .call(brush.move, overviewX.range());
 }

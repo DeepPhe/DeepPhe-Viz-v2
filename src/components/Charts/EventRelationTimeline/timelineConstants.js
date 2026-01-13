@@ -42,6 +42,13 @@ export const LEGEND = {
   anchorY: 6,
 };
 
+export const LABEL = {
+  margin: 200,
+};
+
+export const TOGGLE_BUTTON = {
+  margin: 150,
+};
 export const TEXT = {
   widthPerLetter: 12,
   marginLeft: 10,

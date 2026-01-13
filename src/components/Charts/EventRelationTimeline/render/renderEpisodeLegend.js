@@ -1,4 +1,5 @@
 import { MARGINS, LEGEND, ARROW } from "../timelineConstants";
+import { renderLegendToggle } from "./renderLegendToggle";
 import * as d3 from "d3";
 /**
  * Renders the episode legend on a given legendSvg
@@ -92,4 +93,11 @@ export function renderEpisodeLegend({
           return "Unspecified temporal relation.";
         });
     });
+
+  // renderLegendToggle({
+  //   legendSvg,
+  //   containerWidth,
+  // handleToggleClick,
+  // toggleState,
+  // });
 }
