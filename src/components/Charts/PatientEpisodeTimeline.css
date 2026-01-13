@@ -31,7 +31,7 @@
 }
 
 .selected_report {
-    fill-opacity: 1 !important;
+    /*fill-opacity: 1 !important;*/
     stroke: black !important;
     stroke-width: 2px !important;
 }
@@ -47,7 +47,9 @@
 }
 
 .main_report_PE:hover {
-    fill-opacity: 1;
+    /*fill-opacity: 1;*/
+    stroke: black !important;
+    stroke-width: 2px !important;
 }
 
 .overview_report {
@@ -109,6 +111,12 @@
     stroke: red;
 }
 
+.interior_age_guideline {
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    stroke: red;
+}
+
 .report_type_label,
 .overview_label,
 .age_label {
@@ -117,6 +125,18 @@
 }
 
 .encounter_age {
+    font-size: 11px;
+    fill: #444;
+    text-anchor: middle;
+}
+
+.interior_age {
+    font-size: 11px;
+    fill: #444;
+    text-anchor: middle;
+}
+
+.years_since_label {
     font-size: 11px;
     fill: #444;
     text-anchor: middle;

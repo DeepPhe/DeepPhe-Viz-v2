@@ -1,4 +1,4 @@
-import * as d3 from "d3v4";
+import * as d3 from "d3";
 import React from "react";
 import ToggleSwitch from "../CustomButtons/ToggleSwitch";
 import { snakeCase } from "lodash";

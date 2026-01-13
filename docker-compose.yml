@@ -1,0 +1,51 @@
+services:
+  deepphe-visualizer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deepphe-visualizer
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    volumes:
+      # Mount logs directory for persistence
+      - ./logs:/app/logs
+      # Optional: Mount database if you want to update it without rebuilding
+      # - ./demopatients.sqlite:/app/demopatients.sqlite:ro
+    healthcheck:
+      test: [ "CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - deepphe-network
+    labels:
+      - "com.deepphe.description=DeepPhe Visualizer"
+      - "com.deepphe.version=2.1.0"
+
+  # Optional: Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: deepphe-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - deepphe-visualizer
+    restart: unless-stopped
+    networks:
+      - deepphe-network
+    profiles:
+      - with-nginx
+
+networks:
+  deepphe-network:
+    driver: bridge
+

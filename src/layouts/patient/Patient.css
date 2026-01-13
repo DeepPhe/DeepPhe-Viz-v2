@@ -1382,7 +1382,7 @@ white text with more shading
 }
 
 .selected_report {
-    fill-opacity: 1 !important;
+    /*fill-opacity: 1 !important;*/
     stroke: black !important;
     stroke-width: 2px !important;
     /*stroke-width: 6px;*/
@@ -1400,7 +1400,7 @@ white text with more shading
 }
 
 .main_report_PE:hover {
-    fill-opacity: 1;
+    /*fill-opacity: 1;*/
     /*stroke-width: 6px;*/
 }
 

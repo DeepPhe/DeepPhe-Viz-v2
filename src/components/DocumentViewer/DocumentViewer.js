@@ -237,6 +237,17 @@ export function DocumentViewer(props) {
     }
   };
 
+  const handleMentionClick = (conceptId) => {
+    console.log("Mention clicked, conceptId:", conceptId);
+
+    // Toggle the clicked term (same logic as handleTermClick)
+    if (clickedTerms.includes(conceptId)) {
+      setClickedTerms(clickedTerms.filter((id) => id !== conceptId));
+    } else {
+      setClickedTerms([...clickedTerms, conceptId]);
+    }
+  };
+
   const getReport = () => {
     const factIdTemp = "";
     // If there are fact based reports, highlight the displaying one
@@ -370,6 +381,7 @@ export function DocumentViewer(props) {
                   confidence={confidence}
                   filterLabel={filterLabel}
                   setFilterLabel={setFilterLabel}
+                  onMentionClick={handleMentionClick}
                 />
               </GridItem>
             </SplitPane>

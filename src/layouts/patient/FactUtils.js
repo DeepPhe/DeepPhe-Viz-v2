@@ -1,4 +1,4 @@
-import * as d3 from "d3v4";
+import * as d3 from "d3";
 import $ from "jquery";
 
 const baseUri = "http://localhost:3001/api";

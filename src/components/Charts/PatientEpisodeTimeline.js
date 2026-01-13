@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import * as d3 from "d3v4";
+import * as d3 from "d3";
 import * as $ from "jquery";
+import "./PatientEpisodeTimeline.css";
 
 const baseUri = "http://localhost:3001/api";
 const transitionDuration = 800; // time in ms
@@ -141,6 +142,7 @@ const PatientEpisodeTimeline = ({
 
     function highlightSelectedTimelineReport(reportId) {
       // Remove previous added highlighting classes
+      console.log("reportID:", reportId);
       const css = "selected_report";
       $(".main_report").removeClass(css);
       $(".overview_report").removeClass(css);
@@ -231,8 +233,15 @@ const PatientEpisodeTimeline = ({
     // Convert string to date
     if (reportData !== null) {
       reportData.forEach(function (d) {
-        let formattedDateStr = formatTime(new Date(Number(d.date)));
-        d.formattedDate = parseTime(formattedDateStr);
+        // Parse YYYYMMDDHHmm format: "201001311015"
+        let year = d.date.substring(0, 4);
+        let month = d.date.substring(4, 6);
+        let day = d.date.substring(6, 8);
+        let hour = d.date.substring(8, 10);
+        let minute = d.date.substring(10, 12);
+
+        // Create proper Date object (month is 0-indexed)
+        d.formattedDate = new Date(year, parseInt(month) - 1, day, hour, minute);
       });
 
       // The earliest report date
@@ -307,16 +316,24 @@ const PatientEpisodeTimeline = ({
         let obj = {};
         let datesArr = episodeDates[episode];
         let newDatesArr = [];
+        // console.log(episodeDates);
 
         datesArr.forEach(function (d) {
-          // Format the date to a human-readable string first, formatTime() takes Date object instead of string
-          // d.slice(0, 19) returns the time string without the time zone part.
-          // E.g., "11/28/2012 01:00 AM" from "11/28/2012 01:00 AM AST"
-          let formattedTimeStr = formatTime(new Date(d.slice(0, 19)));
-          // Then convert a string back to a date to be used by d3
-          let date = parseTime(formattedTimeStr);
+          // console.log("Original date string:", d);
 
-          newDatesArr.push(date);
+          // The date is already in YYYY/MM/DD format, which JavaScript can parse directly
+          let date = new Date(d);
+          // console.log("Parsed Date object:", date);
+
+          // Now format and parse if needed
+          let formattedTimeStr = formatTime(date);
+          // console.log("Formatted time string:", formattedTimeStr);
+
+          let finalDate = parseTime(formattedTimeStr);
+          // console.log("Final parsed date:", finalDate);
+          // console.log("---");
+
+          newDatesArr.push(finalDate);
         });
 
         let minDate = d3.min(newDatesArr, function (d) {
@@ -334,12 +351,15 @@ const PatientEpisodeTimeline = ({
         episodeSpansData.push(obj);
       });
 
-      // Create the container if it doesn't exist
-      if (!document.getElementById(svgContainerId)) {
-        const container = document.createElement("div");
+      let container = document.getElementById(svgContainerId);
+      if (!container) {
+        container = document.createElement("div");
         container.id = svgContainerId;
-        document.body.appendChild(container); // Append to the desired parent (body, or other parent element)
+        document.body.appendChild(container);
       }
+
+      // Remove any existing SVG before creating a new one
+      d3.select(`#${svgContainerId}`).selectAll("svg").remove();
 
       // SVG
       const totalHeight =
@@ -502,12 +522,12 @@ const PatientEpisodeTimeline = ({
 
       // Function expression to handle mouse wheel zoom or drag on main area
       // Need to define this before defining zoom since it's function expression instead of function declariation
-      let zoomed = function () {
+      let zoomed = function (event) {
         // Ignore zoom-by-brush
-        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") {
+        if (event.sourceEvent && event.sourceEvent.type === "brush") {
           return;
         }
-        let transform = d3.event.transform;
+        let transform = event.transform;
 
         mainX.domain(transform.rescaleX(overviewX).domain());
 
@@ -745,33 +765,39 @@ const PatientEpisodeTimeline = ({
             return color(d.episode);
           })
           .style("cursor", "pointer")
-          .on("click", function (d) {
+          .on("click", function (event, d) {
             const $circle = $("#main_" + d.id);
             const isSelected = $circle.hasClass("selected_report");
+            console.log("data: ", d.id);
+
+            // Always clear previous selections first
+            $(".main_report_PE").removeClass("selected_report");
+            $(".overview_report").removeClass("selected_report");
+            $(".selected_report_icon").remove();
 
             if (isSelected) {
-              // UNHIGHLIGHT
               removeFactBasedHighlighting(d.id);
-              $(".main_report_PE").removeClass("selected_report");
-              $(".overview_report").removeClass("selected_report");
-              $(".selected_report_icon").remove();
               $("#docs").hide();
               $("#report_instance").hide();
-              return; // stop further processing
+              return;
             }
 
             $("#docs").show();
+
             if (Object.keys(factBasedReports).indexOf(d.id) === -1) {
               removeFactBasedHighlighting(d.id);
             }
+
             highlightSelectedTimelineReport(d.id);
             $("#report_instance").show();
             setReportId(d.id);
 
+            // Set current document index if found
             const docIndex = patientJson?.documents?.findIndex((doc) => d.id === doc.id);
             if (docIndex !== -1) {
               setCurrDocId(docIndex);
             } else {
+              console.log(docIndex, d.id);
               console.warn("❗Could not find document for reportId:", d.id);
             }
           });
@@ -954,13 +980,12 @@ const PatientEpisodeTimeline = ({
 
       // Function expression to create brush function redraw with selection
       // Need to define this before defining brush since it's function expression instead of function declariation
-      let brushed = function () {
+      let brushed = function (event) {
         // Ignore brush-by-zoom
-        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") {
+        if (event.sourceEvent && event.sourceEvent.type === "zoom") {
           return;
         }
 
-        // Can also use d3.event.selection as an alternative to d3.brushSelection(overviewBrush.node())
         let selection = d3.brushSelection(overviewBrush.node());
 
         // Update the position of custom brush handles

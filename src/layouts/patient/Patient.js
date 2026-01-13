@@ -7,7 +7,7 @@ import CardBody from "components/Card/CardBody.js";
 import CustomTable from "../../components/CustomTables/CustomTable";
 import CancerAndTumorSummary from "../../components/Summaries/CancerAndTumorSummary";
 import PatientEpisodeTimeline from "../../components/Charts/PatientEpisodeTimeline";
-import EventRelationTimeline from "../../components/Charts/EventRelationTimeline";
+import EventRelationTimeline from "../../components/Charts/EventRelationTimeline/EventRelationTimeline";
 import CardHeader from "../../components/Card/CardHeader";
 import { Col, Container, Nav, Navbar, Row } from "react-bootstrap";
 import { DocumentViewer } from "../../components/DocumentViewer/DocumentViewer";
@@ -41,7 +41,7 @@ function Patient(props) {
   const [clickedTerms, setClickedTerms] = useState([]); // Initial state set to empty array
   const [processingDone, setProcessingDone] = useState(false);
   const [expandedPatientEpisode, setExpandedPatientEpisode] = useState(true); // initially open
-  const [expandedEventRelation, setExpandedEventRelation] = useState(false); // initially open
+  const [expandedEventRelation, setExpandedEventRelation] = useState(true); // initially open
   const [expandedPatientID, setExpandedPatientID] = useState(true); // initially open
   const [expandedCancerDetail, setExpandedCancerDetail] = useState(true); // initially open
   const conceptsPerDocumentRef = useRef({});
@@ -59,6 +59,7 @@ function Patient(props) {
     if (hasDocuments(fullJson)) {
       setPatientDocument(getPatientDocument(currDocId, fullJson));
     }
+    console.log(currDocId);
   }, [currDocId, fullJson]);
 
   useEffect(() => {
@@ -148,6 +149,7 @@ function Patient(props) {
               setReportId={setReportId}
               conceptsPerDocument={conceptsPerDocumentRef.current}
               expandedPatientID={expandedPatientID}
+              currDocId={currDocId}
             />
           </CardBody>
         )}
@@ -347,8 +349,8 @@ function Patient(props) {
         <GridItem xs={12} sm={12} md={10}>
           {getComponentPatientIdAndDemographics()}
           {getComponentCancerAndTumorDetail()}
-          {getComponentPatientEpisodeTimeline()}
           {getComponentEventRelationTimeline()}
+          {getComponentPatientEpisodeTimeline()}
           {getComponentDocumentViewer()}
         </GridItem>
         <GridItem xs={12} sm={12} md={1} />

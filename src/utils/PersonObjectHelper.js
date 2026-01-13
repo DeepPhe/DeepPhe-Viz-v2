@@ -7,7 +7,7 @@ const getConceptsPerDocumentRef = (patientObject) => {
   const map = {};
   patientObject.documents.forEach((doc) => {
     const mentionIdsInDoc = doc.mentions.map((m) => m.id);
-    map[`main_${doc.name}`] = patientObject.concepts.filter((concept) =>
+    map[`main_${doc.id}`] = patientObject.concepts.filter((concept) =>
       concept.mentionIds?.some((id) => mentionIdsInDoc.includes(id))
     );
   });
