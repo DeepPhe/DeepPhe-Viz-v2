@@ -10,15 +10,12 @@ npm-debug.log
 *.md
 !README.md
 
-# Development files
-src/
-public/
+# Development files (keep src/ and public/ - needed for Docker build)
 .eslintrc.json
 .prettierrc.json
 jsconfig.json
-craco.config.js
 
-# Build artifacts (will be created during build)
+# Build artifacts that exist locally (will be created during Docker build)
 build/
 
 # Deployment artifacts
