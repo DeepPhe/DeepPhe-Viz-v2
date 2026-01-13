@@ -56,45 +56,36 @@ npm start
 
 ## Production Deployment
 
-### 🚀 Quick Deploy to Linux
-
-**Fastest method using automated script:**
+### 🐳 Docker Deployment (Recommended)
 
 ```bash
-# 1. Create deployment package
-./create-deployment-package.sh
-
-# 2. Transfer to Linux server
-scp deepphe-deploy.tar.gz user@server:/home/user/
-
-# 3. On Linux server
-ssh user@server
-tar -xzf deepphe-deploy.tar.gz
-cd deepphe-deploy
-npm install
-sudo npm install -g pm2
-pm2 start ecosystem.config.js
-pm2 save
-pm2 startup
-```
-
-**Your app is now running at:** `http://your-server-ip:3000`
-
-### 🐳 Docker Deployment
-
-```bash
-# Build and run with Docker
+# Build and run with Docker Compose
 docker-compose up -d
 
 # View logs
 docker-compose logs -f
+
+# Stop the application
+docker-compose down
 ```
 
-### 📚 Complete Deployment Documentation
+**Your app will be running at:** `http://localhost:3000` (or your server IP:3000)
 
-- **[Quick Start Guide](DEPLOYMENT_QUICK_START.md)** - Common commands and quick reference
-- **[Complete Linux Deployment](LINUX_DEPLOYMENT.md)** - Full deployment guide with all methods
-- **[Deployment Files Summary](DEPLOYMENT_FILES_SUMMARY.md)** - Overview of all deployment files
+### 🔧 Manual Docker Commands
+
+```bash
+# Build the Docker image
+docker build -t deepphe-visualizer .
+
+# Run the container
+docker run -d -p 3000:3000 --name deepphe-viz deepphe-visualizer
+
+# View logs
+docker logs -f deepphe-viz
+
+# Stop and remove
+docker stop deepphe-viz && docker rm deepphe-viz
+```
 
 ---
 
@@ -123,8 +114,7 @@ Viz2/
 ├── build/                  # Production build (generated)
 ├── server.js               # Express server
 ├── Dockerfile              # Docker configuration
-├── docker-compose.yml      # Docker Compose setup
-└── create-deployment-package.sh  # Deployment automation
+└── docker-compose.yml      # Docker Compose setup
 ```
 
 ---
@@ -136,7 +126,6 @@ The application uses SQLite for data storage:
 - **File:** `demopatients.sqlite`
 - **Location:** `public/` directory
 - **Access:** Direct SQL queries via `sql.js`
-- **Documentation:** [SQLite Refactoring Guide](SQLITE_REFACTORING.md)
 
 ---
 
@@ -154,12 +143,11 @@ npm test -- sqlite_client.test.js
 
 ## Scripts
 
-| Command                          | Description               |
-|----------------------------------|---------------------------|
-| `npm start`                      | Start development server  |
-| `npm run build`                  | Build for production      |
-| `npm test`                       | Run tests                 |
-| `./create-deployment-package.sh` | Create deployment package |
+| Command         | Description              |
+|-----------------|--------------------------|
+| `npm start`     | Start development server |
+| `npm run build` | Build for production     |
+| `npm test`      | Run tests                |
 
 ---
 
@@ -189,20 +177,6 @@ See LICENSE file for details.
 
 ---
 
-## Support
-
-For deployment help, see:
-
-- [DEPLOYMENT_QUICK_START.md](DEPLOYMENT_QUICK_START.md)
-- [LINUX_DEPLOYMENT.md](LINUX_DEPLOYMENT.md)
-
-For development help, see:
-
-- [SQLITE_REFACTORING.md](SQLITE_REFACTORING.md)
-- [SQLITE_CLIENT_QUICK_REF.md](SQLITE_CLIENT_QUICK_REF.md)
-
----
-
 ## Contributing
 
 1. Fork the repository
@@ -211,14 +185,3 @@ For development help, see:
 4. Run tests
 5. Submit a pull request
 
----
-
-## Authors
-
-University of Pittsburgh, Department of Biomedical Informatics
-
----
-
-## Version
-
-**v2.1.0** - SQLite Direct Access with Enhanced Deployment
