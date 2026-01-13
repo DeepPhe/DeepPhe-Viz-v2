@@ -1,16 +1,15 @@
 import {
   AGE_AREA,
-  GAPS,
   ARROW,
+  GAPS,
+  LANE,
   LEGEND,
   MARGINS,
   MARKER_TOGGLE_MAP,
+  OVERVIEW,
   TEXT,
   TIMELINE_PADDING_DAYS,
-  LANE,
-  OVERVIEW,
   TIMESPAN,
-  PADDING,
 } from "../timelineConstants";
 import * as d3 from "d3";
 import { createAllSvgs } from "./createAllSvgs";
@@ -872,13 +871,13 @@ export function renderTimeline({
     //   });
 
     // Update toggle buttons position
-    toggleButtonGroup
-      .transition()
-      .duration(duration)
-      .attr("transform", (d, i) => {
-        const offset = positions[i].isExpanded ? 0 : 10;
-        return `translate(0, ${positions[i].y + offset})`;
-      });
+    // toggleButtonGroup
+    //   .transition()
+    //   .duration(duration)
+    //   .attr("transform", (d, i) => {
+    //     const offset = positions[i].isExpanded ? 0 : 10;
+    //     return `translate(0, ${positions[i].y + offset})`;
+    //   });
 
     // Update divider lines
     const dividers = main_ER_svg.selectAll(".report_type_divider").data(positions.slice(0, -1));
@@ -896,13 +895,13 @@ export function renderTimeline({
       });
 
     // Update toggle buttons text/icon - more specific selector
-    toggleButtonGroup.each(function (d) {
-      d3.select(this)
-        .select(".toggle-icon")
-        .transition()
-        .duration(duration)
-        .attr("d", expandedState[d] ? zoomOut : zoomIn);
-    });
+    // toggleButtonGroup.each(function (d) {
+    //   d3.select(this)
+    //     .select(".toggle-icon")
+    //     .transition()
+    //     .duration(duration)
+    //     .attr("d", expandedState[d] ? zoomOut : zoomIn);
+    // });
 
     // Recalculate groupBaseYMap based on new positions
     const newGroupBaseYMap = {};
@@ -912,37 +911,37 @@ export function renderTimeline({
     });
 
     // Calculate the offset for each group
-    const groupOffsets = {};
-    positions.forEach((pos) => {
-      const oldBaseY = desiredGroupLaneOrderStartY[pos.group];
-      const newBaseY = newGroupBaseYMap[pos.group];
-      groupOffsets[pos.group] = newBaseY - oldBaseY;
-    });
+    // const groupOffsets = {};
+    // positions.forEach((pos) => {
+    //   const oldBaseY = desiredGroupLaneOrderStartY[pos.group];
+    //   const newBaseY = newGroupBaseYMap[pos.group];
+    //   groupOffsets[pos.group] = newBaseY - oldBaseY;
+    // });
 
     // Update data elements
-    mainReports.selectAll(".main_report_group").each(function (d, i) {
-      const group = d3.select(this);
-      const isExpanded = expandedState[d.laneGroup];
-
-      // Handle conceptId as array or single value
-      const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
-      const elementId = `${d.laneGroup}_${i}_${conceptId}`;
-
-      // Get the relative Y position (stored relative to base)
-      const relativeY = originalYPositions.get(elementId) || 0;
-
-      // Calculate new absolute Y position
-      const newBaseY = newGroupBaseYMap[d.laneGroup];
-      const newY = newBaseY + relativeY;
-
-      group
-        .transition()
-        .duration(duration)
-        .attr("transform", `translate(0, ${newY})`)
-        .style("opacity", isExpanded ? 1 : 0);
-
-      group.style("pointer-events", isExpanded ? "all" : "none");
-    });
+    // mainReports.selectAll(".main_report_group").each(function (d, i) {
+    //   const group = d3.select(this);
+    //   const isExpanded = expandedState[d.laneGroup];
+    //
+    //   // Handle conceptId as array or single value
+    //   const conceptId = Array.isArray(d.conceptId) ? d.conceptId[0] : d.conceptId;
+    //   const elementId = `${d.laneGroup}_${i}_${conceptId}`;
+    //
+    //   // Get the relative Y position (stored relative to base)
+    //   const relativeY = originalYPositions.get(elementId) || 0;
+    //
+    //   // Calculate new absolute Y position
+    //   const newBaseY = newGroupBaseYMap[d.laneGroup];
+    //   const newY = newBaseY + relativeY;
+    //
+    //   group
+    //     .transition()
+    //     .duration(duration)
+    //     .attr("transform", `translate(0, ${newY})`)
+    //     .style("opacity", isExpanded ? 1 : 0);
+    //
+    //   group.style("pointer-events", isExpanded ? "all" : "none");
+    // });
 
     // Update or create heatmaps for collapsed lanes
     positions.forEach((pos) => {
@@ -993,7 +992,7 @@ export function renderTimeline({
     });
 
     // Update the global groupBaseYMap
-    Object.assign(desiredGroupLaneOrderStartY, newGroupBaseYMap);
+    // Object.assign(desiredGroupLaneOrderStartY, newGroupBaseYMap);
   }
 
   // Create a group for toggle buttons (outside the main graph area)

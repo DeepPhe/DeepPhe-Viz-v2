@@ -33,8 +33,8 @@ pm2 startup
 # On your Mac or Linux server
 cd /Volumes/Samsung-Ext/dev/Viz2
 
-# Build and run
-docker-compose up -d
+# Build and run (first time may take a few minutes to build)
+docker-compose up -d --build
 
 # Check status
 docker-compose logs -f
