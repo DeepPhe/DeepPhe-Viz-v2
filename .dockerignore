@@ -1,0 +1,55 @@
+# Docker Deployment Ignore
+# Files to exclude from Docker build context
+
+node_modules/
+npm-debug.log
+.git/
+.gitignore
+.idea/
+.DS_Store
+*.md
+!README.md
+
+# Development files
+src/
+public/
+.eslintrc.json
+.prettierrc.json
+jsconfig.json
+craco.config.js
+
+# Build artifacts (will be created during build)
+build/
+
+# Deployment artifacts
+deepphe-deploy/
+deepphe-deploy.tar.gz
+*.exe
+deepphe-visualizer-macos
+deepphe-visualizer-win.exe
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env.local
+.env.development
+.env.test
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+
+# Test files
+coverage/
+.nyc_output/
+
+# Misc
+identifier.sqlite
+rel.sh
+
