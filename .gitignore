@@ -1,3 +1,9 @@
+deepphe-visualizer-macos
+deepphe-visualizer-win.exe
+demopatients.sqlite
+public/demopatients.sqlite
+public/docs/demo_docs.db
+
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 .idea/*
 # dependencies

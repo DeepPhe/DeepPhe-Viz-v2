@@ -1,15 +1,11 @@
 import { deleteDB, openDB } from "idb";
-import parsePipeSeparatedFile from "./DbFileReader";
+import initSqlJs from "sql.js";
 import {
   CANCER_ATTRIBUTES_STORE,
-  CANCER_ATTRIBUTES_TEXT_FILE,
   DEEPPHE_DB,
   OMAP_DX_STORE,
-  OMAP_DX_TEXT_FILE,
   OMAP_PATIENT_STORE,
-  OMAP_PATIENT_TEXT_FILE,
   TUMOR_ATTRIBUTES_STORE,
-  TUMOR_ATTRIBUTES_TEXT_FILE,
 } from "./DbConsts";
 
 const initDB = async () => {
@@ -45,16 +41,17 @@ const initDB = async () => {
   }
 };
 
-const loadFileData = (filePath) => {
-  const fullPath = `${process.env.PUBLIC_URL}/${filePath}`;
-  return new Promise((resolve, reject) => {
-    fetch(fullPath)
-      .then((res) => resolve(res.text()))
-      .catch((e) => {
-        //console.log(e);
-        reject(e);
-      });
+const loadSqliteDatabase = async () => {
+  const SQL = await initSqlJs({
+    locateFile: (file) => `https://sql.js.org/dist/${file}`,
   });
+
+  const dbPath = `${process.env.PUBLIC_URL}/demopatients.sqlite`;
+  const response = await fetch(dbPath);
+  const buffer = await response.arrayBuffer();
+  const db = new SQL.Database(new Uint8Array(buffer));
+
+  return db;
 };
 
 const storeData = (db, storeName, data) => {
@@ -77,49 +74,78 @@ const storeData = (db, storeName, data) => {
   });
 };
 
-const loadDataForStore = (db, storeName, filePath) => {
-  //console.log("Loading data for store:", storeName);
-  return loadFileData(filePath).then((content) => {
-    if (!content) {
-      console.error(`Error loading file: ${filePath}`);
-      return Promise.reject(new Error(`File content is empty for ${filePath}`));
-    } else {
-      let parsedData;
+const loadDataForStore = async (sqliteDb, idbDb, storeName) => {
+  let query;
+  let parsedData = [];
 
-      if (storeName === OMAP_DX_STORE || storeName === OMAP_PATIENT_STORE) {
-        // Special handling for OMAP data to exclude the first "id" column
-        parsedData = parseOmapData(content);
-      } else {
-        // Regular parsing for other stores
-        parsedData = parsePipeSeparatedFile(content, "|");
-      }
+  switch (storeName) {
+    case CANCER_ATTRIBUTES_STORE:
+      query =
+        "SELECT patientid, cancerid, cancer_type, attribid, attribval, confidence FROM cancer_attributes";
+      break;
+    case TUMOR_ATTRIBUTES_STORE:
+      query =
+        "SELECT patientid, CANCER_ID, TUMOR_ID, tumor_type, attribute_name, attribute_value, attribute_status, confidence FROM tumor_attributes";
+      break;
+    case OMAP_DX_STORE:
+      query = "SELECT COL, VAL, PERSON_IDS FROM calculated_dx_data";
+      break;
+    case OMAP_PATIENT_STORE:
+      query = "SELECT COL, VAL, PERSON_IDS FROM calculated_patient_data";
+      break;
+    default:
+      throw new Error(`Unknown store: ${storeName}`);
+  }
 
-      // Return the Promise from storeData
-      return storeData(db, storeName, parsedData);
+  const results = sqliteDb.exec(query);
+
+  if (results.length > 0) {
+    const values = results[0].values;
+
+    if (storeName === OMAP_DX_STORE || storeName === OMAP_PATIENT_STORE) {
+      // Special handling for OMAP data
+      parsedData = processOmapResults(values);
+    } else if (storeName === CANCER_ATTRIBUTES_STORE) {
+      // Process cancer attributes
+      parsedData = values.map((row) => ({
+        patientid: row[0],
+        cancerid: row[1],
+        cancer_type: row[2],
+        attribid: row[3],
+        attribval: row[4],
+        confidence: row[5],
+      }));
+    } else if (storeName === TUMOR_ATTRIBUTES_STORE) {
+      // Process tumor attributes - using the actual column names from the database
+      parsedData = values.map((row) => ({
+        patientid: row[0],
+        CANCER_ID: row[1],
+        tumorid: row[2], // Map TUMOR_ID to tumorid for consistency
+        tumor_type: row[3],
+        attribid: row[4], // Map attribute_name to attribid
+        attribval: row[5], // Map attribute_value to attribval
+        attribute_status: row[6],
+        confidence: row[7],
+      }));
     }
-  });
+  }
+
+  return storeData(idbDb, storeName, parsedData);
 };
 
-// Function to parse OMAP data without using the first column as "id"
-const parseOmapData = (fileContent) => {
-  const lines = fileContent.split(/\r?\n/).filter((line) => line.trim());
+// Function to process OMAP data from SQLite results
+const processOmapResults = (values) => {
   const result = [];
 
-  // Extract header row and parse column names
-  if (lines.length === 0) return result;
+  for (const row of values) {
+    const attribid = row[0]; // COL
+    let attribval = row[1]; // VAL
+    const personIds = row[2]; // PERSON_IDS
 
-  const headerRow = lines[0];
-  const headers = headerRow.split("|").map((header) => header.trim());
-  const patientIdCol = headers.indexOf("PERSON_IDS");
-  const nameCol = headers.indexOf("COL");
-  const attribValCol = headers.indexOf("VAL");
+    // Parse the comma-separated patient IDs
+    const patientIds = personIds.split(",").map((id) => id.trim());
 
-  // Process each data row (skip the header row)
-  for (let i = 1; i < lines.length; i++) {
-    const columns = lines[i].split("|");
-    const patientIds = columns[patientIdCol].split(",").map((id) => id);
-    const attribid = columns[nameCol].trim();
-    let attribval = columns[attribValCol].trim();
+    // Special handling for age_at_dx
     if (attribid.toLowerCase() === "age_at_dx") {
       attribval = parseInt(attribval.substring(0, attribval.length - 1) + "0");
       if (attribval > 90) {
@@ -127,7 +153,8 @@ const parseOmapData = (fileContent) => {
       }
     }
 
-    const chunkSize = 5000; // Adjust chunk size as needed
+    // Split patient IDs into chunks to avoid performance issues
+    const chunkSize = 5000;
     for (let i = 0; i < patientIds.length; i += chunkSize) {
       const chunk = patientIds.slice(i, i + chunkSize);
       result.push({ patientids: chunk, attribid, attribval });
@@ -137,24 +164,22 @@ const parseOmapData = (fileContent) => {
   return result;
 };
 
-// Usage example:
-// const csvPromises = loadCsvFilesFromPublicDb(['patients.csv', 'diagnoses.csv', 'treatments.csv']);
-// Promise.all(csvPromises).then(dataArrays => {
-//   // dataArrays contains the parsed contents of each CSV file
-// });
-const loadData = (db) => {
-  //console.log("Loading data for all stores");
-  // const csvData = loadCsvFilesFromPublicDb(CSV_FILE_NAMES);
-  return new Promise((resolve, reject) => {
-    Promise.all([
-      loadDataForStore(db, OMAP_DX_STORE, OMAP_DX_TEXT_FILE),
-      loadDataForStore(db, OMAP_PATIENT_STORE, OMAP_PATIENT_TEXT_FILE),
-      loadDataForStore(db, CANCER_ATTRIBUTES_STORE, CANCER_ATTRIBUTES_TEXT_FILE),
-      loadDataForStore(db, TUMOR_ATTRIBUTES_STORE, TUMOR_ATTRIBUTES_TEXT_FILE),
-    ]).then((data) => {
-      //console.log("All data loaded successfully");
-      resolve(data);
-    });
+// Load all data from SQLite database into IndexedDB stores
+const loadData = async (idbDb) => {
+  //console.log("Loading data from SQLite database");
+
+  // Load the SQLite database
+  const sqliteDb = await loadSqliteDatabase();
+
+  return Promise.all([
+    loadDataForStore(sqliteDb, idbDb, OMAP_DX_STORE),
+    loadDataForStore(sqliteDb, idbDb, OMAP_PATIENT_STORE),
+    loadDataForStore(sqliteDb, idbDb, CANCER_ATTRIBUTES_STORE),
+    loadDataForStore(sqliteDb, idbDb, TUMOR_ATTRIBUTES_STORE),
+  ]).then((data) => {
+    //console.log("All data loaded successfully from SQLite database");
+    sqliteDb.close();
+    return data;
   });
 };
 
