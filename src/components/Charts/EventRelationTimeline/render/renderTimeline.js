@@ -11,6 +11,8 @@ import {
   OVERVIEW,
   TIMESPAN,
   PADDING,
+  LABEL,
+  TOGGLE_BUTTON,
 } from "../timelineConstants";
 import * as d3 from "d3";
 import { createAllSvgs } from "./createAllSvgs";
@@ -279,82 +281,82 @@ export function renderTimeline({
   });
 
   // Add toggle group to legendSvg
-  const toggleGroup = legendSvg
-    .append("g")
-    .attr("class", "filter-toggle-group")
-    .attr("transform", `translate(${containerWidth - 40})`)
-    .style("cursor", "pointer")
-    .style("pointer-events", "all") // Ensure it can receive clicks
-    .raise(); // Move to front
-
-  // Label text
-  const toggleLabel = toggleGroup
-    .append("text")
-    .attr("x", -10)
-    .attr("y", 15)
-    .attr("alignment-baseline", "middle")
-    .attr("text-anchor", "end")
-    .attr("font-size", "12px")
-    .text("Showing: All Patient Events");
-
-  // Background (toggle track)
-  const toggleBg = toggleGroup
-    .append("rect")
-    .attr("class", "toggle-bg")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("width", 40)
-    .attr("height", 20)
-    .attr("rx", 10)
-    .attr("ry", 10)
-    .attr("fill", "#ccc");
-
-  // Circle (toggle knob)
-  const knob = toggleGroup
-    .append("circle")
-    .attr("class", "toggle-knob")
-    .attr("cx", 10)
-    .attr("cy", 10)
-    .attr("r", 8)
-    .attr("fill", "white")
-    .style("stroke", "#888");
-
-  let localToggleState = toggleState; // Initialize with React state
-
-  // Click → notify React
-  toggleGroup.on("click", () => {
-    if (handleToggleClick) {
-      handleToggleClick();
-
-      // Toggle the LOCAL state
-      localToggleState = !localToggleState; // UPDATE the local state!
-
-      // Update visuals based on the NEW local state
-      knob
-        .transition()
-        .duration(200)
-        .attr("cx", localToggleState ? 30 : 10); // Use localToggleState, not isNowOn
-
-      toggleBg
-        .transition()
-        .duration(200)
-        .attr("fill", localToggleState ? "#007bff" : "#ccc");
-
-      toggleLabel.text(
-        localToggleState ? "Showing: Filtered Patient Events" : "Showing: All Patient Events"
-      );
-    }
-  });
+  // const toggleGroup = legendSvg
+  //   .append("g")
+  //   .attr("class", "filter-toggle-group")
+  //   .attr("transform", `translate(${containerWidth - 40})`)
+  //   .style("cursor", "pointer")
+  //   .style("pointer-events", "all") // Ensure it can receive clicks
+  //   .raise(); // Move to front
+  //
+  // // Label text
+  // const toggleLabel = toggleGroup
+  //   .append("text")
+  //   .attr("x", -10)
+  //   .attr("y", 15)
+  //   .attr("alignment-baseline", "middle")
+  //   .attr("text-anchor", "end")
+  //   .attr("font-size", "12px")
+  //   .text("Showing: All Patient Events");
+  //
+  // // Background (toggle track)
+  // const toggleBg = toggleGroup
+  //   .append("rect")
+  //   .attr("class", "toggle-bg")
+  //   .attr("x", 0)
+  //   .attr("y", 0)
+  //   .attr("width", 40)
+  //   .attr("height", 20)
+  //   .attr("rx", 10)
+  //   .attr("ry", 10)
+  //   .attr("fill", "#ccc");
+  //
+  // // Circle (toggle knob)
+  // const knob = toggleGroup
+  //   .append("circle")
+  //   .attr("class", "toggle-knob")
+  //   .attr("cx", 10)
+  //   .attr("cy", 10)
+  //   .attr("r", 8)
+  //   .attr("fill", "white")
+  //   .style("stroke", "#888");
+  //
+  // let localToggleState = toggleState; // Initialize with React state
+  //
+  // // Click → notify React
+  // toggleGroup.on("click", () => {
+  //   if (handleToggleClick) {
+  //     handleToggleClick();
+  //
+  //     // Toggle the LOCAL state
+  //     localToggleState = !localToggleState; // UPDATE the local state!
+  //
+  //     // Update visuals based on the NEW local state
+  //     knob
+  //       .transition()
+  //       .duration(200)
+  //       .attr("cx", localToggleState ? 30 : 10); // Use localToggleState, not isNowOn
+  //
+  //     toggleBg
+  //       .transition()
+  //       .duration(200)
+  //       .attr("fill", localToggleState ? "#007bff" : "#ccc");
+  //
+  //     toggleLabel.text(
+  //       localToggleState ? "Showing: Filtered Patient Events" : "Showing: All Patient Events"
+  //     );
+  //   }
+  // });
 
   // After defining everything:
-  function updateTogglePosition() {
-    const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
-    // Keep it 40px from the right edge and some padding from the top
-    toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
-  }
+  // function updateTogglePosition() {
+  //   const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
+  //   // Keep it 40px from the right edge and some padding from the top
+  //   toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
+  // }
 
   // Call it initially
-  updateTogglePosition();
+  // updateTogglePosition();
 
   let isUpdating = false; // Add this flag at the top level of renderTimeline
 
@@ -416,6 +418,8 @@ export function renderTimeline({
   const caretPath = "M -4 -2.67 L 0 1.33 L 4 -2.67";
   const caretRight = "M 0 0 L 10 5 L 0 10"; // triangle pointing right
   const caretDown = "M 0 0 L 10 0 L 5 10 Z"; // triangle pointing down
+  // Attach zoom ONCE
+  // main_ER_svg.call(zoom);
 
   groupLayouts.forEach((layout, i) => {
     // isLastGroup is used to ensure divider line is not used after last group
@@ -757,12 +761,11 @@ export function renderTimeline({
   }
 
   function updateLayout(animate = true, activeGroupKey = null, spans) {
-    main_ER_svg.selectAll(".group").remove();
+    main_ER_svg.selectAll("*").remove();
+    axisLayer.selectAll(".main-ER-x-axis-bottom").remove();
+    age_ER.selectAll("*").remove();
+    // timelineSvg.selectAll(".zoom_ER").remove();
     const duration = animate ? 600 : 0;
-    let currentY = LANE.GROUP_TOP_PADDING;
-    let variableTotalContentHeight = 0;
-    let groupNToggleY = 0;
-    // height of last divider line + 10
     let yGroupOffset = 0;
     const updatedGroupLayout = [];
 
@@ -804,167 +807,150 @@ export function renderTimeline({
       drawLanes(groupG, layout.spans, layout.key);
     });
 
+    const newViewBoxHeight =
+      MARGINS.top +
+      LEGEND.height +
+      GAPS.legendToMain +
+      totalContentHeight +
+      GAPS.pad +
+      OVERVIEW.height +
+      GAPS.pad +
+      AGE_AREA.height +
+      MARGINS.bottom;
+
+    timelineSvg.attr("viewBox", `0 0 ${containerWidth} ${newViewBoxHeight}`);
+
+    // Select zoom rect
+    const zoomER = timelineSvg.select(".zoom_ER");
+    if (!zoomER.empty()) {
+      // 1. Resize zoom rect
+      zoomER.attr("height", totalContentHeight).attr("width", svgWidth);
+
+      // 2. Update zoom constraints
+      zoom
+        .translateExtent([
+          [0, 0],
+          [svgWidth, totalContentHeight],
+        ])
+        .extent([
+          [0, 0],
+          [svgWidth, totalContentHeight],
+        ]);
+
+      // 3. Re-apply current transform
+      const t = d3.zoomTransform(zoomER.node());
+      zoomER.call(zoom.transform, t);
+    } else {
+      console.warn("zoom_ER not found! Make sure it exists outside cleared groups.");
+    }
+
+    timelineSvg
+      .select("#secondary_area_clip rect")
+      .attr("width", svgWidth + LABEL.margin + TOGGLE_BUTTON.margin)
+      .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top)
+      .attr("x", -LABEL.margin) // change this if needed
+      .attr("y", -PADDING.top);
+
+    const dateAnchorGroup = main_ER_svg
+      .append("g")
+      .attr("class", "date-anchors")
+      .attr("clip-path", "url(#secondary_area_clip)")
+      .lower(); // Send to back so relations appear on top
+
+    // Add vertical lines at each unique date
+    dateAnchorGroup
+      .selectAll(".date-anchor-line")
+      .data(uniqueDates)
+      .enter()
+      .append("line")
+      .attr("class", "date-anchor-line")
+      .attr("x1", (d) => mainX(d))
+      .attr("x2", (d) => mainX(d))
+      .attr("y1", 0)
+      .attr("y2", totalContentHeight) // spans all lanes
+      .style("stroke", "#d3d3d3") // light gray
+      .style("stroke-width", 2)
+      .style("stroke-dasharray", "3,3") // dashed line
+      .style("opacity", 0.9)
+      .style("pointer-events", "none");
+
+    const ageERY = MARGINS.top + LEGEND.height + GAPS.legendToMain + totalContentHeight + GAPS.pad;
+
+    age_ER.attr("transform", `translate(${MARGINS.left}, ${ageERY})`);
+
+    age_ER
+      .append("text")
+      .attr("x", -TEXT.marginLeft)
+      .attr("y", AGE_AREA.height / 2)
+      .attr("dy", ".5ex")
+      .attr("class", "age_label")
+      .text("Patient Age");
+
+    // Draw start + end ages
+    age_ER
+      .selectAll(".encounter_age")
+      .data(encounterDates)
+      .enter()
+      .append("text")
+      .attr("x", (d) => mainX(d))
+      .attr("y", AGE_AREA.height / 2)
+      .attr("dy", ".5ex")
+      .attr("class", "encounter_age")
+      .text((d, i) => encounterAges[i]);
+
+    // Start + end guideline lines
+    age_ER
+      .selectAll(".encounter_age_guideline")
+      .data(encounterDates)
+      .enter()
+      .append("line")
+      .attr("x1", (d) => mainX(d))
+      .attr("y1", 12)
+      .attr("x2", (d) => mainX(d))
+      .attr("y2", 25)
+      .attr("class", "encounter_age_guideline");
+
+    // const yearsSinceDiagnosis = interiorAges.map((a) => a - startAge);
+
+    // Draw the “year since diagnosis” labels (1, 2, 3…)
+    age_ER
+      .selectAll(".years_since_label")
+      .data(interiorDates)
+      .enter()
+      .append("text")
+      .attr("x", (d) => mainX(d))
+      .attr("y", AGE_AREA.height / 2) // below everything else
+      .attr("class", "years_since_label")
+      .text((d, i) => `Year ${yearsSinceDiagnosis[i]}`);
+
+    // Draw guideline lines for intermediate ages
+    age_ER
+      .selectAll(".interior_age_guideline")
+      .data(interiorDates)
+      .enter()
+      .append("line")
+      .attr("x1", (d) => mainX(d))
+      .attr("y1", 12)
+      .attr("x2", (d) => mainX(d))
+      .attr("y2", 25)
+      .attr("class", "interior_age_guideline");
+
     axisLayer
       .append("g")
       .attr("class", "main-ER-x-axis-bottom")
       .attr("transform", `translate(0, ${totalContentHeight})`)
       .call(xAxisBottom);
 
-    // Loop over all groups
-    // main_ER_svg.selectAll(".group").each(function () {
-    //   const groupG = d3.select(this);
-    //   const groupKey = groupG.attr("data-group-key");
-    //   const laneCount = getLaneCount(spans);
-    //   const groupHeight = laneCount * LANE.height;
-    //
-    //   const isExpanded = expandedState[groupKey];
-    //
-    //   // const laneCount = assignLanes(e)
-    //   // const fullHeight = +groupG.attr("data-expanded-height");
-    //   // const collapsedHeight = +groupG.attr("data-collapsed-height");
-    //   // const groupHeight = isExpanded ? fullHeight : collapsedHeight;
-    //   // const groupHeight =
-    //   // Move group to its new position
-    //   groupG.transition().duration(duration).attr("transform", `translate(0, ${currentY})`);
-    //
-    //   // Show/hide lanes
-    //   // groupG
-    //   //   .selectAll(".lane")
-    //   //   .transition()
-    //   //   .duration(duration)
-    //   //   .style("opacity", isExpanded ? 1 : 0)
-    //   //   .style("pointer-events", isExpanded ? "all" : "none");
-    //
-    //   // Remove any existing heatmap for this group
-    //   // groupG.selectAll(".heatmap").remove();
-    //
-    //   // const heatmapG = groupG.select(".heatmap");
-    //   // heatmapG.selectAll("*").remove(); // clear old
-    //   // if (!isExpanded) {
-    //   //   const heatmapData = createLaneHeatmap(groupKey, svgWidth);
-    //   //   if (heatmapData) {
-    //   //     heatmapG.style("display", null).attr("transform", "translate(0,-5)");
-    //   //     heatmapG
-    //   //       .selectAll("rect")
-    //   //       .data(heatmapData)
-    //   //       .enter()
-    //   //       .append("rect")
-    //   //       .attr("x", (d) => d.x)
-    //   //       .attr("y", 0)
-    //   //       .attr("width", (d) => Math.max(1, d.width))
-    //   //       .attr("height", LANE.height)
-    //   //       .attr("fill", (d) => d.color);
-    //   //   }
-    //   // } else {
-    //   //   heatmapG.style("display", "none");
-    //   // }
-    //
-    //   // let laneCount = 0;
-    //
-    //   // if (collapsed) {
-    //   //   laneCount = 1;
-    //   // } else {
-    //   //   laneCount = assignLanes();
-    //   // }
-    //
-    //   // const laneCount = assignLanes();
-    //
-    //   // console.log(currentY);
-    //   currentY += groupHeight + LANE.GROUP_TOP_PADDING;
-    //   groupNToggleY += groupHeight;
-    //
-    //   if (groupKey === activeGroupKey) {
-    //     // Rotate toggle caret
-    //     groupG
-    //       .select(".toggle-icon")
-    //       .transition()
-    //       .duration(duration)
-    //       .attr("transform", isExpanded ? "rotate(0)" : "rotate(-90)")
-    //       .attr("transform", `translate(0, ${groupNToggleY / 2})`);
-    //
-    //     // Move the label to the center of the visible height
-    //     groupG
-    //       .select(".group-label")
-    //       .transition()
-    //       .duration(duration)
-    //       .attr("transform", `translate(${-TEXT.marginLeft}, ${groupNToggleY / 2})`);
-    //   }
-    //
-    //   // Update dividers if you have them
-    //   groupG
-    //     .selectAll(".group-divider")
-    //     .transition()
-    //     .duration(duration)
-    //     .attr("y1", groupHeight)
-    //     .attr("y2", groupHeight);
-    //
-    //   // Increment currentY for the next group
-    //
-    //   // variableTotalContentHeight = currentY + LANE.GROUP_TOP_PADDING;
-    // });
+    const overviewY =
+      MARGINS.top +
+      LEGEND.height +
+      GAPS.legendToMain +
+      totalContentHeight +
+      GAPS.pad +
+      AGE_AREA.height +
+      AGE_AREA.bottomPad;
 
-    // Update SVG total height
-    // const svgTotalHeight =
-    //   MARGINS.top +
-    //   LEGEND.height +
-    //   GAPS.legendToMain +
-    //   totalContentHeight +
-    //   GAPS.pad +
-    //   OVERVIEW.height +
-    //   GAPS.pad +
-    //   AGE_AREA.height +
-    //   MARGINS.bottom;
-
-    // timelineSvg
-    //   .transition()
-    //   .duration(duration)
-    //   .attr("viewBox", `0 0 ${containerWidth} ${svgTotalHeight}`)
-    //   .style("height", `${svgTotalHeight}px`);
-
-    // timelineSvg
-    //   .select(".zoom_ER")
-    //   .transition()
-    //   .duration(duration)
-    //   .attr("height", variableTotalContentHeight + GAPS.legendToMain);
-
-    // Update bottom x-axis
-    // timelineSvg
-    //   .select(".main-ER-x-axis-bottom")
-    //   .transition()
-    //   .duration(duration)
-    //   .attr(
-    //     "transform",
-    //     `translate(0, ${
-    //       MARGINS.top + LEGEND.height + GAPS.legendToMain + variableTotalContentHeight
-    //     })`
-    //   );
-
-    // age_ER
-    //   .transition()
-    //   .duration(duration)
-    //   .attr(
-    //     "transform",
-    //     `translate(${MARGINS.left}, ${
-    //       MARGINS.top + LEGEND.height + GAPS.legendToMain + variableTotalContentHeight + GAPS.pad
-    //     })`
-    //   );
-
-    // Update overview position
-    // overview
-    //   .transition()
-    //   .duration(duration)
-    //   .attr(
-    //     "transform",
-    //     `translate(${MARGINS.left}, ${
-    //       MARGINS.top +
-    //       LEGEND.height +
-    //       GAPS.legendToMain +
-    //       variableTotalContentHeight +
-    //       GAPS.pad +
-    //       AGE_AREA.height +
-    //       AGE_AREA.bottomPad
-    //     })`
-    //   );
+    overview.attr("transform", `translate(${MARGINS.left}, ${overviewY})`);
   }
 
   const defs = d3.select("svg").append("defs");
@@ -1055,8 +1041,24 @@ export function renderTimeline({
   verticalLineCap
     .append("path")
     .attr("d", "M6 0 L6 12") // vertical line from top to bottom
-    // .style("fill", "rgb(49, 163, 84)")
     .style("stroke", "rgb(49, 163, 84)")
+    .attr("stroke-width", 3)
+    .attr("stroke-opacity", 0.75);
+
+  const collapsedVerticalLineCap = defs
+    .append("marker")
+    .attr("id", "verticalLineCap")
+    .attr("viewBox", "0 0 12 12")
+    .attr("refX", 6) // Center horizontally
+    .attr("refY", 6) // Center vertically
+    .attr("markerWidth", 2.5)
+    .attr("markerHeight", 2.5)
+    .attr("orient", "auto");
+
+  collapsedVerticalLineCap
+    .append("path")
+    .attr("d", "M6 0 L6 12") // vertical line from top to bottom
+    .style("stroke", "rgb(128, 128, 128)")
     .attr("stroke-width", 3)
     .attr("stroke-opacity", 0.75);
 
@@ -1275,9 +1277,9 @@ export function renderTimeline({
       .attr("x2", x2)
       .attr("y1", 0)
       .attr("y2", 0)
-      .attr("stroke", d.negated ? "rgb(255, 0, 0)" : "rgb(79, 33, 84)")
+      .attr("stroke", "rgb(128, 128, 128)")
       .attr("stroke-width", 5)
-      .attr("stroke-opacity", 0.75)
+      .attr("stroke-opacity", 0.3)
       .style("cursor", "pointer")
       .on("click", (event) => handleClick(event, d));
     if (markerStart) {
@@ -1287,34 +1289,58 @@ export function renderTimeline({
       mainLine.attr("marker-end", markerEnd);
     }
     mainLine.append("title").text(tooltipText);
+  }
 
-    // const tooltip = d3.select("#tooltip");
+  function drawHeatOn({ group, d, x, lineType, handleClick }) {
+    // Handle arrays for display
+    const conceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
+    // Get concept names and count duplicates
+    const conceptNames = conceptIds.map(
+      (id) => concepts.find((c) => c.id === id)?.preferredText || "Unknown"
+    );
+    // Count occurrences of each concept name
+    const nameCounts = {};
+    conceptNames.forEach((name) => {
+      nameCounts[name] = (nameCounts[name] || 0) + 1;
+    });
 
-    // group
-    //   .append("circle")
-    //   .attr("cx", x2)
-    //   .attr("cy", 0)
-    //   .attr("data-marker-type", "end")
-    //   .attr("r", 8) // increase as needed to ensure easy hover/click
-    //   .style("fill", "transparent")
-    //   .style("cursor", "pointer")
-    //   .attr("pointer-events", "all")
-    //   .on("click", (event) => handleClick(event, d))
-    //   .append("title")
-    //   .text(tooltipText);
-    //
-    // group
-    //   .append("circle")
-    //   .attr("cx", x1)
-    //   .attr("cy", 0)
-    //   .attr("data-marker-type", "start")
-    //   .attr("r", 8) // increase as needed to ensure easy hover/click
-    //   .style("fill", "transparent")
-    //   .style("cursor", "pointer")
-    //   .attr("pointer-events", "all")
-    //   .on("click", (event) => handleClick(event, d))
-    //   .append("title")
-    //   .text(tooltipText);
+    // Format as "Name (x3), Other Name (x2)" or just "Name" if count is 1
+    const conceptNamesDisplay = Object.entries(nameCounts)
+      .map(([name, count]) => (count > 1 ? `${name} (x${count})` : name))
+      .join(", ");
+
+    const tooltipText = `${d.relation1}: ${d.start}\n${d.relation2}: ${d.end}\nConcept Name: ${conceptNamesDisplay}\n`;
+    group
+      .append("line")
+      .attr("class", "relation-outline")
+      .attr("data-line-type", lineType)
+      .attr("x1", x)
+      .attr("y1", -7)
+      .attr("x2", x)
+      .attr("y2", 7)
+      .attr("stroke", "black")
+      .attr("stroke-width", 5)
+      .style("cursor", "pointer")
+      .attr("stroke-opacity", 0);
+
+    group
+      .append("line")
+      .attr("class", "main_report_contains relation-icon")
+      .attr("data-concept-ids", d.conceptIds.join(","))
+      .attr("data-line-type", lineType)
+      .attr("x1", x)
+      .attr("x2", x)
+      .attr("y1", -6) // Extends above
+      .attr("y2", 6) // Extends below
+      .attr("stroke", "rgb(128, 128, 128)")
+      .attr("stroke-width", 4)
+      .attr("stroke-opacity", 0.75)
+      .style("cursor", "pointer")
+      .on("click", (event) => {
+        handleClick(event, d);
+      })
+      .append("title")
+      .text(tooltipText);
   }
 
   function drawSoloAfterRelation({ group, d, x, handleClick }) {
@@ -1442,10 +1468,6 @@ export function renderTimeline({
   function drawLanes(groupG, spans, groupKey) {
     // Group events by lane index
     const spansByLane = d3.group(spans, (d) => d.laneIndex);
-    console.log(groupKey);
-    console.log(expandedState);
-    console.log(expandedState[groupKey]);
-
     const expanded = expandedState[groupKey];
 
     for (const [laneIndex, spansInLane] of spansByLane) {
@@ -1462,13 +1484,55 @@ export function renderTimeline({
         const containsGroup = laneG.append("g").attr("class", "contains-group").datum(d);
 
         if (!expanded) {
-          drawHeatSpan({
-            group: containsGroup,
-            d,
-            x1,
-            x2,
-            handleClick,
-          });
+          if (d.relation1 === "On" && d.relation2 === "On") {
+            if (d.formattedStartDate === d.formattedEndDate) {
+              drawHeatOn({
+                group: containsGroup,
+                d,
+                x: x1,
+                lineType: "x1-only",
+                handleClick,
+              });
+            } else {
+              drawTimeSpan({
+                group: containsGroup,
+                d,
+                x1,
+                x2,
+                markerStart: "url(#verticalLineCap)",
+                markerEnd: "url(#verticalLineCap)",
+                handleClick,
+              });
+            }
+          } else if (d.relation1 === "Overlaps" && d.relation2 === "On") {
+            drawHeatSpan({
+              group: containsGroup,
+              d,
+              x1,
+              x2,
+              markerEnd: "url(#collapsedVerticalLineCap)",
+              handleClick,
+            });
+          } else if (d.relation1 === "On" && d.relation2 === "Overlaps") {
+            drawHeatSpan({
+              group: containsGroup,
+              d,
+              x1,
+              x2,
+              markerStart: "url(#collapsedVerticalLineCap)",
+              handleClick,
+            });
+          } else {
+            // catch-all for anything else
+            drawHeatSpan({
+              group: containsGroup,
+              d,
+              x1,
+              x2,
+              handleClick,
+            });
+          }
+
           return;
         }
 
