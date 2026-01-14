@@ -524,7 +524,10 @@ const PatientEpisodeTimeline = ({
       // Need to define this before defining zoom since it's function expression instead of function declariation
       let zoomed = function (event) {
         // Ignore zoom-by-brush
-        if (event.sourceEvent && event.sourceEvent.type === "brush") {
+        if (
+          event.sourceEvent == null ||
+          (event.sourceEvent && event.sourceEvent.type === "brush")
+        ) {
           return;
         }
         let transform = event.transform;
@@ -533,7 +536,7 @@ const PatientEpisodeTimeline = ({
 
         // Update the report dots in main area
         update();
-
+        event.isZooming = true;
         // Update the overview as moving
         overview.select(".brush").call(brush.move, mainX.range().map(transform.invertX, transform));
 
@@ -997,14 +1000,16 @@ const PatientEpisodeTimeline = ({
         update();
 
         // Zoom the main area
-        svg
-          .select(".zoom_PE")
-          .call(
-            zoom.transform,
-            d3.zoomIdentity
-              .scale(svgWidth / (selection[1] - selection[0]))
-              .translate(-selection[0], 0)
-          );
+        if (event.isZooming != undefined && !event.isZooming) {
+          svg
+            .select(".zoom_PE")
+            .call(
+              zoom.transform,
+              d3.zoomIdentity
+                .scale(svgWidth / (selection[1] - selection[0]))
+                .translate(-selection[0], 0)
+            );
+        }
       };
 
       // D3 brush
