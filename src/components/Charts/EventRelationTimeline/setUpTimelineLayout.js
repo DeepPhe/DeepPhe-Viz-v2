@@ -1,4 +1,4 @@
-import { GAPS, LEGEND, MARGINS, PADDING } from "./timelineConstants";
+import { GAPS, LEGEND, MARGINS, PADDING, LABEL, TOGGLE_BUTTON } from "./timelineConstants";
 
 export function setupTimelineLayout(timelineSvg, svgWidth, totalContentHeight, zoom) {
   timelineSvg
@@ -6,9 +6,9 @@ export function setupTimelineLayout(timelineSvg, svgWidth, totalContentHeight, z
     .append("clipPath")
     .attr("id", "secondary_area_clip")
     .append("rect")
-    .attr("x", 0)
+    .attr("x", -LABEL.margin) //change this to labelWidth
     .attr("y", -PADDING.top)
-    .attr("width", svgWidth)
+    .attr("width", svgWidth + LABEL.margin + TOGGLE_BUTTON.margin)
     .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top);
 
   timelineSvg
