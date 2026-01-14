@@ -13,6 +13,7 @@ function TabPanel(props) {
   const isActive = value === index;
 
   return (
+    // eslint-disable-next-line react/jsx-props-no-spreading
     <div
       role="tabpanel"
       hidden={value !== index}
