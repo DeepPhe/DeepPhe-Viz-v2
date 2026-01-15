@@ -3,13 +3,14 @@ import { GAPS, LEGEND, MARGINS, PADDING, LABEL, TOGGLE_BUTTON } from "./timeline
 export function setupTimelineLayout(timelineSvg, svgWidth, totalContentHeight, zoom) {
   timelineSvg
     .append("defs")
-    .append("clipPath")
-    .attr("id", "secondary_area_clip")
     .append("rect")
     .attr("x", -LABEL.margin) //change this to labelWidth
     .attr("y", -PADDING.top)
     .attr("width", svgWidth + LABEL.margin + TOGGLE_BUTTON.margin)
     .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top);
+
+  // .append("clipPath")
+  // .attr("id", "secondary_area_clip")
 
   timelineSvg
     .append("rect")

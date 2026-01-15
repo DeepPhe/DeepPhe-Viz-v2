@@ -405,9 +405,6 @@ export function renderTimeline({
     ])
     .on("zoom", zoomed);
 
-  // const timelineWidth = svgWidth + MARGINS.left;
-  console.log(svgWidth);
-
   // make main_ER_svg and Age_ER (ER = event relation)
   const { main_ER_svg, age_ER, axisLayer } = setupTimelineLayout(
     timelineSvg,
