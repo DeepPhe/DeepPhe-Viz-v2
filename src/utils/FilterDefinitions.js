@@ -293,8 +293,6 @@ const getAbbrevCategories = (categories) => {
       "RACE.Black": "Black",
       "RACE.White": "White",
     };
-    //Add the stage mappings
-    mapping;
 
     // Add the stage mappings to mappings
     const combinedMappings = { ...mapping };
