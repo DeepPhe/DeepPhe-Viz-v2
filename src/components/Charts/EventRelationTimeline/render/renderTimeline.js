@@ -406,7 +406,7 @@ export function renderTimeline({
     .on("zoom", zoomed);
 
   // make main_ER_svg and Age_ER (ER = event relation)
-  const { main_ER_svg, age_ER, axisLayer } = setupTimelineLayout(
+  const { main_ER_root, main_ER_ui, main_ER_data, axisLayer, age_ER } = setupTimelineLayout(
     timelineSvg,
     svgWidth,
     totalContentHeight,
@@ -423,7 +423,10 @@ export function renderTimeline({
     const isLastGroup = i === groupLayouts.length - 1;
 
     const groupG = drawCaretAndLabelForGroup(
-      main_ER_svg,
+      {
+        ui: main_ER_ui,
+        data: main_ER_data,
+      },
       layout.spans,
       layout.key,
       layout.yOffset,
@@ -449,7 +452,7 @@ export function renderTimeline({
     .call(xAxisBottom);
 
   function drawCaretAndLabelForGroup(
-    parent,
+    layers,
     spans,
     groupKey,
     yOffset,
@@ -457,21 +460,28 @@ export function renderTimeline({
     width,
     showDivider = true
   ) {
-    const collapsedHeight = 10; // minimal height when collapsed
-    const groupG = parent
+    const collapsedHeight = 10;
+
+    const dataGroupG = layers.data
       .append("g")
-      .attr("class", `group group-${groupKey.replace(/\s+/g, "-")}`)
+      .attr("class", `group group-data group-${groupKey.replace(/\s+/g, "-")}`)
       .attr("data-expanded-height", height)
       .attr("data-collapsed-height", collapsedHeight)
       .attr("data-group-key", groupKey)
       .attr("transform", `translate(0, ${yOffset + LANE.GROUP_TOP_PADDING})`);
 
-    groupG.append("g").attr("class", "heatmap").style("display", "none");
+    const uiGroupG = layers.ui
+      .append("g")
+      .attr("class", `group group-ui group-${groupKey.replace(/\s+/g, "-")}`)
+      .attr("data-group-key", groupKey)
+      .attr("transform", `translate(0, ${yOffset + LANE.GROUP_TOP_PADDING})`);
 
-    const labelG = groupG
+    dataGroupG.append("g").attr("class", "heatmap").style("display", "none");
+
+    const labelG = uiGroupG
       .append("g")
       .attr("class", "group-label")
-      .attr("transform", `translate(${-TEXT.marginLeft}, ${height / 2})`);
+      .attr("transform", `translate(${-TEXT.marginLeft}, ${height / 2 - 5})`);
 
     labelG
       .append("text")
@@ -480,10 +490,10 @@ export function renderTimeline({
       .text(`${groupKey} (${spans.length}):`);
 
     // ---------- TOGGLE ----------
-    const toggleG = groupG
+    const toggleG = uiGroupG
       .append("g")
       .attr("class", "group-toggle")
-      .attr("transform", `translate(${svgWidth}, ${height / 2})`)
+      .attr("transform", `translate(${svgWidth + 10}, ${height / 2 - 5})`)
       .style("cursor", "pointer")
       .on("click", (event) => {
         event.stopPropagation();
@@ -508,7 +518,7 @@ export function renderTimeline({
 
     // Divider
     if (showDivider) {
-      groupG
+      dataGroupG
         .append("line")
         .attr("class", "group-divider")
         .attr("x1", 0)
@@ -519,7 +529,10 @@ export function renderTimeline({
         .attr("stroke-width", 1);
     }
 
-    return groupG;
+    return {
+      data: dataGroupG,
+      ui: uiGroupG,
+    };
   }
 
   function getLaneCount(spans, padding = 0) {
@@ -597,7 +610,7 @@ export function renderTimeline({
 
   function updateMainReports() {
     // Re-bind data to existing groups
-    const lanes = d3.select(".main_ER_svg").selectAll(".contains-group");
+    const lanes = d3.select(".main_ER_data").selectAll(".contains-group");
 
     lanes.each(function (d) {
       const g = d3.select(this);
@@ -723,7 +736,7 @@ export function renderTimeline({
 
         if (heatmapData) {
           // Create new heatmap group
-          const newHeatmapGroup = main_ER_svg
+          const newHeatmapGroup = main_ER_data
             .append("g")
             .attr("class", heatmapClass)
             .attr("transform", transform); // Keep same y position
@@ -758,7 +771,8 @@ export function renderTimeline({
   }
 
   function updateLayout(animate = true, activeGroupKey = null, spans) {
-    main_ER_svg.selectAll("*").remove();
+    main_ER_data.selectAll("*").remove();
+    main_ER_ui.selectAll("*").remove();
     axisLayer.selectAll(".main-ER-x-axis-bottom").remove();
     age_ER.selectAll("*").remove();
     // timelineSvg.selectAll(".zoom_ER").remove();
@@ -792,7 +806,10 @@ export function renderTimeline({
       const isLastGroup = i === updatedGroupLayout.length - 1;
 
       const groupG = drawCaretAndLabelForGroup(
-        main_ER_svg,
+        {
+          ui: main_ER_ui,
+          data: main_ER_data,
+        },
         layout.spans,
         layout.key,
         layout.yOffset,
@@ -843,12 +860,12 @@ export function renderTimeline({
 
     timelineSvg
       .select("#secondary_area_clip rect")
-      .attr("width", svgWidth + LABEL.margin + TOGGLE_BUTTON.margin)
-      .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top)
-      .attr("x", -LABEL.margin) // change this if needed
-      .attr("y", -PADDING.top);
+      .attr("x", 0) // no negative margin
+      .attr("y", -PADDING.top)
+      .attr("width", svgWidth) // only the data area
+      .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top);
 
-    const dateAnchorGroup = main_ER_svg
+    const dateAnchorGroup = main_ER_data
       .append("g")
       .attr("class", "date-anchors")
       .attr("clip-path", "url(#secondary_area_clip)")
@@ -1057,7 +1074,7 @@ export function renderTimeline({
     .attr("d", "M6 0 L6 12") // vertical line from top to bottom
     .style("stroke", "rgb(128, 128, 128)")
     .attr("stroke-width", 3)
-    .attr("stroke-opacity", 0.75);
+    .attr("stroke-opacity", 0.3);
 
   const selectedVerticalLineCap = defs
     .append("marker")
@@ -1092,7 +1109,7 @@ export function renderTimeline({
   }
 
   // Add this BEFORE you create mainReports
-  const dateAnchorGroup = main_ER_svg
+  const dateAnchorGroup = main_ER_data
     .append("g")
     .attr("class", "date-anchors")
     .attr("clip-path", "url(#secondary_area_clip)")
@@ -1466,9 +1483,10 @@ export function renderTimeline({
     // Group events by lane index
     const spansByLane = d3.group(spans, (d) => d.laneIndex);
     const expanded = expandedState[groupKey];
+    const groupDataG = groupG.data;
 
     for (const [laneIndex, spansInLane] of spansByLane) {
-      const laneG = groupG
+      const laneG = groupDataG
         .append("g")
         .attr("class", "lane")
         .attr("transform", `translate(0, ${!expanded ? 0 : laneIndex * LANE.height})`);

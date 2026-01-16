@@ -1,16 +1,17 @@
 import { GAPS, LEGEND, MARGINS, PADDING, LABEL, TOGGLE_BUTTON } from "./timelineConstants";
 
 export function setupTimelineLayout(timelineSvg, svgWidth, totalContentHeight, zoom) {
-  timelineSvg
-    .append("defs")
-    .append("rect")
-    .attr("x", -LABEL.margin) //change this to labelWidth
-    .attr("y", -PADDING.top)
-    .attr("width", svgWidth + LABEL.margin + TOGGLE_BUTTON.margin)
-    .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top);
+  const defs = timelineSvg.append("defs");
 
-  // .append("clipPath")
-  // .attr("id", "secondary_area_clip")
+  defs
+    .append("clipPath")
+    .attr("id", "secondary_area_clip")
+    .attr("clipPathUnits", "userSpaceOnUse")
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", -PADDING.top)
+    .attr("width", svgWidth)
+    .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top);
 
   timelineSvg
     .append("rect")
@@ -29,13 +30,21 @@ export function setupTimelineLayout(timelineSvg, svgWidth, totalContentHeight, z
       `translate(${MARGINS.left}, ${MARGINS.top + LEGEND.height + GAPS.legendToMain})`
     );
 
-  const main_ER_svg = timelineSvg
+  const main_ER_root = timelineSvg
     .append("g")
-    .attr("class", "main_ER_svg")
+    .attr("class", "main_ER_root")
     .attr(
       "transform",
       `translate(${MARGINS.left}, ${MARGINS.top + LEGEND.height + GAPS.legendToMain})`
-    )
+    );
+
+  // UI layer (labels, toggles, headers)
+  const main_ER_ui = main_ER_root.append("g").attr("class", "main_ER_ui");
+
+  // Data layer (lanes, ranges, markers)
+  const main_ER_data = main_ER_root
+    .append("g")
+    .attr("class", "main_ER_data")
     .attr("clip-path", "url(#secondary_area_clip)");
 
   const age_ER = timelineSvg
@@ -48,5 +57,11 @@ export function setupTimelineLayout(timelineSvg, svgWidth, totalContentHeight, z
       })`
     );
 
-  return { main_ER_svg, age_ER, axisLayer };
+  return {
+    main_ER_root,
+    main_ER_ui,
+    main_ER_data,
+    axisLayer,
+    age_ER,
+  };
 }
