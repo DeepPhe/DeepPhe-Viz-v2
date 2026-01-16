@@ -180,12 +180,21 @@ const getAbbrevCategories = (categories) => {
       "CANCER.O": "Ov", // Remove the "CANCER." prefix
       "Course.": "N/S", // Remove the "Course." prefix
       "AGE_AT_DX.": "N/S", // Remove the "AGE_AT_DX." prefix
-      "AGE_AT_DX.30": "30",
-      "AGE_AT_DX.40": "40",
-      "AGE_AT_DX.50": "50",
-      "AGE_AT_DX.60": "60",
-      "AGE_AT_DX.70": "70",
-      "AGE_AT_DX.80": "80",
+      "AGE_AT_DX.30-39": "30-39",
+      "AGE_AT_DX.40-49": "40-49",
+      "AGE_AT_DX.50-59": "50-59",
+      "AGE_AT_DX.60-69": "60-69",
+      "AGE_AT_DX.70-79": "70-79",
+      "AGE_AT_DX.80-89": "80-89",
+      "AGE_AT_DX.90+": "90+",
+      // Legacy single number formats (if any exist)
+      "AGE_AT_DX.30": "30-39",
+      "AGE_AT_DX.40": "40-49",
+      "AGE_AT_DX.50": "50-59",
+      "AGE_AT_DX.60": "60-69",
+      "AGE_AT_DX.70": "70-79",
+      "AGE_AT_DX.80": "80-89",
+      "AGE_AT_DX.90": "90+",
       "Course.Complete Remission": "CR",
       "Course.Disease Controlled": "DC",
       "Course.Disease Sequela": "DS",
