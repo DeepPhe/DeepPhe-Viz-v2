@@ -2,16 +2,16 @@ import {
   AGE_AREA,
   ARROW,
   GAPS,
+  LABEL,
   LANE,
   LEGEND,
   MARGINS,
   MARKER_TOGGLE_MAP,
   OVERVIEW,
+  PADDING,
   TEXT,
   TIMELINE_PADDING_DAYS,
   TIMESPAN,
-  PADDING,
-  LABEL,
   TOGGLE_BUTTON,
 } from "../timelineConstants";
 import * as d3 from "d3";
@@ -1058,7 +1058,7 @@ export function renderTimeline({
   collapsedVerticalLineCap
     .append("path")
     .attr("d", "M6 0 L6 12") // vertical line from top to bottom
-    .style("stroke", "rgb(128, 128, 128)")
+    .style("stroke", "rgb(49, 163, 84)")
     .attr("stroke-width", 3)
     .attr("stroke-opacity", 0.75);
 
@@ -1277,7 +1277,7 @@ export function renderTimeline({
       .attr("x2", x2)
       .attr("y1", 0)
       .attr("y2", 0)
-      .attr("stroke", "rgb(128, 128, 128)")
+      .attr("stroke", "rgb(49, 163, 84)")
       .attr("stroke-width", 5)
       .attr("stroke-opacity", 0.3)
       .style("cursor", "pointer")
@@ -1332,7 +1332,7 @@ export function renderTimeline({
       .attr("x2", x)
       .attr("y1", -6) // Extends above
       .attr("y2", 6) // Extends below
-      .attr("stroke", "rgb(128, 128, 128)")
+      .attr("stroke", "rgb(49, 163, 84)")
       .attr("stroke-width", 4)
       .attr("stroke-opacity", 0.75)
       .style("cursor", "pointer")

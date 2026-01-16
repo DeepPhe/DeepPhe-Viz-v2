@@ -236,10 +236,12 @@ const processOmapData = (rawResults) => {
 
     // Special handling for age_at_dx
     if (attribid.toLowerCase() === "age_at_dx") {
-      // Extract the numeric part (e.g., "50s" -> "50", "60s" -> "60")
-      const numericPart = attribval.replace(/[^0-9]/g, "");
-      attribval = parseInt(numericPart);
-      if (attribval > 90) {
+      // Extract the first numeric part (e.g., "50s" -> "50", "50-59" -> "50", "60-69" -> "60")
+      const match = attribval.match(/\d+/);
+      attribval = match ? parseInt(match[0]) : attribval;
+
+      // Cap at 90 for display purposes
+      if (typeof attribval === "number" && attribval > 90) {
         attribval = 90;
       }
     }
