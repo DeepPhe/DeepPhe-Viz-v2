@@ -414,7 +414,8 @@ svg .tick text {
 .basicCardHeader .MuiIconButton-root {
     position: absolute;
     left: 0;
-    top: 5px;
+    top: 3px;
+    padding: .75rem;
 }
 
 .info_icon {

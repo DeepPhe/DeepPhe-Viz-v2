@@ -1758,50 +1758,50 @@ export function renderTimeline({
     const toToggle = new Set();
 
     // Emphasize matching relations
-    clickedConceptIds.forEach((id) => {
-      document.querySelectorAll(".relation-icon").forEach((el) => {
-        const ids = el.dataset.conceptIds
-          ? el.dataset.conceptIds.split(",").map((s) => s.trim())
-          : [];
+    // clickedConceptIds.forEach((id) => {
+    document.querySelectorAll(".relation-icon").forEach((el) => {
+      const ids = el.dataset.conceptIds
+        ? el.dataset.conceptIds.split(",").map((s) => s.trim())
+        : [];
 
-        if (clickedConceptIds.some((id) => ids.includes(id))) {
-          toToggle.add(el);
-        }
-        // console.log(toToggle);
-      });
-
-      // 2. Toggle each element exactly once
-      toToggle.forEach((el) => {
-        skipNextEffect.current = true;
-
-        // marker toggle
-        ["marker-start", "marker-end"].forEach((attr) => {
-          if (el.hasAttribute(attr)) {
-            const currentMarker = el.getAttribute(attr);
-            if (MARKER_TOGGLE_MAP[currentMarker]) {
-              el.setAttribute(attr, MARKER_TOGGLE_MAP[currentMarker]);
-            }
-          }
-        });
-
-        // class toggle
-        el.classList.toggle("selected");
-        el.classList.toggle("unselected");
-
-        // Show/hide the black outline line
-        const group = el.closest("g");
-        const isNowSelected = el.classList.contains("selected");
-        if (group) {
-          const outlines = group.querySelectorAll(".relation-outline");
-          if (outlines.length) {
-            outlines.forEach((outline) => {
-              // Do something with the outlines, like showing or hiding
-              outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
-            });
-          }
-        }
-      });
+      if (clickedConceptIds.some((id) => ids.includes(id))) {
+        toToggle.add(el);
+      }
+      // console.log(toToggle);
     });
+
+    // 2. Toggle each element exactly once
+    toToggle.forEach((el) => {
+      skipNextEffect.current = true;
+
+      // marker toggle
+      ["marker-start", "marker-end"].forEach((attr) => {
+        if (el.hasAttribute(attr)) {
+          const currentMarker = el.getAttribute(attr);
+          if (MARKER_TOGGLE_MAP[currentMarker]) {
+            el.setAttribute(attr, MARKER_TOGGLE_MAP[currentMarker]);
+          }
+        }
+      });
+
+      // class toggle
+      el.classList.toggle("selected");
+      el.classList.toggle("unselected");
+
+      // Show/hide the black outline line
+      const group = el.closest("g");
+      const isNowSelected = el.classList.contains("selected");
+      if (group) {
+        const outlines = group.querySelectorAll(".relation-outline");
+        if (outlines.length) {
+          outlines.forEach((outline) => {
+            // Do something with the outlines, like showing or hiding
+            outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
+          });
+        }
+      }
+    });
+    // });
 
     const matchingNotes = Object.entries(conceptsPerDocument)
       .filter(([_, objArray]) => objArray.some((obj) => clickedConceptIds.includes(obj.id)))

@@ -77,187 +77,6 @@ function Patient(props) {
     );
   };
 
-  function getSummary(patientId) {
-    return fetch("http://localhost:3001/api/patient/" + patientId + "/cancerAndTumorSummary");
-  }
-
-  const getComponentPatientEpisodeTimeline = () => {
-    return (
-      <Card>
-        <CardHeader className={"basicCardHeader"}>
-          <Box alignItems="center">
-            <span style={{ paddingLeft: "14px" }}>
-              <b>Patient Episode Timeline</b>
-            </span>
-            <IconButton onClick={() => setExpandedPatientEpisode((prev) => !prev)} size="small">
-              {expandedPatientEpisode ? <ExpandLess /> : <ExpandMore />}
-            </IconButton>
-          </Box>
-        </CardHeader>
-
-        {expandedPatientEpisode && (
-          <CardBody>
-            {patientObject && Object.keys(patientObject).length > 0 ? (
-              <PatientEpisodeTimeline
-                svgContainerId="PatientEpisodeTimelineSvg"
-                reportId={reportId}
-                patientJson={fullJson}
-                timeline={patientObject}
-                patientId={patientId}
-                setReportId={setReportId}
-                setCurrDocId={setCurrDocId}
-                //getReport={getReport}
-              ></PatientEpisodeTimeline>
-            ) : (
-              <div>Loading timeline...</div>
-            )}
-          </CardBody>
-        )}
-      </Card>
-    );
-  };
-
-  const getComponentEventRelationTimeline = () => {
-    if (isLoading()) {
-      return <div>Loading Event Relation Table...</div>;
-    }
-    const conceptsInDocument = patientDocument.getConceptsInDocument(fullJson.concepts);
-
-    return (
-      <Card>
-        <CardHeader className={"basicCardHeader"}>
-          <Box>
-            <span style={{ paddingLeft: "14px" }}>
-              <b>Event Timeline</b>
-            </span>
-            <IconButton onClick={() => setExpandedEventRelation((prev) => !prev)} size="small">
-              {expandedEventRelation ? <ExpandLess /> : <ExpandMore />}
-            </IconButton>
-          </Box>
-        </CardHeader>
-
-        {expandedEventRelation && (
-          <CardBody>
-            <EventRelationTimeline
-              setClickedTerms={setClickedTerms}
-              clickedTerms={clickedTerms}
-              svgContainerId="EventRelationTimelineSvg"
-              reportId={reportId}
-              patientJson={fullJson}
-              concepts={conceptsInDocument}
-              patientId={patientId}
-              setReportId={setReportId}
-              conceptsPerDocument={conceptsPerDocumentRef.current}
-              expandedPatientID={expandedPatientID}
-              currDocId={currDocId}
-            />
-          </CardBody>
-        )}
-      </Card>
-    );
-  };
-
-  const getComponentPatientIdAndDemographics = () => {
-    return (
-      <Card>
-        <CardHeader className={"basicCardHeader"}>
-          <Box alignItems="center">
-            <span style={{ paddingLeft: "14px" }}>
-              <b>Patient ID and Demographics</b>
-            </span>
-            <IconButton onClick={() => setExpandedPatientID((prev) => !prev)} size="small">
-              {expandedPatientID ? <ExpandLess /> : <ExpandMore />}
-            </IconButton>
-          </Box>
-        </CardHeader>
-
-        {expandedPatientID && (
-          <CardBody>
-            <CustomTable patientId={patientId} />
-          </CardBody>
-        )}
-      </Card>
-    );
-  };
-
-  const getComponentFooter = () => {
-    return (
-      <React.Fragment>
-        <div className={"mainFooter"}>
-          <Row>
-            <Col md={1}></Col>
-            <Col md={4}>
-              Supported by the{" "}
-              <a target="_blank" rel="noopener noreferrer" href="https://itcr.cancer.gov/">
-                National Cancer Institute&apos;s Information Technology for Cancer Research
-              </a>{" "}
-              initiative. (Grant #U24CA248010)
-            </Col>
-            <Col md={1}></Col>
-            <Col md={5}>
-              ©2025 Harvard Medical School, University of Pittsburgh, and Vanderbilt University
-              Medical Center.
-            </Col>
-            <Col md={1}></Col>
-          </Row>
-        </div>
-      </React.Fragment>
-    );
-  };
-
-  const getComponentDocumentViewer = () => {
-    if (isLoading()) {
-      return <div>Loading Document Viewer...</div>;
-    }
-    const conceptsInDocument = patientDocument.getConceptsInDocument(fullJson.concepts);
-    // console.log("CONCEPTS IN DOCUMENT", conceptsInDocument);
-    // console.log("THSI IS PATIENT DOC", patientDocument);
-    if (isEmpty(reportId) || patientDocument.getMentionIdsInDocument() === 0) {
-      return <div>Report ID is empty or no mentions...</div>;
-    }
-
-    return (
-      <DocumentViewer
-        patientId={patientId}
-        reportId={reportId}
-        factId={factId}
-        factBasedReports={factBasedReports}
-        patientDocument={patientDocument}
-        concepts={conceptsInDocument}
-        mentions={mentionIdsInDocumentRef.current}
-        clickedTerms={clickedTerms}
-        setClickedTerms={setClickedTerms}
-      ></DocumentViewer>
-    );
-  };
-
-  const getComponentCancerAndTumorDetail = () => {
-    return (
-      <React.Fragment>
-        <Card>
-          <CardHeader className={"basicCardHeader"}>
-            <Box alignItems="center">
-              <span style={{ paddingLeft: "14px" }}>
-                <b>Cancer and Tumor Detail</b>
-              </span>
-              <IconButton onClick={() => setExpandedCancerDetail((prev) => !prev)} size="small">
-                {expandedCancerDetail ? <ExpandLess /> : <ExpandMore />}
-              </IconButton>
-            </Box>
-          </CardHeader>
-
-          {expandedCancerDetail && (
-            <CardBody>
-              <div id="summary">
-                <CancerAndTumorSummary cancers={summary} />
-              </div>
-            </CardBody>
-          )}
-        </Card>
-      </React.Fragment>
-    );
-  };
-
   const getComponentNavBar = () => {
     return (
       <Box sx={{ flexGrow: 1, mb: 4 }}>
@@ -303,6 +122,183 @@ function Patient(props) {
           </Toolbar>
         </AppBar>
       </Box>
+    );
+  };
+
+  const getComponentPatientIdAndDemographics = () => {
+    return (
+      <Card>
+        <CardHeader className={"basicCardHeader"}>
+          <Box alignItems="center">
+            <span style={{ paddingLeft: "14px" }}>
+              <b>Patient ID and Demographics</b>
+            </span>
+            <IconButton onClick={() => setExpandedPatientID((prev) => !prev)} size="small">
+              {expandedPatientID ? <ExpandLess /> : <ExpandMore />}
+            </IconButton>
+          </Box>
+        </CardHeader>
+
+        {expandedPatientID && (
+          <CardBody>
+            <CustomTable patientId={patientId} />
+          </CardBody>
+        )}
+      </Card>
+    );
+  };
+
+  const getComponentCancerAndTumorDetail = () => {
+    return (
+      <React.Fragment>
+        <Card>
+          <CardHeader className={"basicCardHeader"}>
+            <Box alignItems="center">
+              <span style={{ paddingLeft: "14px" }}>
+                <b>Cancer and Tumor Detail</b>
+              </span>
+              <IconButton onClick={() => setExpandedCancerDetail((prev) => !prev)} size="small">
+                {expandedCancerDetail ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
+            </Box>
+          </CardHeader>
+
+          {expandedCancerDetail && (
+            <CardBody>
+              <div id="summary">
+                <CancerAndTumorSummary cancers={summary} />
+              </div>
+            </CardBody>
+          )}
+        </Card>
+      </React.Fragment>
+    );
+  };
+
+  const getComponentEventRelationTimeline = () => {
+    if (isLoading()) {
+      return <div>Loading Event Relation Table...</div>;
+    }
+    const conceptsInDocument = patientDocument.getConceptsInDocument(fullJson.concepts);
+
+    return (
+      <Card>
+        <CardHeader className={"basicCardHeader"}>
+          <Box>
+            <span style={{ paddingLeft: "14px" }}>
+              <b>Event Timeline</b>
+            </span>
+            <IconButton onClick={() => setExpandedEventRelation((prev) => !prev)} size="small">
+              {expandedEventRelation ? <ExpandLess /> : <ExpandMore />}
+            </IconButton>
+          </Box>
+        </CardHeader>
+
+        {expandedEventRelation && (
+          <CardBody>
+            <EventRelationTimeline
+              setClickedTerms={setClickedTerms}
+              clickedTerms={clickedTerms}
+              svgContainerId="EventRelationTimelineSvg"
+              reportId={reportId}
+              patientJson={fullJson}
+              concepts={conceptsInDocument}
+              patientId={patientId}
+              setReportId={setReportId}
+              conceptsPerDocument={conceptsPerDocumentRef.current}
+              expandedPatientID={expandedPatientID}
+              currDocId={currDocId}
+            />
+          </CardBody>
+        )}
+      </Card>
+    );
+  };
+
+  const getComponentPatientEpisodeTimeline = () => {
+    return (
+      <Card>
+        <CardHeader className={"basicCardHeader"}>
+          <Box alignItems="center">
+            <span style={{ paddingLeft: "14px" }}>
+              <b>Patient Episode Timeline</b>
+            </span>
+            <IconButton onClick={() => setExpandedPatientEpisode((prev) => !prev)} size="small">
+              {expandedPatientEpisode ? <ExpandLess /> : <ExpandMore />}
+            </IconButton>
+          </Box>
+        </CardHeader>
+
+        {expandedPatientEpisode && (
+          <CardBody>
+            {patientObject && Object.keys(patientObject).length > 0 ? (
+              <PatientEpisodeTimeline
+                svgContainerId="PatientEpisodeTimelineSvg"
+                reportId={reportId}
+                patientJson={fullJson}
+                timeline={patientObject}
+                patientId={patientId}
+                setReportId={setReportId}
+                setCurrDocId={setCurrDocId}
+                //getReport={getReport}
+              ></PatientEpisodeTimeline>
+            ) : (
+              <div>Loading timeline...</div>
+            )}
+          </CardBody>
+        )}
+      </Card>
+    );
+  };
+
+  const getComponentDocumentViewer = () => {
+    if (isLoading()) {
+      return <div>Loading Document Viewer...</div>;
+    }
+    const conceptsInDocument = patientDocument.getConceptsInDocument(fullJson.concepts);
+    // console.log("CONCEPTS IN DOCUMENT", conceptsInDocument);
+    // console.log("THSI IS PATIENT DOC", patientDocument);
+    if (isEmpty(reportId) || patientDocument.getMentionIdsInDocument() === 0) {
+      return <div>Report ID is empty or no mentions...</div>;
+    }
+
+    return (
+      <DocumentViewer
+        patientId={patientId}
+        reportId={reportId}
+        factId={factId}
+        factBasedReports={factBasedReports}
+        patientDocument={patientDocument}
+        concepts={conceptsInDocument}
+        mentions={mentionIdsInDocumentRef.current}
+        clickedTerms={clickedTerms}
+        setClickedTerms={setClickedTerms}
+      ></DocumentViewer>
+    );
+  };
+
+  const getComponentFooter = () => {
+    return (
+      <React.Fragment>
+        <div className={"mainFooter"}>
+          <Row>
+            <Col md={1}></Col>
+            <Col md={4}>
+              Supported by the{" "}
+              <a target="_blank" rel="noopener noreferrer" href="https://itcr.cancer.gov/">
+                National Cancer Institute&apos;s Information Technology for Cancer Research
+              </a>{" "}
+              initiative. (Grant #U24CA248010)
+            </Col>
+            <Col md={1}></Col>
+            <Col md={5}>
+              ©2025 Harvard Medical School, University of Pittsburgh, and Vanderbilt University
+              Medical Center.
+            </Col>
+            <Col md={1}></Col>
+          </Row>
+        </div>
+      </React.Fragment>
     );
   };
 

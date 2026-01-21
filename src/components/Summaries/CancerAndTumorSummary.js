@@ -120,6 +120,7 @@ Handlebars.registerHelper("inArray", function (item, arr, opts) {
 
 class CancerAndTumorSummary extends Component {
   render() {
+    console.log("CancerAndTumorSummary props:", this.props);
     return <div className="container" dangerouslySetInnerHTML={{ __html: template(this.props) }} />;
   }
 }
