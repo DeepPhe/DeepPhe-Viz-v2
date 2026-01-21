@@ -461,6 +461,8 @@ export function renderTimeline({
     showDivider = true
   ) {
     const collapsedHeight = 10;
+    // const expanded = expandedState[groupKey];
+    // console.log(expanded);
 
     const dataGroupG = layers.data
       .append("g")
@@ -469,6 +471,16 @@ export function renderTimeline({
       .attr("data-collapsed-height", collapsedHeight)
       .attr("data-group-key", groupKey)
       .attr("transform", `translate(0, ${yOffset + LANE.GROUP_TOP_PADDING})`);
+
+    // dataGroupG
+    //   .append("rect")
+    //   .attr("class", "group-bg")
+    //   .attr("x", 0)
+    //   .attr("y", 0)
+    //   .attr("width", width)
+    //   .attr("height", expanded ? height : collapsedHeight)
+    //   .attr("fill", expanded ? "#f8f9fa" : "#d1d5db")
+    //   .lower(); // darker grey when collapsed
 
     const uiGroupG = layers.ui
       .append("g")
@@ -784,11 +796,11 @@ export function renderTimeline({
     for (const key of desiredOrder) {
       // Filter spans that belong to this group
       const spansForGroup = spanData.filter((d) => d.laneGroup === key);
-      console.log(spansForGroup);
+      // console.log(spansForGroup);
       // Skip groups with no spans
       if (!spansForGroup.length) continue;
       const laneCount = getLaneCount(spansForGroup);
-      console.log(laneCount);
+      // console.log(laneCount);
       const groupHeight = laneCount * LANE.height;
 
       updatedGroupLayout.push({
@@ -906,7 +918,7 @@ export function renderTimeline({
       .data(encounterDates)
       .enter()
       .append("text")
-      .attr("x", (d) => mainX(d))
+      .attr("x", (d) => d._px)
       .attr("y", AGE_AREA.height / 2)
       .attr("dy", ".5ex")
       .attr("class", "encounter_age")
@@ -918,9 +930,9 @@ export function renderTimeline({
       .data(encounterDates)
       .enter()
       .append("line")
-      .attr("x1", (d) => mainX(d))
+      .attr("x1", (d) => d._px)
       .attr("y1", 12)
-      .attr("x2", (d) => mainX(d))
+      .attr("x2", (d) => d._px)
       .attr("y2", 25)
       .attr("class", "encounter_age_guideline");
 
@@ -932,7 +944,7 @@ export function renderTimeline({
       .data(interiorDates)
       .enter()
       .append("text")
-      .attr("x", (d) => mainX(d))
+      .attr("x", (d) => d._px)
       .attr("y", AGE_AREA.height / 2) // below everything else
       .attr("class", "years_since_label")
       .text((d, i) => `Year ${yearsSinceDiagnosis[i]}`);
@@ -943,9 +955,9 @@ export function renderTimeline({
       .data(interiorDates)
       .enter()
       .append("line")
-      .attr("x1", (d) => mainX(d))
+      .attr("x1", (d) => d._px)
       .attr("y1", 12)
-      .attr("x2", (d) => mainX(d))
+      .attr("x2", (d) => d._px)
       .attr("y2", 25)
       .attr("class", "interior_age_guideline");
 
@@ -1841,13 +1853,18 @@ export function renderTimeline({
   let startAge = encounterAges[0];
   let endAge = encounterAges[1];
 
+  // Cache pixel positions once
+  encounterDates.forEach((d, i) => {
+    d._px = mainX(d);
+  });
+
   // Draw start + end ages
   age_ER
     .selectAll(".encounter_age")
     .data(encounterDates)
     .enter()
     .append("text")
-    .attr("x", (d) => mainX(d))
+    .attr("x", (d) => d._px)
     .attr("y", AGE_AREA.height / 2)
     .attr("dy", ".5ex")
     .attr("class", "encounter_age")
@@ -1859,9 +1876,9 @@ export function renderTimeline({
     .data(encounterDates)
     .enter()
     .append("line")
-    .attr("x1", (d) => mainX(d))
+    .attr("x1", (d) => d._px)
     .attr("y1", 12)
-    .attr("x2", (d) => mainX(d))
+    .attr("x2", (d) => d._px)
     .attr("y2", 25)
     .attr("class", "encounter_age_guideline");
 
@@ -1879,15 +1896,19 @@ export function renderTimeline({
 
   const interiorDates = interiorAges.map((a) => ageToDate(a, startAge, minStartDate));
 
+  interiorDates.forEach((d, i) => {
+    d._px = mainX(d);
+  });
+
   // Draw guideline lines for intermediate ages
   age_ER
     .selectAll(".interior_age_guideline")
     .data(interiorDates)
     .enter()
     .append("line")
-    .attr("x1", (d) => mainX(d))
+    .attr("x1", (d) => d._px)
     .attr("y1", 12)
-    .attr("x2", (d) => mainX(d))
+    .attr("x2", (d) => d._px)
     .attr("y2", 25)
     .attr("class", "interior_age_guideline");
 
@@ -1901,7 +1922,7 @@ export function renderTimeline({
     .data(interiorDates)
     .enter()
     .append("text")
-    .attr("x", (d) => mainX(d))
+    .attr("x", (d) => d._px)
     .attr("y", AGE_AREA.height / 2) // below everything else
     .attr("class", "years_since_label")
     .text((d, i) => `Year ${yearsSinceDiagnosis[i]}`);
