@@ -6,7 +6,7 @@ import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CustomTable from "../../components/CustomTables/CustomTable";
 import CancerAndTumorSummary from "../../components/Summaries/CancerAndTumorSummary";
-import PatientEpisodeTimeline from "../../components/Charts/PatientEpisodeTimeline";
+import PatientDocumentTimeline from "../../components/Charts/PatientDocumentTimeline";
 import EventRelationTimeline from "../../components/Charts/EventRelationTimeline/EventRelationTimeline";
 import CardHeader from "../../components/Card/CardHeader";
 import { Col, Container, Nav, Navbar, Row } from "react-bootstrap";
@@ -40,7 +40,7 @@ function Patient(props) {
   const [currDocId, setCurrDocId] = useState(0);
   const [clickedTerms, setClickedTerms] = useState([]); // Initial state set to empty array
   const [processingDone, setProcessingDone] = useState(false);
-  const [expandedPatientEpisode, setExpandedPatientEpisode] = useState(true); // initially open
+  const [expandedPatientDocument, setExpandedPatientDocument] = useState(true); // initially open
   const [expandedEventRelation, setExpandedEventRelation] = useState(true); // initially open
   const [expandedPatientID, setExpandedPatientID] = useState(true); // initially open
   const [expandedCancerDetail, setExpandedCancerDetail] = useState(true); // initially open
@@ -215,25 +215,25 @@ function Patient(props) {
     );
   };
 
-  const getComponentPatientEpisodeTimeline = () => {
+  const getComponentPatientDocumentTimeline = () => {
     return (
       <Card>
         <CardHeader className={"basicCardHeader"}>
           <Box alignItems="center">
             <span style={{ paddingLeft: "14px" }}>
-              <b>Patient Episode Timeline</b>
+              <b>Patient Document Timeline</b>
             </span>
-            <IconButton onClick={() => setExpandedPatientEpisode((prev) => !prev)} size="small">
-              {expandedPatientEpisode ? <ExpandLess /> : <ExpandMore />}
+            <IconButton onClick={() => setExpandedPatientDocument((prev) => !prev)} size="small">
+              {expandedPatientDocument ? <ExpandLess /> : <ExpandMore />}
             </IconButton>
           </Box>
         </CardHeader>
 
-        {expandedPatientEpisode && (
+        {expandedPatientDocument && (
           <CardBody>
             {patientObject && Object.keys(patientObject).length > 0 ? (
-              <PatientEpisodeTimeline
-                svgContainerId="PatientEpisodeTimelineSvg"
+              <PatientDocumentTimeline
+                svgContainerId="PatientDocumentTimelineSvg"
                 reportId={reportId}
                 patientJson={fullJson}
                 timeline={patientObject}
@@ -241,7 +241,7 @@ function Patient(props) {
                 setReportId={setReportId}
                 setCurrDocId={setCurrDocId}
                 //getReport={getReport}
-              ></PatientEpisodeTimeline>
+              ></PatientDocumentTimeline>
             ) : (
               <div>Loading timeline...</div>
             )}
@@ -346,7 +346,7 @@ function Patient(props) {
           {getComponentPatientIdAndDemographics()}
           {getComponentCancerAndTumorDetail()}
           {getComponentEventRelationTimeline()}
-          {getComponentPatientEpisodeTimeline()}
+          {getComponentPatientDocumentTimeline()}
           {getComponentDocumentViewer()}
         </GridItem>
         <GridItem xs={12} sm={12} md={1} />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as d3 from "d3";
 import * as $ from "jquery";
-import "./PatientEpisodeTimeline.css";
+import "./PatientDocumentTimeline.css";
 
 const baseUri = "http://localhost:3001/api";
 const transitionDuration = 800; // time in ms
@@ -12,7 +12,7 @@ let reportTextRight = "";
 export { mentionedTerms };
 export { reportTextRight };
 
-const PatientEpisodeTimeline = ({
+const PatientDocumentTimeline = ({
   patientId,
   setReportId,
   patientJson,
@@ -1054,7 +1054,7 @@ const PatientEpisodeTimeline = ({
         // const jsonResponse = await response.json();
         processTimelineResponse(timeline);
       } catch (error) {
-        console.error("PatientEpisodeTimeline fetch error:", error);
+        console.error("PatientDocumentTimeline fetch error:", error);
       }
     };
 
@@ -1064,4 +1064,4 @@ const PatientEpisodeTimeline = ({
   return <div className="Timeline" id={svgContainerId}></div>;
 };
 
-export default PatientEpisodeTimeline;
+export default PatientDocumentTimeline;
