@@ -156,4 +156,28 @@
     padding: 10px 5px;
 }
 
+.summary_layout {
+    display: flex;
+    height: 100%;
+}
+
+.summary_main {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 16px;
+}
+
+.summary_side_panel {
+    width: 320px;
+    border-left: 1px solid #ddd;
+    padding: 12px;
+    background: #fafafa;
+}
+
+.side_panel_content {
+    font-size: 14px;
+    color: #444;
+}
+
+
 

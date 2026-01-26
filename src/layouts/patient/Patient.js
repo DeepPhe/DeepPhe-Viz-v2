@@ -166,7 +166,7 @@ function Patient(props) {
           {expandedCancerDetail && (
             <CardBody>
               <div id="summary">
-                <CancerAndTumorSummary cancers={summary} />
+                <CancerAndTumorSummary cancers={summary} patientJson={fullJson} />
               </div>
             </CardBody>
           )}

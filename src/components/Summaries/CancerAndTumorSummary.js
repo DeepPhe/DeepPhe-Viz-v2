@@ -119,9 +119,211 @@ Handlebars.registerHelper("inArray", function (item, arr, opts) {
 });
 
 class CancerAndTumorSummary extends Component {
+  state = {
+    selectedFactId: null,
+  };
+
+  handleFactClick = (e) => {
+    const el = e.target.closest(".fact");
+    if (!el) return;
+
+    const factId = el.id;
+
+    // 1️⃣ Find basic info
+    const info = this.findBasicFactInfo(factId);
+    if (!info) return;
+
+    // 2️⃣ Find corresponding attribute value
+    const attributeValue = this.findAttributeByFact(info);
+
+    // 3️⃣ Find mentions and documents
+    const conceptIds = attributeValue?.valueObj?.conceptIds || [];
+    const mentions = this.findMentionsForConcept(conceptIds);
+    const documents = this.getDocumentsFromMentions(mentions);
+
+    // 4️⃣ Store everything in state
+    this.setState({
+      selectedFactInfo: info,
+      selectedAttributeValue: attributeValue,
+      selectedConceptMentions: mentions,
+      selectedConceptDocuments: documents,
+    });
+  };
+
+  findBasicFactInfo = (factId) => {
+    const { cancers = [] } = this.props;
+
+    for (const cancer of cancers) {
+      for (const group of cancer.collatedCancerFacts || []) {
+        for (const fact of group.facts || []) {
+          if (fact.id === factId) {
+            return {
+              cancerId: cancer.cancerId,
+              selectedFactId: fact.id,
+              categoryName: group.categoryName,
+              prettyName: fact.prettyName || fact.value,
+            };
+          }
+        }
+      }
+    }
+
+    return null;
+  };
+
+  findAttributeByFact = (selectedFactInfo) => {
+    if (!selectedFactInfo) return null;
+
+    const { patientJson } = this.props;
+    const { cancerId, selectedFactId } = selectedFactInfo;
+
+    if (!patientJson?.cancers) return null;
+
+    // Find the cancer that matches the selectedFact's cancerId
+    const matchedCancer = patientJson.cancers.find((c) => c.id === cancerId);
+    if (!matchedCancer) return null;
+
+    // Loop through attributes
+    for (const attr of matchedCancer.attributes || []) {
+      for (const val of attr.values || []) {
+        if (val.id === selectedFactId) {
+          return {
+            attributeName: attr.name || attr.category || "Unknown",
+            valueObj: val,
+          };
+        }
+      }
+    }
+
+    return null;
+  };
+
+  findMentionsForConcept = (conceptIds = []) => {
+    const { patientJson } = this.props;
+    if (!patientJson?.concepts) return [];
+
+    // Collect all mentions that match any of the conceptIds
+    const mentions = [];
+
+    for (const concept of patientJson.concepts) {
+      if (!conceptIds.includes(concept.id)) continue;
+
+      // Each concept may have mentions
+      if (concept.mentions?.length) {
+        mentions.push(...concept.mentions);
+      }
+    }
+
+    return mentions;
+  };
+
+  getDocumentsFromMentions = (mentions = []) => {
+    // Extract unique document IDs from mentions
+    const docIds = new Set();
+    for (const mention of mentions) {
+      if (mention.documentId) {
+        docIds.add(mention.documentId);
+      }
+    }
+
+    // Optionally map to full document objects if you have patientJson.documents
+    const documents = [];
+    const { patientJson } = this.props;
+    if (patientJson?.documents) {
+      for (const doc of patientJson.documents) {
+        if (docIds.has(doc.id)) {
+          documents.push(doc);
+        }
+      }
+    }
+
+    return documents;
+  };
+
   render() {
     console.log("CancerAndTumorSummary props:", this.props);
-    return <div className="container" dangerouslySetInnerHTML={{ __html: template(this.props) }} />;
+    // I need to import fullJson, then get the AV id from this.state.selectedFactInfo.selectedFactId
+    // with the AV id I will then look at fullJson -> cancers -> cancerId -> attributes -> values | AV = Attr Value
+
+    // Now that we have conceptId, I'll need to go into PatientJson -> concepts -> find mentions for matching concept
+    // -> get the documents that those mentions are within -> from here we can display which documents contain that
+    // clicked concept
+
+    // console.log("props:", this.state.selectedAttributeValue.valueObj.conceptIds);
+
+    return (
+      <div className="summary_layout">
+        {/* LEFT: existing Handlebars output */}
+        <div
+          className="summary_main"
+          onClick={this.handleFactClick}
+          dangerouslySetInnerHTML={{ __html: template(this.props) }}
+        />
+
+        {/* RIGHT: info panel */}
+        <div className="summary_side_panel">
+          <h3>Details</h3>
+
+          {this.state.selectedFactInfo ? (
+            <div>
+              <div>
+                <strong>Cancer ID:</strong> {this.state.selectedFactInfo.cancerId}
+              </div>
+              <div>
+                <strong>Fact ID:</strong> {this.state.selectedFactInfo.selectedFactId}
+              </div>
+              <div>
+                <strong>Category:</strong> {this.state.selectedFactInfo.categoryName}
+              </div>
+              <div>
+                <strong>Pretty Name:</strong> {this.state.selectedFactInfo.prettyName}
+              </div>
+
+              {this.state.selectedAttributeValue ? (
+                <div>
+                  <div>
+                    <strong>Concept Ids:</strong>{" "}
+                    {this.state.selectedAttributeValue.valueObj.conceptIds}
+                  </div>
+                  <div>
+                    <strong>Negated:</strong>{" "}
+                    {String(this.state.selectedAttributeValue.valueObj.negated)}
+                  </div>
+                  <div>
+                    <strong>Confidence:</strong>{" "}
+                    {String(this.state.selectedAttributeValue.valueObj.confidence)}%
+                  </div>
+                  {/*<div>*/}
+                  {/*  <strong>Attribute Name:</strong>{" "}*/}
+                  {/*  {this.state.selectedAttributeValue.attributeName}*/}
+                  {/*</div>*/}
+                  {/*<pre style={{ fontSize: "12px" }}>*/}
+                  {/*  {JSON.stringify(this.state.selectedAttributeValue.valueObj, null, 2)}*/}
+                  {/*</pre>*/}
+
+                  {this.state.selectedConceptDocuments?.length ? (
+                    <div style={{ marginTop: 8 }}>
+                      <strong>Documents containing this concept:</strong>
+                      <ul>
+                        {this.state.selectedConceptDocuments.map((doc) => (
+                          <li key={doc.id}>{doc.title || doc.id}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div>No documents contain this concept.</div>
+                  )}
+                </div>
+              ) : (
+                <div>No attribute value found for this fact.</div>
+              )}
+            </div>
+          ) : (
+            <div>Click a fact to see details here.</div>
+          )}
+        </div>
+      </div>
+    );
   }
 }
 
