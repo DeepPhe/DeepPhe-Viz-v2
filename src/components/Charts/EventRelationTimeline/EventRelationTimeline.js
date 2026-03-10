@@ -17,13 +17,11 @@ export default function EventRelationTimeline(props) {
   // const currDocId = props.currDocId;
   const [isFilterOn, setIsFilterOn] = useState(false);
 
+  const clickedTermsRef = useRef(clickedTerms);
+  const fullDataRef = useRef(null);
+
   useEffect(() => {
-    if (clickedTerms.length === 0) {
-      document.querySelectorAll("circle").forEach((circle) => {
-        circle.style.fillOpacity = "0.3"; // Reset fill opacity to default
-        circle.style.strokeWidth = "1px"; // Reset stroke width to none
-      });
-    }
+    clickedTermsRef.current = clickedTerms;
   }, [clickedTerms]);
 
   // In React component
@@ -60,6 +58,106 @@ export default function EventRelationTimeline(props) {
 
   const skipNextEffect = useRef(false);
 
+  function getFilteredData() {
+    const data = fullDataRef.current;
+    if (!data || !conceptsPerDocument) return data;
+
+    const docKey = Object.keys(conceptsPerDocument).find((key) =>
+      key.endsWith(`_${currDocRef.current}`)
+    );
+    const conceptsForDoc = conceptsPerDocument[docKey] || [];
+    const conceptIdsFromDoc = conceptsForDoc.map((c) => c.id);
+
+    const indices = data.conceptIds
+      .map((id, i) => (conceptIdsFromDoc.includes(id) ? i : null))
+      .filter((i) => i !== null);
+
+    return {
+      ...data,
+      conceptIds: indices.map((i) => data.conceptIds[i]),
+      startRelation: indices.map((i) => data.startRelation[i]),
+      startDate: indices.map((i) => data.startDate[i]),
+      endRelation: indices.map((i) => data.endRelation[i]),
+      endDate: indices.map((i) => data.endDate[i]),
+      dpheGroup: indices.map((i) => data.dpheGroup[i]),
+      laneGroup: indices.map((i) => data.laneGroup[i]),
+      negated: indices.map((i) => data.negated[i]),
+    };
+  }
+
+  function callRenderTimeline(data) {
+    const container = document.getElementById(svgContainerId);
+    if (container) container.innerHTML = "";
+
+    renderTimeline({
+      svgContainerId,
+      patientId: data.patientId,
+      conceptIds: data.conceptIds,
+      startRelation: data.startRelation,
+      startDate: data.startDate,
+      endRelation: data.endRelation,
+      endDate: data.endDate,
+      dpheGroup: data.dpheGroup,
+      laneGroup: data.laneGroup,
+      dpheGroupCounts: data.dpheGroupCounts,
+      laneGroupsCounts: data.laneGroupsCounts,
+      negated: data.negated,
+      concepts,
+      toggleState,
+      handleToggleClick,
+      clickedTermsRef,
+      setClickedTerms,
+      skipNextEffect,
+      conceptsPerDocument,
+      reportId,
+    });
+  }
+
+  // useEffect(() => {
+  //   if (!conceptsPerDocument) return;
+  //
+  //   fetchTXTData(getDpheGroupByConceptId, getNegatedByConceptId).then((data) => {
+  //     if (!data) return;
+  //
+  //     const transformedData = transformTXTData(data);
+  //     const container = document.getElementById(svgContainerId);
+  //     if (container) container.innerHTML = "";
+  //
+  //     const filteredDpheGroup = transformedData.dpheGroup.filter(Boolean);
+  //     const filteredLaneGroup = transformedData.laneGroup.filter(Boolean);
+  //
+  //     if (filteredDpheGroup.length === 0 || filteredLaneGroup.length === 0) return;
+  //
+  //     fullDataRef.current = transformedData; // ← store it
+  //     callRenderTimeline(transformedData);
+  //   });
+  // }, [conceptsPerDocument]);
+
+  //     renderTimeline({
+  //       svgContainerId,
+  //       patientId: transformedData.patientId,
+  //       conceptIds: transformedData.conceptIds,
+  //       startRelation: transformedData.startRelation,
+  //       startDate: transformedData.startDate,
+  //       endRelation: transformedData.endRelation,
+  //       endDate: transformedData.endDate,
+  //       dpheGroup: transformedData.dpheGroup,
+  //       laneGroup: transformedData.laneGroup,
+  //       dpheGroupCounts: transformedData.dpheGroupCounts,
+  //       laneGroupsCounts: transformedData.laneGroupsCounts,
+  //       negated: transformedData.negated,
+  //       concepts,
+  //       toggleState,
+  //       handleToggleClick: handleToggleClick,
+  //       clickedTermsRef,
+  //       setClickedTerms,
+  //       skipNextEffect: skipNextEffect,
+  //       conceptsPerDocument,
+  //       reportId,
+  //     });
+  //   });
+  // }, [conceptsPerDocument]);
+
   useEffect(() => {
     if (!conceptsPerDocument) return;
 
@@ -67,56 +165,22 @@ export default function EventRelationTimeline(props) {
       if (!data) return;
 
       const transformedData = transformTXTData(data);
-      const container = document.getElementById(svgContainerId);
-      if (container) container.innerHTML = "";
 
       const filteredDpheGroup = transformedData.dpheGroup.filter(Boolean);
       const filteredLaneGroup = transformedData.laneGroup.filter(Boolean);
-
       if (filteredDpheGroup.length === 0 || filteredLaneGroup.length === 0) return;
 
-      renderTimeline({
-        svgContainerId,
-        patientId: transformedData.patientId,
-        conceptIds: transformedData.conceptIds,
-        startRelation: transformedData.startRelation,
-        startDate: transformedData.startDate,
-        endRelation: transformedData.endRelation,
-        endDate: transformedData.endDate,
-        dpheGroup: transformedData.dpheGroup,
-        laneGroup: transformedData.laneGroup,
-        dpheGroupCounts: transformedData.dpheGroupCounts,
-        laneGroupsCounts: transformedData.laneGroupsCounts,
-        negated: transformedData.negated,
-        concepts,
-        toggleState,
-        handleToggleClick: handleToggleClick,
-        setClickedTerms,
-        skipNextEffect: skipNextEffect,
-        conceptsPerDocument,
-        reportId,
-      });
+      fullDataRef.current = transformedData; // ← store it
+      callRenderTimeline(transformedData);
     });
-  }, [conceptsPerDocument]);
+  }, [conceptsPerDocument]); // Add conceptsPerDocument as dependency
 
   useEffect(() => {
-    if (!conceptsPerDocument) return; // Add this guard
+    if (!fullDataRef.current || !conceptsPerDocument) return;
 
-    if (toggleState) {
-      applyDocumentFilter();
-    } else {
-      // Show all relations when toggle is off
-      document.querySelectorAll(".relation-icon").forEach((el) => {
-        el.style.display = null;
-        const group = el.closest("g");
-        if (group) {
-          group.querySelectorAll(".relation-outline").forEach((outline) => {
-            outline.style.display = null;
-          });
-        }
-      });
-    }
-  }, [toggleState, conceptsPerDocument]); // Add conceptsPerDocument as dependency
+    const data = toggleState ? getFilteredData() : fullDataRef.current;
+    callRenderTimeline(data);
+  }, [toggleState, reportId]);
 
   useEffect(() => {
     if (skipNextEffect.current) {
@@ -180,55 +244,55 @@ export default function EventRelationTimeline(props) {
     currDocRef.current = props.currDocId;
   }, [props.currDocId]);
 
-  function applyDocumentFilter() {
-    if (!conceptsPerDocument) return; // Add this
-    const docKey = Object.keys(conceptsPerDocument).find((key) =>
-      key.endsWith(`_${currDocRef.current}`)
-    );
-    const conceptsForDoc = conceptsPerDocument[docKey] || [];
-    const conceptIdsFromDoc = conceptsForDoc.map((concept) => concept.id);
-    // Call your update logic
-    if (toggleState) {
-      filterRelationsByConceptIds(conceptIdsFromDoc);
-    } else {
-      // Show all relations
-      document.querySelectorAll(".relation-icon").forEach((el) => {
-        el.style.display = null;
-        const group = el.closest("g");
-        if (group) {
-          group.querySelectorAll(".relation-outline").forEach((outline) => {
-            outline.style.display = null;
-          });
-        }
-      });
-    }
-  }
-
-  function filterRelationsByConceptIds(conceptIdsFromDoc) {
-    if (!conceptIdsFromDoc || !conceptIdsFromDoc.length) return;
-
-    document.querySelectorAll(".relation-icon").forEach((el) => {
-      const elConceptIds = el.dataset.conceptIds
-        ? el.dataset.conceptIds
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-
-      // Show the relation if any of its concept IDs match the selected doc's concepts
-      const matches = elConceptIds.some((id) => conceptIdsFromDoc.includes(id));
-
-      el.style.display = matches ? null : "none";
-
-      // Also hide/show outlines
-      const group = el.closest("g");
-      if (group) {
-        group.querySelectorAll(".relation-outline").forEach((outline) => {
-          outline.style.display = matches ? null : "none";
-        });
-      }
-    });
-  }
+  // function applyDocumentFilter() {
+  //   if (!conceptsPerDocument) return; // Add this
+  //   const docKey = Object.keys(conceptsPerDocument).find((key) =>
+  //     key.endsWith(`_${currDocRef.current}`)
+  //   );
+  //   const conceptsForDoc = conceptsPerDocument[docKey] || [];
+  //   const conceptIdsFromDoc = conceptsForDoc.map((concept) => concept.id);
+  //   // Call your update logic
+  //   if (toggleState) {
+  //     filterRelationsByConceptIds(conceptIdsFromDoc);
+  //   } else {
+  //     // Show all relations
+  //     document.querySelectorAll(".relation-icon").forEach((el) => {
+  //       el.style.display = null;
+  //       const group = el.closest("g");
+  //       if (group) {
+  //         group.querySelectorAll(".relation-outline").forEach((outline) => {
+  //           outline.style.display = null;
+  //         });
+  //       }
+  //     });
+  //   }
+  // }
+  //
+  // function filterRelationsByConceptIds(conceptIdsFromDoc) {
+  //   if (!conceptIdsFromDoc || !conceptIdsFromDoc.length) return;
+  //
+  //   document.querySelectorAll(".relation-icon").forEach((el) => {
+  //     const elConceptIds = el.dataset.conceptIds
+  //       ? el.dataset.conceptIds
+  //           .split(",")
+  //           .map((s) => s.trim())
+  //           .filter(Boolean)
+  //       : [];
+  //
+  //     // Show the relation if any of its concept IDs match the selected doc's concepts
+  //     const matches = elConceptIds.some((id) => conceptIdsFromDoc.includes(id));
+  //
+  //     el.style.display = matches ? null : "none";
+  //
+  //     // Also hide/show outlines
+  //     const group = el.closest("g");
+  //     if (group) {
+  //       group.querySelectorAll(".relation-outline").forEach((outline) => {
+  //         outline.style.display = matches ? null : "none";
+  //       });
+  //     }
+  //   });
+  // }
 
   return <div className="Timeline" id={svgContainerId}></div>;
 }

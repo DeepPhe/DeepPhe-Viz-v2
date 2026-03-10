@@ -38,10 +38,7 @@ const source = `
                                 <li><span class="fact" id="{{id}}">T: {{value}}</span></li>
                                 {{/each}}
                             </ul>
-                            {{else}}
-                            <ul class="cancer_tnm_fact_list">
-                                <li><span>T: N/A</span></li>
-                            </ul>
+
                             {{/if}}
 
                             {{#if data.N}}
@@ -50,10 +47,7 @@ const source = `
                                 <li><span class="fact" id="{{id}}">N: {{value}}</span></li>
                                 {{/each}}
                             </ul>
-                            {{else}}
-                            <ul class="cancer_tnm_fact_list">
-                                <li><span>N: N/A</span></li>
-                            </ul>
+
                             {{/if}}
 
                             {{#if data.M}}
@@ -61,12 +55,8 @@ const source = `
                                 {{#each data.M}}
                                 <li><span class="fact" id="{{id}}">M: {{value}}</span></li>
                                 {{/each}}
-                            </ul>
-                            {{else}}
-                            <ul class="cancer_tnm_fact_list">
-                                <li><span>M: N/A</span></li>
-                            </ul>
-                                            
+                            </ul>                      
+                                         
                             {{/if}}
                         </div>
                         {{/each}}
@@ -144,8 +134,12 @@ class CancerAndTumorSummary extends Component {
 
     const factId = el.id;
 
+    console.log(factId);
+
     // Find basic info
     const info = this.findBasicFactInfo(factId);
+
+    console.log(info);
     if (!info) return;
 
     // Find corresponding attribute value

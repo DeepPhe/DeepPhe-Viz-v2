@@ -40,6 +40,7 @@ export function renderTimeline({
   concepts,
   toggleState,
   handleToggleClick,
+  clickedTermsRef,
   setClickedTerms,
   skipNextEffect,
   conceptsPerDocument,
@@ -296,7 +297,7 @@ export function renderTimeline({
   toggleGroup
     .append("text")
     .attr("x", 0)
-    .attr("y", 15)
+    .attr("y", 20)
     .attr("alignment-baseline", "middle")
     .attr("font-size", "12px")
     .text("Showing:");
@@ -325,23 +326,18 @@ export function renderTimeline({
   dropdown.property("value", toggleState ? "filtered" : "all");
 
   // Change → notify React
-  dropdown.on("change", function () {
-    const isFiltered = this.value === "filtered";
-    if (handleToggleClick && isFiltered !== toggleState) {
-      handleToggleClick();
-    }
-  });
+  dropdown.on("change", () => handleToggleClick?.());
 
   // After defining everything:
-  function updateTogglePosition() {
-    console.log(svgContainerId);
-    const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
-    // Keep it 40px from the right edge and some padding from the top
-    toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
-  }
+  // function updateTogglePosition() {
+  //   console.log(svgContainerId);
+  //   const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
+  //   // Keep it 40px from the right edge and some padding from the top
+  //   toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
+  // }
 
   // Call it initially
-  updateTogglePosition();
+  // updateTogglePosition();
 
   let isUpdating = false; // Add this flag at the top level of renderTimeline
 
@@ -1714,22 +1710,60 @@ export function renderTimeline({
   function handleClick(event, d) {
     const clickedConceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
     if (!clickedConceptIds.length) return;
-    setClickedTerms((prevTerms) => {
-      // Check if ANY of the merged concept IDs are already clicked
-      const hasAnyClicked = clickedConceptIds.some((id) => prevTerms.includes(id));
 
+    // Calculate BEFORE setState, synchronously
+    const hasAnyClicked = clickedTermsRef.current.some((id) => clickedConceptIds.includes(id));
+    const isDeselecting = hasAnyClicked;
+
+    setClickedTerms((prevTerms) => {
       if (hasAnyClicked) {
-        // Remove ALL concept IDs from this merged event
         return prevTerms.filter((term) => !clickedConceptIds.includes(term));
       } else {
-        // Add ALL concept IDs from this merged event
         return [...prevTerms, ...clickedConceptIds];
       }
     });
 
-    // Set all circles and relations to light/transparent
+    if (isDeselecting) {
+      document.querySelectorAll("circle").forEach((circle) => {
+        circle.style.fillOpacity = ".3";
+      });
+
+      document.querySelectorAll(".relation-icon").forEach((el) => {
+        const ids = el.dataset.conceptIds
+          ? el.dataset.conceptIds.split(",").map((s) => s.trim())
+          : [];
+
+        const wasSelected = clickedConceptIds.some((id) => ids.includes(id));
+
+        el.classList.remove("selected", "unselected");
+
+        if (wasSelected) {
+          ["marker-start", "marker-end"].forEach((attr) => {
+            if (el.hasAttribute(attr)) {
+              const currentMarker = el.getAttribute(attr);
+              const originalMarker = Object.entries(MARKER_TOGGLE_MAP).find(
+                ([, v]) => v === currentMarker
+              )?.[0];
+              if (originalMarker) el.setAttribute(attr, originalMarker);
+            }
+          });
+        }
+
+        const group = el.closest("g");
+        if (group) {
+          group.querySelectorAll(".relation-outline").forEach((outline) => {
+            outline.setAttribute("stroke-opacity", "0");
+          });
+        }
+      });
+
+      clearDocumentHighlights();
+      return;
+    }
+
+    // --- Selecting logic ---
     document.querySelectorAll("circle").forEach((circle) => {
-      circle.style.fillOpacity = "0.3"; // very light by default
+      circle.style.fillOpacity = "0.3";
     });
 
     document.querySelectorAll(".relation-icon").forEach((el) => {
@@ -1738,10 +1772,8 @@ export function renderTimeline({
       }
     });
 
-    // Find all elements that should toggle
     const toToggle = new Set();
 
-    // Emphasize matching relations
     document.querySelectorAll(".relation-icon").forEach((el) => {
       const ids = el.dataset.conceptIds
         ? el.dataset.conceptIds.split(",").map((s) => s.trim())
@@ -1752,11 +1784,9 @@ export function renderTimeline({
       }
     });
 
-    // Toggle each element exactly once
     toToggle.forEach((el) => {
       skipNextEffect.current = true;
 
-      // marker toggle
       ["marker-start", "marker-end"].forEach((attr) => {
         if (el.hasAttribute(attr)) {
           const currentMarker = el.getAttribute(attr);
@@ -1766,21 +1796,15 @@ export function renderTimeline({
         }
       });
 
-      // class toggle
       el.classList.toggle("selected");
       el.classList.toggle("unselected");
 
-      // Show/hide the black outline line
       const group = el.closest("g");
       const isNowSelected = el.classList.contains("selected");
       if (group) {
-        const outlines = group.querySelectorAll(".relation-outline");
-        if (outlines.length) {
-          outlines.forEach((outline) => {
-            // Do something with the outlines, like showing or hiding
-            outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
-          });
-        }
+        group.querySelectorAll(".relation-outline").forEach((outline) => {
+          outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
+        });
       }
     });
 
