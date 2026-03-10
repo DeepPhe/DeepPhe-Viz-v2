@@ -47,6 +47,7 @@ function Patient(props) {
   const conceptsPerDocumentRef = useRef({});
   const mentionIdsInDocumentRef = useRef({});
   const [fullJson, setFullJson] = useState(undefined);
+  const [highlightedDocIds, setHighlightedDocIds] = useState([]);
 
   useEffect(() => {
     if (hasDocuments(fullJson)) {
@@ -166,7 +167,11 @@ function Patient(props) {
           {expandedCancerDetail && (
             <CardBody>
               <div id="summary">
-                <CancerAndTumorSummary cancers={summary} patientJson={fullJson} />
+                <CancerAndTumorSummary
+                  cancers={summary}
+                  patientJson={fullJson}
+                  onConceptDocumentsSelected={(docIds) => setHighlightedDocIds(docIds)}
+                />
               </div>
             </CardBody>
           )}
@@ -240,6 +245,7 @@ function Patient(props) {
                 patientId={patientId}
                 setReportId={setReportId}
                 setCurrDocId={setCurrDocId}
+                highlightedDocIds={highlightedDocIds || []}
                 //getReport={getReport}
               ></PatientDocumentTimeline>
             ) : (

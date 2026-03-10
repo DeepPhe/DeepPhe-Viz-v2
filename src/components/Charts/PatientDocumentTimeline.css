@@ -12,6 +12,12 @@
     overflow-x: auto;
 }
 
+.main_report_PE.concept_highlight {
+    stroke: yellow;
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 5px yellow);
+}
+
 /* Episode and report elements */
 .episode_legend_circle,
 .main_report_PE {

@@ -23,7 +23,7 @@ export function createAllSvgs({ containerId, containerWidth, svgTotalHeight, LEG
   const timelineSvg = container
     .append("svg")
     .attr("class", "timeline_svg")
-    .attr("viewBox", `0 0 ${containerWidth} ${svgTotalHeight}`)
+    .attr("viewBox", `0 20 ${containerWidth} ${svgTotalHeight}`)
     .attr("preserveAspectRatio", "xMidYMid meet");
 
   return { legendSvg, timelineSvg };

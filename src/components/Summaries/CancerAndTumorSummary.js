@@ -32,28 +32,41 @@ const source = `
                         <div class="tnm_by_type">
                             <span class="tnm_type">{{type}} TNM: </span>
                             
-                            {{#if data.T}}
+                           {{#if data.T}}
                             <ul class="cancer_tnm_fact_list">
                                 {{#each data.T}}
-                                <li><span class="fact" id="{{id}}">{{value}}</span></li>
+                                <li><span class="fact" id="{{id}}">T: {{value}}</span></li>
                                 {{/each}}
+                            </ul>
+                            {{else}}
+                            <ul class="cancer_tnm_fact_list">
+                                <li><span>T: N/A</span></li>
                             </ul>
                             {{/if}}
 
                             {{#if data.N}}
                             <ul class="cancer_tnm_fact_list">
                                 {{#each data.N}}
-                                <li><span class="fact" id="{{id}}">{{value}}</span></li>
+                                <li><span class="fact" id="{{id}}">N: {{value}}</span></li>
                                 {{/each}}
+                            </ul>
+                            {{else}}
+                            <ul class="cancer_tnm_fact_list">
+                                <li><span>N: N/A</span></li>
                             </ul>
                             {{/if}}
 
                             {{#if data.M}}
                             <ul class="cancer_tnm_fact_list">
                                 {{#each data.M}}
-                                <li><span class="fact" id="{{id}}">{{value}}</span></li>
+                                <li><span class="fact" id="{{id}}">M: {{value}}</span></li>
                                 {{/each}}
                             </ul>
+                            {{else}}
+                            <ul class="cancer_tnm_fact_list">
+                                <li><span>M: N/A</span></li>
+                            </ul>
+                                            
                             {{/if}}
                         </div>
                         {{/each}}
@@ -127,21 +140,29 @@ class CancerAndTumorSummary extends Component {
     const el = e.target.closest(".fact");
     if (!el) return;
 
+    console.log(el);
+
     const factId = el.id;
 
-    // 1️⃣ Find basic info
+    // Find basic info
     const info = this.findBasicFactInfo(factId);
     if (!info) return;
 
-    // 2️⃣ Find corresponding attribute value
+    // Find corresponding attribute value
     const attributeValue = this.findAttributeByFact(info);
 
-    // 3️⃣ Find mentions and documents
+    // Find mentions and documents
     const conceptIds = attributeValue?.valueObj?.conceptIds || [];
     const mentions = this.findMentionsForConcept(conceptIds);
+    console.log("are we getting here");
     const documents = this.getDocumentsFromMentions(mentions);
+    const docIds = documents.map((d) => d.id);
+    console.log(docIds);
 
-    // 4️⃣ Store everything in state
+    if (this.props.onConceptDocumentsSelected) {
+      this.props.onConceptDocumentsSelected(docIds);
+    }
+    // Store everything in state
     this.setState({
       selectedFactInfo: info,
       selectedAttributeValue: attributeValue,
@@ -156,7 +177,8 @@ class CancerAndTumorSummary extends Component {
     for (const cancer of cancers) {
       for (const group of cancer.collatedCancerFacts || []) {
         for (const fact of group.facts || []) {
-          if (fact.id === factId) {
+          const rawFactId = fact.id.replace(/^list_view_/, "");
+          if (rawFactId === factId) {
             return {
               cancerId: cancer.cancerId,
               selectedFactId: fact.id,
@@ -202,6 +224,12 @@ class CancerAndTumorSummary extends Component {
     const { patientJson } = this.props;
     if (!patientJson?.concepts) return [];
 
+    // console.log("Looking for conceptIds:", conceptIds);
+    // console.log(
+    //   "Available concept ids:",
+    //   patientJson.concepts.map((c) => c.id)
+    // );
+
     // Collect all mentions that match any of the conceptIds
     const mentions = [];
 
@@ -209,8 +237,8 @@ class CancerAndTumorSummary extends Component {
       if (!conceptIds.includes(concept.id)) continue;
 
       // Each concept may have mentions
-      if (concept.mentions?.length) {
-        mentions.push(...concept.mentions);
+      if (concept.mentionIds?.length) {
+        mentions.push(...concept.mentionIds);
       }
     }
 
@@ -218,30 +246,19 @@ class CancerAndTumorSummary extends Component {
   };
 
   getDocumentsFromMentions = (mentions = []) => {
-    // Extract unique document IDs from mentions
-    const docIds = new Set();
-    for (const mention of mentions) {
-      if (mention.documentId) {
-        docIds.add(mention.documentId);
-      }
-    }
-
-    // Optionally map to full document objects if you have patientJson.documents
-    const documents = [];
     const { patientJson } = this.props;
-    if (patientJson?.documents) {
-      for (const doc of patientJson.documents) {
-        if (docIds.has(doc.id)) {
-          documents.push(doc);
-        }
-      }
-    }
+    if (!patientJson?.documents) return [];
+    const mentionIds = new Set(mentions);
 
-    return documents;
+    const matchedDocuments = patientJson.documents.filter((doc) =>
+      doc.mentions?.some((m) => mentionIds.has(m.id))
+    );
+
+    return matchedDocuments;
   };
 
   render() {
-    console.log("CancerAndTumorSummary props:", this.props);
+    // console.log("CancerAndTumorSummary props:", this.props);
     // I need to import fullJson, then get the AV id from this.state.selectedFactInfo.selectedFactId
     // with the AV id I will then look at fullJson -> cancers -> cancerId -> attributes -> values | AV = Attr Value
 
@@ -266,25 +283,25 @@ class CancerAndTumorSummary extends Component {
 
           {this.state.selectedFactInfo ? (
             <div>
-              <div>
-                <strong>Cancer ID:</strong> {this.state.selectedFactInfo.cancerId}
-              </div>
-              <div>
-                <strong>Fact ID:</strong> {this.state.selectedFactInfo.selectedFactId}
-              </div>
+              {/*<div>*/}
+              {/*  <strong>Cancer ID:</strong> {this.state.selectedFactInfo.cancerId}*/}
+              {/*</div>*/}
+              {/*<div>*/}
+              {/*  <strong>Fact ID:</strong> {this.state.selectedFactInfo.selectedFactId}*/}
+              {/*</div>*/}
               <div>
                 <strong>Category:</strong> {this.state.selectedFactInfo.categoryName}
               </div>
               <div>
-                <strong>Pretty Name:</strong> {this.state.selectedFactInfo.prettyName}
+                <strong>Name:</strong> {this.state.selectedFactInfo.prettyName}
               </div>
 
               {this.state.selectedAttributeValue ? (
                 <div>
-                  <div>
-                    <strong>Concept Ids:</strong>{" "}
-                    {this.state.selectedAttributeValue.valueObj.conceptIds}
-                  </div>
+                  {/*<div>*/}
+                  {/*  <strong>Concept Ids:</strong>{" "}*/}
+                  {/*  {this.state.selectedAttributeValue.valueObj.conceptIds}*/}
+                  {/*</div>*/}
                   <div>
                     <strong>Negated:</strong>{" "}
                     {String(this.state.selectedAttributeValue.valueObj.negated)}
@@ -304,11 +321,16 @@ class CancerAndTumorSummary extends Component {
                   {this.state.selectedConceptDocuments?.length ? (
                     <div style={{ marginTop: 8 }}>
                       <strong>Documents containing this concept:</strong>
-                      <ul>
+                      <div style={{ marginTop: 4 }}>
                         {this.state.selectedConceptDocuments.map((doc) => (
-                          <li key={doc.id}>{doc.title || doc.id}</li>
+                          <div
+                            key={doc.id}
+                            style={{ padding: "4px 0", borderBottom: "1px solid #eee" }}
+                          >
+                            {doc.title || doc.id}
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   ) : (
                     <div>No documents contain this concept.</div>

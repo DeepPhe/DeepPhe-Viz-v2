@@ -19,6 +19,10 @@ import { createAllSvgs } from "./createAllSvgs";
 import { renderEpisodeLegend } from "./renderEpisodeLegend";
 import { computeEpisodeLegendLayout } from "./computeEpisodeLegendLayout";
 import { setupTimelineLayout } from "../setUpTimelineLayout";
+import {
+  highlightDocumentCircles,
+  clearDocumentHighlights,
+} from "../../../../utils/highlightDocumentCircles";
 
 export function renderTimeline({
   svgContainerId,
@@ -224,11 +228,11 @@ export function renderTimeline({
   for (const key of desiredOrder) {
     // Filter spans that belong to this group
     const spansForGroup = spanData.filter((d) => d.laneGroup === key);
-    console.log(spansForGroup);
+    // console.log(spansForGroup);
     // Skip groups with no spans
     if (!spansForGroup.length) continue;
     const laneCount = getLaneCount(spansForGroup);
-    console.log(laneCount);
+    // console.log(laneCount);
     const groupHeight = laneCount * LANE.height;
 
     groupLayouts.push({
@@ -281,82 +285,63 @@ export function renderTimeline({
   });
 
   // Add toggle group to legendSvg
-  // const toggleGroup = legendSvg
-  //   .append("g")
-  //   .attr("class", "filter-toggle-group")
-  //   .attr("transform", `translate(${containerWidth - 40})`)
-  //   .style("cursor", "pointer")
-  //   .style("pointer-events", "all") // Ensure it can receive clicks
-  //   .raise(); // Move to front
-  //
-  // // Label text
-  // const toggleLabel = toggleGroup
-  //   .append("text")
-  //   .attr("x", -10)
-  //   .attr("y", 15)
-  //   .attr("alignment-baseline", "middle")
-  //   .attr("text-anchor", "end")
-  //   .attr("font-size", "12px")
-  //   .text("Showing: All Patient Events");
-  //
-  // // Background (toggle track)
-  // const toggleBg = toggleGroup
-  //   .append("rect")
-  //   .attr("class", "toggle-bg")
-  //   .attr("x", 0)
-  //   .attr("y", 0)
-  //   .attr("width", 40)
-  //   .attr("height", 20)
-  //   .attr("rx", 10)
-  //   .attr("ry", 10)
-  //   .attr("fill", "#ccc");
-  //
-  // // Circle (toggle knob)
-  // const knob = toggleGroup
-  //   .append("circle")
-  //   .attr("class", "toggle-knob")
-  //   .attr("cx", 10)
-  //   .attr("cy", 10)
-  //   .attr("r", 8)
-  //   .attr("fill", "white")
-  //   .style("stroke", "#888");
-  //
-  // let localToggleState = toggleState; // Initialize with React state
-  //
-  // // Click → notify React
-  // toggleGroup.on("click", () => {
-  //   if (handleToggleClick) {
-  //     handleToggleClick();
-  //
-  //     // Toggle the LOCAL state
-  //     localToggleState = !localToggleState; // UPDATE the local state!
-  //
-  //     // Update visuals based on the NEW local state
-  //     knob
-  //       .transition()
-  //       .duration(200)
-  //       .attr("cx", localToggleState ? 30 : 10); // Use localToggleState, not isNowOn
-  //
-  //     toggleBg
-  //       .transition()
-  //       .duration(200)
-  //       .attr("fill", localToggleState ? "#007bff" : "#ccc");
-  //
-  //     toggleLabel.text(
-  //       localToggleState ? "Showing: Filtered Patient Events" : "Showing: All Patient Events"
-  //     );
-  //   }
-  // });
+  const toggleGroup = legendSvg
+    .append("g")
+    .attr("class", "filter-toggle-group")
+    .attr("transform", `translate(${containerWidth - 220})`)
+    .style("pointer-events", "all")
+    .raise();
+
+  // Label text
+  toggleGroup
+    .append("text")
+    .attr("x", 0)
+    .attr("y", 15)
+    .attr("alignment-baseline", "middle")
+    .attr("font-size", "12px")
+    .text("Showing:");
+
+  // Foreign object to embed HTML <select> in SVG
+  const foreignObj = toggleGroup
+    .append("foreignObject")
+    .attr("x", 55)
+    .attr("y", 2)
+    .attr("width", 165)
+    .attr("height", 24);
+
+  const dropdown = foreignObj
+    .append("xhtml:select")
+    .style("width", "100%")
+    .style("height", "100%")
+    .style("font-size", "12px")
+    .style("cursor", "pointer")
+    .style("border", "1px solid #ccc")
+    .style("border-radius", "4px");
+
+  dropdown.append("xhtml:option").attr("value", "all").text("All Patient Events");
+  dropdown.append("xhtml:option").attr("value", "filtered").text("Filtered Patient Events");
+
+  // Set initial value based on toggleState
+  dropdown.property("value", toggleState ? "filtered" : "all");
+
+  // Change → notify React
+  dropdown.on("change", function () {
+    const isFiltered = this.value === "filtered";
+    if (handleToggleClick && isFiltered !== toggleState) {
+      handleToggleClick();
+    }
+  });
 
   // After defining everything:
-  // function updateTogglePosition() {
-  //   const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
-  //   // Keep it 40px from the right edge and some padding from the top
-  //   toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
-  // }
+  function updateTogglePosition() {
+    console.log(svgContainerId);
+    const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
+    // Keep it 40px from the right edge and some padding from the top
+    toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
+  }
 
   // Call it initially
-  // updateTogglePosition();
+  updateTogglePosition();
 
   let isUpdating = false; // Add this flag at the top level of renderTimeline
 
@@ -1303,9 +1288,9 @@ export function renderTimeline({
       .attr("x2", x2)
       .attr("y1", 0)
       .attr("y2", 0)
-      .attr("stroke", "rgb(128, 128, 128)")
+      .attr("stroke", d.negated ? "rgb(255, 0, 0)" : "rgb(49, 163, 84)")
       .attr("stroke-width", 5)
-      .attr("stroke-opacity", 0.3)
+      .attr("stroke-opacity", 0.5)
       .style("cursor", "pointer")
       .on("click", (event) => handleClick(event, d));
     if (markerStart) {
@@ -1358,9 +1343,9 @@ export function renderTimeline({
       .attr("x2", x)
       .attr("y1", -6) // Extends above
       .attr("y2", 6) // Extends below
-      .attr("stroke", "rgb(128, 128, 128)")
+      .attr("stroke", "rgb(49, 163, 84)")
       .attr("stroke-width", 4)
-      .attr("stroke-opacity", 0.75)
+      .attr("stroke-opacity", 0.5)
       .style("cursor", "pointer")
       .on("click", (event) => {
         handleClick(event, d);
@@ -1728,7 +1713,6 @@ export function renderTimeline({
 
   function handleClick(event, d) {
     const clickedConceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
-    // console.log("handleClick called during render!", event, d);
     if (!clickedConceptIds.length) return;
     setClickedTerms((prevTerms) => {
       // Check if ANY of the merged concept IDs are already clicked
@@ -1754,11 +1738,10 @@ export function renderTimeline({
       }
     });
 
-    // 1. Find all elements that should toggle
+    // Find all elements that should toggle
     const toToggle = new Set();
 
     // Emphasize matching relations
-    // clickedConceptIds.forEach((id) => {
     document.querySelectorAll(".relation-icon").forEach((el) => {
       const ids = el.dataset.conceptIds
         ? el.dataset.conceptIds.split(",").map((s) => s.trim())
@@ -1767,10 +1750,9 @@ export function renderTimeline({
       if (clickedConceptIds.some((id) => ids.includes(id))) {
         toToggle.add(el);
       }
-      // console.log(toToggle);
     });
 
-    // 2. Toggle each element exactly once
+    // Toggle each element exactly once
     toToggle.forEach((el) => {
       skipNextEffect.current = true;
 
@@ -1801,39 +1783,13 @@ export function renderTimeline({
         }
       }
     });
-    // });
 
     const matchingNotes = Object.entries(conceptsPerDocument)
       .filter(([_, objArray]) => objArray.some((obj) => clickedConceptIds.includes(obj.id)))
       .map(([note]) => note);
 
-    matchingNotes.forEach((reportId) => {
-      const circle = document.getElementById(reportId);
-
-      if (circle && circle.parentNode) {
-        const svg = circle.parentNode;
-        const existingRing = svg.querySelector(`#highlight-ring-${reportId}`);
-
-        if (existingRing) {
-          existingRing.remove();
-          return;
-        }
-
-        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        ring.setAttribute("cx", circle.getAttribute("cx"));
-        ring.setAttribute("cy", circle.getAttribute("cy"));
-        ring.setAttribute("r", parseFloat(circle.getAttribute("r")) * 1.4);
-        ring.setAttribute("fill", "none");
-        ring.setAttribute("stroke", "gold");
-        ring.setAttribute("stroke-opacity", "0.7");
-        ring.setAttribute("stroke-width", "6");
-        ring.setAttribute("id", `highlight-ring-${reportId}`);
-
-        svg.insertBefore(ring, circle);
-      } else {
-        console.log("Circle not found:", reportId);
-      }
-    });
+    clearDocumentHighlights();
+    highlightDocumentCircles(matchingNotes);
   }
 
   // Encounter ages label

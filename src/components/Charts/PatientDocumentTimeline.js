@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import * as d3 from "d3";
 import * as $ from "jquery";
 import "./PatientDocumentTimeline.css";
+import {
+  highlightDocumentCircles,
+  clearDocumentHighlights,
+} from "../../utils/highlightDocumentCircles";
 
 const baseUri = "http://localhost:3001/api";
 const transitionDuration = 800; // time in ms
@@ -20,6 +24,7 @@ const PatientDocumentTimeline = ({
   svgContainerId,
   setCurrDocId,
   timeline,
+  highlightedDocIds = [],
 }) => {
   const [json, setJson] = useState(null);
 
@@ -40,6 +45,11 @@ const PatientDocumentTimeline = ({
         .catch((err) => reject(err));
     });
   };
+
+  useEffect(() => {
+    clearDocumentHighlights();
+    highlightDocumentCircles(highlightedDocIds);
+  }, [highlightedDocIds]);
 
   const processTimelineResponse = (response) => {
     setJson(response);
@@ -524,8 +534,14 @@ const PatientDocumentTimeline = ({
       // Need to define this before defining zoom since it's function expression instead of function declariation
       let zoomed = function (event) {
         // Ignore zoom-by-brush
-        if (event.sourceEvent && event.sourceEvent.type === "brush") {
+        if (
+          event.sourceEvent !== undefined &&
+          event.sourceEvent !== null &&
+          event.sourceEvent.type === "brush"
+        ) {
           return;
+        } else {
+          console.log("in zoom", event);
         }
         let transform = event.transform;
 
@@ -533,6 +549,7 @@ const PatientDocumentTimeline = ({
 
         // Update the report dots in main area
         update();
+        event.isZooming = true;
 
         // Update the overview as moving
         overview.select(".brush").call(brush.move, mainX.range().map(transform.invertX, transform));
@@ -982,8 +999,14 @@ const PatientDocumentTimeline = ({
       // Need to define this before defining brush since it's function expression instead of function declariation
       let brushed = function (event) {
         // Ignore brush-by-zoom
-        if (event.sourceEvent && event.sourceEvent.type === "zoom") {
+        if (
+          event.sourceEvent !== undefined &&
+          event.sourceEvent !== null &&
+          event.sourceEvent.type === "zoom"
+        ) {
           return;
+        } else {
+          console.log("in brush", event);
         }
 
         let selection = d3.brushSelection(overviewBrush.node());
@@ -995,16 +1018,17 @@ const PatientDocumentTimeline = ({
         mainX.domain(selection.map(overviewX.invert, overviewX));
 
         update();
-
-        // Zoom the main area
-        svg
-          .select(".zoom_PE")
-          .call(
-            zoom.transform,
-            d3.zoomIdentity
-              .scale(svgWidth / (selection[1] - selection[0]))
-              .translate(-selection[0], 0)
-          );
+        if (event.isZooming !== undefined && !event.isZooming) {
+          // Zoom the main area
+          svg
+            .select(".zoom_PE")
+            .call(
+              zoom.transform,
+              d3.zoomIdentity
+                .scale(svgWidth / (selection[1] - selection[0]))
+                .translate(-selection[0], 0)
+            );
+        }
       };
 
       // D3 brush

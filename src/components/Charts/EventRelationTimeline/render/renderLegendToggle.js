@@ -4,55 +4,47 @@ export function renderLegendToggle({ parent, width, initialState = false, onTogg
   const group = parent
     .append("g")
     .attr("class", "filter-toggle-group")
-    .style("cursor", "pointer")
     .style("pointer-events", "all");
 
   // Label
-  const label = group
+  group
     .append("text")
-    .attr("x", -10)
+    .attr("x", 0)
     .attr("y", 15)
     .attr("alignment-baseline", "middle")
-    .attr("text-anchor", "end")
-    .attr("font-size", "12px");
+    .attr("font-size", "12px")
+    .text("Showing:");
 
-  // Background
-  const bg = group
-    .append("rect")
-    .attr("class", "toggle-bg")
-    .attr("width", 40)
-    .attr("height", 20)
-    .attr("rx", 10)
-    .attr("ry", 10);
+  // Foreign object to embed HTML <select> in SVG
+  const foreignObj = group
+    .append("foreignObject")
+    .attr("x", 55)
+    .attr("y", 2)
+    .attr("width", 165)
+    .attr("height", 24);
 
-  // Knob
-  const knob = group
-    .append("circle")
-    .attr("class", "toggle-knob")
-    .attr("cy", 10)
-    .attr("r", 8)
-    .style("stroke", "#888");
+  const dropdown = foreignObj
+    .append("select")
+    .style("width", "100%")
+    .style("height", "100%")
+    .style("font-size", "12px")
+    .style("cursor", "pointer")
+    .style("border", "1px solid #ccc")
+    .style("border-radius", "4px");
+
+  dropdown.append("option").attr("value", "all").text("All Patient Events");
+  dropdown.append("option").attr("value", "filtered").text("Filtered Patient Events");
 
   function render() {
-    knob
-      .transition()
-      .duration(200)
-      .attr("cx", state ? 30 : 10);
-
-    bg.transition()
-      .duration(200)
-      .attr("fill", state ? "#007bff" : "#ccc");
-
-    label.text(state ? "Showing: Filtered Patient Events" : "Showing: All Patient Events");
+    dropdown.property("value", state ? "filtered" : "all");
   }
 
   function reposition(newWidth) {
-    group.attr("transform", `translate(${newWidth - 40}, 0)`);
+    group.attr("transform", `translate(${newWidth - 230}, 0)`);
   }
 
-  group.on("click", () => {
-    state = !state;
-    render();
+  dropdown.on("change", function () {
+    state = this.value === "filtered";
     onToggle?.(state);
   });
 
