@@ -4,6 +4,9 @@ demopatients.sqlite
 public/demopatients.sqlite
 public/docs/demo_docs.db
 
+# AI-generated explanations and documentation
+explanations/
+
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 .idea/*
 # dependencies

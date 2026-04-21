@@ -234,13 +234,25 @@ const processOmapData = (rawResults) => {
     // Parse the comma-separated patient IDs
     const patientIds = PERSON_IDS.split(",").map((id) => id.trim());
 
-    // Special handling for age_at_dx
+    // Special handling for age_at_dx - preserve ranges for display
     if (attribid.toLowerCase() === "age_at_dx") {
-      // Extract the numeric part (e.g., "50s" -> "50", "60s" -> "60")
-      const numericPart = attribval.replace(/[^0-9]/g, "");
-      attribval = parseInt(numericPart);
-      if (attribval > 90) {
-        attribval = 90;
+      // Normalize age ranges to consistent format
+      // "50-59" stays "50-59", "50s" becomes "50-59", single numbers become ranges
+      const firstNumber = attribval.match(/\d+/);
+      if (firstNumber) {
+        const startAge = parseInt(firstNumber[0]);
+
+        // For ages 90+, use "90+" format
+        if (startAge >= 90) {
+          attribval = "90+";
+        } else if (attribval.includes("-")) {
+          // Already a range (e.g., "50-59"), keep it as is
+          attribval = attribval;
+        } else {
+          // Convert single number or "50s" format to range "50-59"
+          const endAge = startAge + 9;
+          attribval = `${startAge}-${endAge}`;
+        }
       }
     }
 
