@@ -32,28 +32,31 @@ const source = `
                         <div class="tnm_by_type">
                             <span class="tnm_type">{{type}} TNM: </span>
                             
-                            {{#if data.T}}
+                           {{#if data.T}}
                             <ul class="cancer_tnm_fact_list">
                                 {{#each data.T}}
-                                <li><span class="fact" id="{{id}}">{{value}}</span></li>
+                                <li><span class="fact" id="{{id}}">T: {{value}}</span></li>
                                 {{/each}}
                             </ul>
+
                             {{/if}}
 
                             {{#if data.N}}
                             <ul class="cancer_tnm_fact_list">
                                 {{#each data.N}}
-                                <li><span class="fact" id="{{id}}">{{value}}</span></li>
+                                <li><span class="fact" id="{{id}}">N: {{value}}</span></li>
                                 {{/each}}
                             </ul>
+
                             {{/if}}
 
                             {{#if data.M}}
                             <ul class="cancer_tnm_fact_list">
                                 {{#each data.M}}
-                                <li><span class="fact" id="{{id}}">{{value}}</span></li>
+                                <li><span class="fact" id="{{id}}">M: {{value}}</span></li>
                                 {{/each}}
-                            </ul>
+                            </ul>                      
+                                         
                             {{/if}}
                         </div>
                         {{/each}}
@@ -119,8 +122,224 @@ Handlebars.registerHelper("inArray", function (item, arr, opts) {
 });
 
 class CancerAndTumorSummary extends Component {
+  state = {
+    selectedFactId: null,
+  };
+
+  handleFactClick = (e) => {
+    const el = e.target.closest(".fact");
+    if (!el) return;
+
+    console.log(el);
+
+    const factId = el.id;
+
+    console.log(factId);
+
+    // Find basic info
+    const info = this.findBasicFactInfo(factId);
+
+    console.log(info);
+    if (!info) return;
+
+    // Find corresponding attribute value
+    const attributeValue = this.findAttributeByFact(info);
+
+    // Find mentions and documents
+    const conceptIds = attributeValue?.valueObj?.conceptIds || [];
+    const mentions = this.findMentionsForConcept(conceptIds);
+    console.log("are we getting here");
+    const documents = this.getDocumentsFromMentions(mentions);
+    const docIds = documents.map((d) => d.id);
+    console.log(docIds);
+
+    if (this.props.onConceptDocumentsSelected) {
+      this.props.onConceptDocumentsSelected(docIds);
+    }
+    // Store everything in state
+    this.setState({
+      selectedFactInfo: info,
+      selectedAttributeValue: attributeValue,
+      selectedConceptMentions: mentions,
+      selectedConceptDocuments: documents,
+    });
+  };
+
+  findBasicFactInfo = (factId) => {
+    const { cancers = [] } = this.props;
+
+    for (const cancer of cancers) {
+      for (const group of cancer.collatedCancerFacts || []) {
+        for (const fact of group.facts || []) {
+          const rawFactId = fact.id.replace(/^list_view_/, "");
+          if (rawFactId === factId) {
+            return {
+              cancerId: cancer.cancerId,
+              selectedFactId: fact.id,
+              categoryName: group.categoryName,
+              prettyName: fact.prettyName || fact.value,
+            };
+          }
+        }
+      }
+    }
+
+    return null;
+  };
+
+  findAttributeByFact = (selectedFactInfo) => {
+    if (!selectedFactInfo) return null;
+
+    const { patientJson } = this.props;
+    const { cancerId, selectedFactId } = selectedFactInfo;
+
+    if (!patientJson?.cancers) return null;
+
+    // Find the cancer that matches the selectedFact's cancerId
+    const matchedCancer = patientJson.cancers.find((c) => c.id === cancerId);
+    if (!matchedCancer) return null;
+
+    // Loop through attributes
+    for (const attr of matchedCancer.attributes || []) {
+      for (const val of attr.values || []) {
+        if (val.id === selectedFactId) {
+          return {
+            attributeName: attr.name || attr.category || "Unknown",
+            valueObj: val,
+          };
+        }
+      }
+    }
+
+    return null;
+  };
+
+  findMentionsForConcept = (conceptIds = []) => {
+    const { patientJson } = this.props;
+    if (!patientJson?.concepts) return [];
+
+    // console.log("Looking for conceptIds:", conceptIds);
+    // console.log(
+    //   "Available concept ids:",
+    //   patientJson.concepts.map((c) => c.id)
+    // );
+
+    // Collect all mentions that match any of the conceptIds
+    const mentions = [];
+
+    for (const concept of patientJson.concepts) {
+      if (!conceptIds.includes(concept.id)) continue;
+
+      // Each concept may have mentions
+      if (concept.mentionIds?.length) {
+        mentions.push(...concept.mentionIds);
+      }
+    }
+
+    return mentions;
+  };
+
+  getDocumentsFromMentions = (mentions = []) => {
+    const { patientJson } = this.props;
+    if (!patientJson?.documents) return [];
+    const mentionIds = new Set(mentions);
+
+    const matchedDocuments = patientJson.documents.filter((doc) =>
+      doc.mentions?.some((m) => mentionIds.has(m.id))
+    );
+
+    return matchedDocuments;
+  };
+
   render() {
-    return <div className="container" dangerouslySetInnerHTML={{ __html: template(this.props) }} />;
+    // console.log("CancerAndTumorSummary props:", this.props);
+    // I need to import fullJson, then get the AV id from this.state.selectedFactInfo.selectedFactId
+    // with the AV id I will then look at fullJson -> cancers -> cancerId -> attributes -> values | AV = Attr Value
+
+    // Now that we have conceptId, I'll need to go into PatientJson -> concepts -> find mentions for matching concept
+    // -> get the documents that those mentions are within -> from here we can display which documents contain that
+    // clicked concept
+
+    // console.log("props:", this.state.selectedAttributeValue.valueObj.conceptIds);
+
+    return (
+      <div className="summary_layout">
+        {/* LEFT: existing Handlebars output */}
+        <div
+          className="summary_main"
+          onClick={this.handleFactClick}
+          dangerouslySetInnerHTML={{ __html: template(this.props) }}
+        />
+
+        {/* RIGHT: info panel */}
+        <div className="summary_side_panel">
+          <h3>Details</h3>
+
+          {this.state.selectedFactInfo ? (
+            <div>
+              {/*<div>*/}
+              {/*  <strong>Cancer ID:</strong> {this.state.selectedFactInfo.cancerId}*/}
+              {/*</div>*/}
+              {/*<div>*/}
+              {/*  <strong>Fact ID:</strong> {this.state.selectedFactInfo.selectedFactId}*/}
+              {/*</div>*/}
+              <div>
+                <strong>Category:</strong> {this.state.selectedFactInfo.categoryName}
+              </div>
+              <div>
+                <strong>Name:</strong> {this.state.selectedFactInfo.prettyName}
+              </div>
+
+              {this.state.selectedAttributeValue ? (
+                <div>
+                  {/*<div>*/}
+                  {/*  <strong>Concept Ids:</strong>{" "}*/}
+                  {/*  {this.state.selectedAttributeValue.valueObj.conceptIds}*/}
+                  {/*</div>*/}
+                  <div>
+                    <strong>Negated:</strong>{" "}
+                    {String(this.state.selectedAttributeValue.valueObj.negated)}
+                  </div>
+                  <div>
+                    <strong>Confidence:</strong>{" "}
+                    {String(this.state.selectedAttributeValue.valueObj.confidence)}%
+                  </div>
+                  {/*<div>*/}
+                  {/*  <strong>Attribute Name:</strong>{" "}*/}
+                  {/*  {this.state.selectedAttributeValue.attributeName}*/}
+                  {/*</div>*/}
+                  {/*<pre style={{ fontSize: "12px" }}>*/}
+                  {/*  {JSON.stringify(this.state.selectedAttributeValue.valueObj, null, 2)}*/}
+                  {/*</pre>*/}
+
+                  {this.state.selectedConceptDocuments?.length ? (
+                    <div style={{ marginTop: 8 }}>
+                      <strong>Documents containing this concept:</strong>
+                      <div style={{ marginTop: 4 }}>
+                        {this.state.selectedConceptDocuments.map((doc) => (
+                          <div
+                            key={doc.id}
+                            style={{ padding: "4px 0", borderBottom: "1px solid #eee" }}
+                          >
+                            {doc.title || doc.id}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>No documents contain this concept.</div>
+                  )}
+                </div>
+              ) : (
+                <div>No attribute value found for this fact.</div>
+              )}
+            </div>
+          ) : (
+            <div>Click a fact to see details here.</div>
+          )}
+        </div>
+      </div>
+    );
   }
 }
 

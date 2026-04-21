@@ -2,16 +2,16 @@ import {
   AGE_AREA,
   ARROW,
   GAPS,
-  LABEL,
   LANE,
   LEGEND,
   MARGINS,
   MARKER_TOGGLE_MAP,
   OVERVIEW,
-  PADDING,
   TEXT,
   TIMELINE_PADDING_DAYS,
   TIMESPAN,
+  PADDING,
+  LABEL,
   TOGGLE_BUTTON,
 } from "../timelineConstants";
 import * as d3 from "d3";
@@ -19,6 +19,10 @@ import { createAllSvgs } from "./createAllSvgs";
 import { renderEpisodeLegend } from "./renderEpisodeLegend";
 import { computeEpisodeLegendLayout } from "./computeEpisodeLegendLayout";
 import { setupTimelineLayout } from "../setUpTimelineLayout";
+import {
+  highlightDocumentCircles,
+  clearDocumentHighlights,
+} from "../../../../utils/highlightDocumentCircles";
 
 export function renderTimeline({
   svgContainerId,
@@ -36,6 +40,7 @@ export function renderTimeline({
   concepts,
   toggleState,
   handleToggleClick,
+  clickedTermsRef,
   setClickedTerms,
   skipNextEffect,
   conceptsPerDocument,
@@ -224,11 +229,11 @@ export function renderTimeline({
   for (const key of desiredOrder) {
     // Filter spans that belong to this group
     const spansForGroup = spanData.filter((d) => d.laneGroup === key);
-    console.log(spansForGroup);
+    // console.log(spansForGroup);
     // Skip groups with no spans
     if (!spansForGroup.length) continue;
     const laneCount = getLaneCount(spansForGroup);
-    console.log(laneCount);
+    // console.log(laneCount);
     const groupHeight = laneCount * LANE.height;
 
     groupLayouts.push({
@@ -281,75 +286,51 @@ export function renderTimeline({
   });
 
   // Add toggle group to legendSvg
-  // const toggleGroup = legendSvg
-  //   .append("g")
-  //   .attr("class", "filter-toggle-group")
-  //   .attr("transform", `translate(${containerWidth - 40})`)
-  //   .style("cursor", "pointer")
-  //   .style("pointer-events", "all") // Ensure it can receive clicks
-  //   .raise(); // Move to front
-  //
-  // // Label text
-  // const toggleLabel = toggleGroup
-  //   .append("text")
-  //   .attr("x", -10)
-  //   .attr("y", 15)
-  //   .attr("alignment-baseline", "middle")
-  //   .attr("text-anchor", "end")
-  //   .attr("font-size", "12px")
-  //   .text("Showing: All Patient Events");
-  //
-  // // Background (toggle track)
-  // const toggleBg = toggleGroup
-  //   .append("rect")
-  //   .attr("class", "toggle-bg")
-  //   .attr("x", 0)
-  //   .attr("y", 0)
-  //   .attr("width", 40)
-  //   .attr("height", 20)
-  //   .attr("rx", 10)
-  //   .attr("ry", 10)
-  //   .attr("fill", "#ccc");
-  //
-  // // Circle (toggle knob)
-  // const knob = toggleGroup
-  //   .append("circle")
-  //   .attr("class", "toggle-knob")
-  //   .attr("cx", 10)
-  //   .attr("cy", 10)
-  //   .attr("r", 8)
-  //   .attr("fill", "white")
-  //   .style("stroke", "#888");
-  //
-  // let localToggleState = toggleState; // Initialize with React state
-  //
-  // // Click → notify React
-  // toggleGroup.on("click", () => {
-  //   if (handleToggleClick) {
-  //     handleToggleClick();
-  //
-  //     // Toggle the LOCAL state
-  //     localToggleState = !localToggleState; // UPDATE the local state!
-  //
-  //     // Update visuals based on the NEW local state
-  //     knob
-  //       .transition()
-  //       .duration(200)
-  //       .attr("cx", localToggleState ? 30 : 10); // Use localToggleState, not isNowOn
-  //
-  //     toggleBg
-  //       .transition()
-  //       .duration(200)
-  //       .attr("fill", localToggleState ? "#007bff" : "#ccc");
-  //
-  //     toggleLabel.text(
-  //       localToggleState ? "Showing: Filtered Patient Events" : "Showing: All Patient Events"
-  //     );
-  //   }
-  // });
+  const toggleGroup = legendSvg
+    .append("g")
+    .attr("class", "filter-toggle-group")
+    .attr("transform", `translate(${containerWidth - 220})`)
+    .style("pointer-events", "all")
+    .raise();
+
+  // Label text
+  toggleGroup
+    .append("text")
+    .attr("x", 0)
+    .attr("y", 20)
+    .attr("alignment-baseline", "middle")
+    .attr("font-size", "12px")
+    .text("Showing:");
+
+  // Foreign object to embed HTML <select> in SVG
+  const foreignObj = toggleGroup
+    .append("foreignObject")
+    .attr("x", 55)
+    .attr("y", 2)
+    .attr("width", 165)
+    .attr("height", 24);
+
+  const dropdown = foreignObj
+    .append("xhtml:select")
+    .style("width", "100%")
+    .style("height", "100%")
+    .style("font-size", "12px")
+    .style("cursor", "pointer")
+    .style("border", "1px solid #ccc")
+    .style("border-radius", "4px");
+
+  dropdown.append("xhtml:option").attr("value", "all").text("All Patient Events");
+  dropdown.append("xhtml:option").attr("value", "filtered").text("Filtered Patient Events");
+
+  // Set initial value based on toggleState
+  dropdown.property("value", toggleState ? "filtered" : "all");
+
+  // Change → notify React
+  dropdown.on("change", () => handleToggleClick?.());
 
   // After defining everything:
   // function updateTogglePosition() {
+  //   console.log(svgContainerId);
   //   const containerWidth = document.getElementById(svgContainerId).getBoundingClientRect().width;
   //   // Keep it 40px from the right edge and some padding from the top
   //   toggleGroup.attr("transform", `translate(${containerWidth - 40})`);
@@ -405,11 +386,8 @@ export function renderTimeline({
     ])
     .on("zoom", zoomed);
 
-  // const timelineWidth = svgWidth + MARGINS.left;
-  console.log(svgWidth);
-
   // make main_ER_svg and Age_ER (ER = event relation)
-  const { main_ER_svg, age_ER, axisLayer } = setupTimelineLayout(
+  const { main_ER_root, main_ER_ui, main_ER_data, axisLayer, age_ER } = setupTimelineLayout(
     timelineSvg,
     svgWidth,
     totalContentHeight,
@@ -426,7 +404,10 @@ export function renderTimeline({
     const isLastGroup = i === groupLayouts.length - 1;
 
     const groupG = drawCaretAndLabelForGroup(
-      main_ER_svg,
+      {
+        ui: main_ER_ui,
+        data: main_ER_data,
+      },
       layout.spans,
       layout.key,
       layout.yOffset,
@@ -452,7 +433,7 @@ export function renderTimeline({
     .call(xAxisBottom);
 
   function drawCaretAndLabelForGroup(
-    parent,
+    layers,
     spans,
     groupKey,
     yOffset,
@@ -460,21 +441,40 @@ export function renderTimeline({
     width,
     showDivider = true
   ) {
-    const collapsedHeight = 10; // minimal height when collapsed
-    const groupG = parent
+    const collapsedHeight = 10;
+    // const expanded = expandedState[groupKey];
+    // console.log(expanded);
+
+    const dataGroupG = layers.data
       .append("g")
-      .attr("class", `group group-${groupKey.replace(/\s+/g, "-")}`)
+      .attr("class", `group group-data group-${groupKey.replace(/\s+/g, "-")}`)
       .attr("data-expanded-height", height)
       .attr("data-collapsed-height", collapsedHeight)
       .attr("data-group-key", groupKey)
       .attr("transform", `translate(0, ${yOffset + LANE.GROUP_TOP_PADDING})`);
 
-    groupG.append("g").attr("class", "heatmap").style("display", "none");
+    // dataGroupG
+    //   .append("rect")
+    //   .attr("class", "group-bg")
+    //   .attr("x", 0)
+    //   .attr("y", 0)
+    //   .attr("width", width)
+    //   .attr("height", expanded ? height : collapsedHeight)
+    //   .attr("fill", expanded ? "#f8f9fa" : "#d1d5db")
+    //   .lower(); // darker grey when collapsed
 
-    const labelG = groupG
+    const uiGroupG = layers.ui
+      .append("g")
+      .attr("class", `group group-ui group-${groupKey.replace(/\s+/g, "-")}`)
+      .attr("data-group-key", groupKey)
+      .attr("transform", `translate(0, ${yOffset + LANE.GROUP_TOP_PADDING})`);
+
+    dataGroupG.append("g").attr("class", "heatmap").style("display", "none");
+
+    const labelG = uiGroupG
       .append("g")
       .attr("class", "group-label")
-      .attr("transform", `translate(${-TEXT.marginLeft}, ${height / 2})`);
+      .attr("transform", `translate(${-TEXT.marginLeft}, ${height / 2 - 5})`);
 
     labelG
       .append("text")
@@ -483,10 +483,10 @@ export function renderTimeline({
       .text(`${groupKey} (${spans.length}):`);
 
     // ---------- TOGGLE ----------
-    const toggleG = groupG
+    const toggleG = uiGroupG
       .append("g")
       .attr("class", "group-toggle")
-      .attr("transform", `translate(${svgWidth}, ${height / 2})`)
+      .attr("transform", `translate(${svgWidth + 10}, ${height / 2 - 5})`)
       .style("cursor", "pointer")
       .on("click", (event) => {
         event.stopPropagation();
@@ -511,7 +511,7 @@ export function renderTimeline({
 
     // Divider
     if (showDivider) {
-      groupG
+      dataGroupG
         .append("line")
         .attr("class", "group-divider")
         .attr("x1", 0)
@@ -522,7 +522,10 @@ export function renderTimeline({
         .attr("stroke-width", 1);
     }
 
-    return groupG;
+    return {
+      data: dataGroupG,
+      ui: uiGroupG,
+    };
   }
 
   function getLaneCount(spans, padding = 0) {
@@ -600,7 +603,7 @@ export function renderTimeline({
 
   function updateMainReports() {
     // Re-bind data to existing groups
-    const lanes = d3.select(".main_ER_svg").selectAll(".contains-group");
+    const lanes = d3.select(".main_ER_data").selectAll(".contains-group");
 
     lanes.each(function (d) {
       const g = d3.select(this);
@@ -726,7 +729,7 @@ export function renderTimeline({
 
         if (heatmapData) {
           // Create new heatmap group
-          const newHeatmapGroup = main_ER_svg
+          const newHeatmapGroup = main_ER_data
             .append("g")
             .attr("class", heatmapClass)
             .attr("transform", transform); // Keep same y position
@@ -761,7 +764,8 @@ export function renderTimeline({
   }
 
   function updateLayout(animate = true, activeGroupKey = null, spans) {
-    main_ER_svg.selectAll("*").remove();
+    main_ER_data.selectAll("*").remove();
+    main_ER_ui.selectAll("*").remove();
     axisLayer.selectAll(".main-ER-x-axis-bottom").remove();
     age_ER.selectAll("*").remove();
     // timelineSvg.selectAll(".zoom_ER").remove();
@@ -773,11 +777,11 @@ export function renderTimeline({
     for (const key of desiredOrder) {
       // Filter spans that belong to this group
       const spansForGroup = spanData.filter((d) => d.laneGroup === key);
-      console.log(spansForGroup);
+      // console.log(spansForGroup);
       // Skip groups with no spans
       if (!spansForGroup.length) continue;
       const laneCount = getLaneCount(spansForGroup);
-      console.log(laneCount);
+      // console.log(laneCount);
       const groupHeight = laneCount * LANE.height;
 
       updatedGroupLayout.push({
@@ -795,7 +799,10 @@ export function renderTimeline({
       const isLastGroup = i === updatedGroupLayout.length - 1;
 
       const groupG = drawCaretAndLabelForGroup(
-        main_ER_svg,
+        {
+          ui: main_ER_ui,
+          data: main_ER_data,
+        },
         layout.spans,
         layout.key,
         layout.yOffset,
@@ -846,12 +853,12 @@ export function renderTimeline({
 
     timelineSvg
       .select("#secondary_area_clip rect")
-      .attr("width", svgWidth + LABEL.margin + TOGGLE_BUTTON.margin)
-      .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top)
-      .attr("x", -LABEL.margin) // change this if needed
-      .attr("y", -PADDING.top);
+      .attr("x", 0) // no negative margin
+      .attr("y", -PADDING.top)
+      .attr("width", svgWidth) // only the data area
+      .attr("height", totalContentHeight + GAPS.legendToMain + PADDING.top);
 
-    const dateAnchorGroup = main_ER_svg
+    const dateAnchorGroup = main_ER_data
       .append("g")
       .attr("class", "date-anchors")
       .attr("clip-path", "url(#secondary_area_clip)")
@@ -892,7 +899,7 @@ export function renderTimeline({
       .data(encounterDates)
       .enter()
       .append("text")
-      .attr("x", (d) => mainX(d))
+      .attr("x", (d) => d._px)
       .attr("y", AGE_AREA.height / 2)
       .attr("dy", ".5ex")
       .attr("class", "encounter_age")
@@ -904,9 +911,9 @@ export function renderTimeline({
       .data(encounterDates)
       .enter()
       .append("line")
-      .attr("x1", (d) => mainX(d))
+      .attr("x1", (d) => d._px)
       .attr("y1", 12)
-      .attr("x2", (d) => mainX(d))
+      .attr("x2", (d) => d._px)
       .attr("y2", 25)
       .attr("class", "encounter_age_guideline");
 
@@ -918,7 +925,7 @@ export function renderTimeline({
       .data(interiorDates)
       .enter()
       .append("text")
-      .attr("x", (d) => mainX(d))
+      .attr("x", (d) => d._px)
       .attr("y", AGE_AREA.height / 2) // below everything else
       .attr("class", "years_since_label")
       .text((d, i) => `Year ${yearsSinceDiagnosis[i]}`);
@@ -929,9 +936,9 @@ export function renderTimeline({
       .data(interiorDates)
       .enter()
       .append("line")
-      .attr("x1", (d) => mainX(d))
+      .attr("x1", (d) => d._px)
       .attr("y1", 12)
-      .attr("x2", (d) => mainX(d))
+      .attr("x2", (d) => d._px)
       .attr("y2", 25)
       .attr("class", "interior_age_guideline");
 
@@ -1058,9 +1065,9 @@ export function renderTimeline({
   collapsedVerticalLineCap
     .append("path")
     .attr("d", "M6 0 L6 12") // vertical line from top to bottom
-    .style("stroke", "rgb(49, 163, 84)")
+    .style("stroke", "rgb(128, 128, 128)")
     .attr("stroke-width", 3)
-    .attr("stroke-opacity", 0.75);
+    .attr("stroke-opacity", 0.3);
 
   const selectedVerticalLineCap = defs
     .append("marker")
@@ -1095,7 +1102,7 @@ export function renderTimeline({
   }
 
   // Add this BEFORE you create mainReports
-  const dateAnchorGroup = main_ER_svg
+  const dateAnchorGroup = main_ER_data
     .append("g")
     .attr("class", "date-anchors")
     .attr("clip-path", "url(#secondary_area_clip)")
@@ -1277,9 +1284,9 @@ export function renderTimeline({
       .attr("x2", x2)
       .attr("y1", 0)
       .attr("y2", 0)
-      .attr("stroke", "rgb(49, 163, 84)")
+      .attr("stroke", d.negated ? "rgb(255, 0, 0)" : "rgb(49, 163, 84)")
       .attr("stroke-width", 5)
-      .attr("stroke-opacity", 0.3)
+      .attr("stroke-opacity", 0.5)
       .style("cursor", "pointer")
       .on("click", (event) => handleClick(event, d));
     if (markerStart) {
@@ -1334,7 +1341,7 @@ export function renderTimeline({
       .attr("y2", 6) // Extends below
       .attr("stroke", "rgb(49, 163, 84)")
       .attr("stroke-width", 4)
-      .attr("stroke-opacity", 0.75)
+      .attr("stroke-opacity", 0.5)
       .style("cursor", "pointer")
       .on("click", (event) => {
         handleClick(event, d);
@@ -1469,9 +1476,10 @@ export function renderTimeline({
     // Group events by lane index
     const spansByLane = d3.group(spans, (d) => d.laneIndex);
     const expanded = expandedState[groupKey];
+    const groupDataG = groupG.data;
 
     for (const [laneIndex, spansInLane] of spansByLane) {
-      const laneG = groupG
+      const laneG = groupDataG
         .append("g")
         .attr("class", "lane")
         .attr("transform", `translate(0, ${!expanded ? 0 : laneIndex * LANE.height})`);
@@ -1701,24 +1709,61 @@ export function renderTimeline({
 
   function handleClick(event, d) {
     const clickedConceptIds = Array.isArray(d.conceptIds) ? d.conceptIds : [d.conceptIds];
-    // console.log("handleClick called during render!", event, d);
     if (!clickedConceptIds.length) return;
-    setClickedTerms((prevTerms) => {
-      // Check if ANY of the merged concept IDs are already clicked
-      const hasAnyClicked = clickedConceptIds.some((id) => prevTerms.includes(id));
 
+    // Calculate BEFORE setState, synchronously
+    const hasAnyClicked = clickedTermsRef.current.some((id) => clickedConceptIds.includes(id));
+    const isDeselecting = hasAnyClicked;
+
+    setClickedTerms((prevTerms) => {
       if (hasAnyClicked) {
-        // Remove ALL concept IDs from this merged event
         return prevTerms.filter((term) => !clickedConceptIds.includes(term));
       } else {
-        // Add ALL concept IDs from this merged event
         return [...prevTerms, ...clickedConceptIds];
       }
     });
 
-    // Set all circles and relations to light/transparent
+    if (isDeselecting) {
+      document.querySelectorAll("circle").forEach((circle) => {
+        circle.style.fillOpacity = ".3";
+      });
+
+      document.querySelectorAll(".relation-icon").forEach((el) => {
+        const ids = el.dataset.conceptIds
+          ? el.dataset.conceptIds.split(",").map((s) => s.trim())
+          : [];
+
+        const wasSelected = clickedConceptIds.some((id) => ids.includes(id));
+
+        el.classList.remove("selected", "unselected");
+
+        if (wasSelected) {
+          ["marker-start", "marker-end"].forEach((attr) => {
+            if (el.hasAttribute(attr)) {
+              const currentMarker = el.getAttribute(attr);
+              const originalMarker = Object.entries(MARKER_TOGGLE_MAP).find(
+                ([, v]) => v === currentMarker
+              )?.[0];
+              if (originalMarker) el.setAttribute(attr, originalMarker);
+            }
+          });
+        }
+
+        const group = el.closest("g");
+        if (group) {
+          group.querySelectorAll(".relation-outline").forEach((outline) => {
+            outline.setAttribute("stroke-opacity", "0");
+          });
+        }
+      });
+
+      clearDocumentHighlights();
+      return;
+    }
+
+    // --- Selecting logic ---
     document.querySelectorAll("circle").forEach((circle) => {
-      circle.style.fillOpacity = "0.3"; // very light by default
+      circle.style.fillOpacity = "0.3";
     });
 
     document.querySelectorAll(".relation-icon").forEach((el) => {
@@ -1727,86 +1772,48 @@ export function renderTimeline({
       }
     });
 
-    // 1. Find all elements that should toggle
     const toToggle = new Set();
 
-    // Emphasize matching relations
-    clickedConceptIds.forEach((id) => {
-      document.querySelectorAll(".relation-icon").forEach((el) => {
-        const ids = el.dataset.conceptIds
-          ? el.dataset.conceptIds.split(",").map((s) => s.trim())
-          : [];
+    document.querySelectorAll(".relation-icon").forEach((el) => {
+      const ids = el.dataset.conceptIds
+        ? el.dataset.conceptIds.split(",").map((s) => s.trim())
+        : [];
 
-        if (clickedConceptIds.some((id) => ids.includes(id))) {
-          toToggle.add(el);
+      if (clickedConceptIds.some((id) => ids.includes(id))) {
+        toToggle.add(el);
+      }
+    });
+
+    toToggle.forEach((el) => {
+      skipNextEffect.current = true;
+
+      ["marker-start", "marker-end"].forEach((attr) => {
+        if (el.hasAttribute(attr)) {
+          const currentMarker = el.getAttribute(attr);
+          if (MARKER_TOGGLE_MAP[currentMarker]) {
+            el.setAttribute(attr, MARKER_TOGGLE_MAP[currentMarker]);
+          }
         }
-        // console.log(toToggle);
       });
 
-      // 2. Toggle each element exactly once
-      toToggle.forEach((el) => {
-        skipNextEffect.current = true;
+      el.classList.toggle("selected");
+      el.classList.toggle("unselected");
 
-        // marker toggle
-        ["marker-start", "marker-end"].forEach((attr) => {
-          if (el.hasAttribute(attr)) {
-            const currentMarker = el.getAttribute(attr);
-            if (MARKER_TOGGLE_MAP[currentMarker]) {
-              el.setAttribute(attr, MARKER_TOGGLE_MAP[currentMarker]);
-            }
-          }
+      const group = el.closest("g");
+      const isNowSelected = el.classList.contains("selected");
+      if (group) {
+        group.querySelectorAll(".relation-outline").forEach((outline) => {
+          outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
         });
-
-        // class toggle
-        el.classList.toggle("selected");
-        el.classList.toggle("unselected");
-
-        // Show/hide the black outline line
-        const group = el.closest("g");
-        const isNowSelected = el.classList.contains("selected");
-        if (group) {
-          const outlines = group.querySelectorAll(".relation-outline");
-          if (outlines.length) {
-            outlines.forEach((outline) => {
-              // Do something with the outlines, like showing or hiding
-              outline.setAttribute("stroke-opacity", isNowSelected ? "1" : "0");
-            });
-          }
-        }
-      });
+      }
     });
 
     const matchingNotes = Object.entries(conceptsPerDocument)
       .filter(([_, objArray]) => objArray.some((obj) => clickedConceptIds.includes(obj.id)))
       .map(([note]) => note);
 
-    matchingNotes.forEach((reportId) => {
-      const circle = document.getElementById(reportId);
-
-      if (circle && circle.parentNode) {
-        const svg = circle.parentNode;
-        const existingRing = svg.querySelector(`#highlight-ring-${reportId}`);
-
-        if (existingRing) {
-          existingRing.remove();
-          return;
-        }
-
-        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        ring.setAttribute("cx", circle.getAttribute("cx"));
-        ring.setAttribute("cy", circle.getAttribute("cy"));
-        ring.setAttribute("r", parseFloat(circle.getAttribute("r")) * 1.4);
-        ring.setAttribute("fill", "none");
-        ring.setAttribute("stroke", "gold");
-        ring.setAttribute("stroke-opacity", "0.7");
-        ring.setAttribute("stroke-width", "6");
-        ring.setAttribute("id", `highlight-ring-${reportId}`);
-
-        svg.insertBefore(ring, circle);
-      } else {
-        console.log("Circle not found:", reportId);
-      }
-    });
+    clearDocumentHighlights();
+    highlightDocumentCircles(matchingNotes);
   }
 
   // Encounter ages label
@@ -1826,13 +1833,18 @@ export function renderTimeline({
   let startAge = encounterAges[0];
   let endAge = encounterAges[1];
 
+  // Cache pixel positions once
+  encounterDates.forEach((d, i) => {
+    d._px = mainX(d);
+  });
+
   // Draw start + end ages
   age_ER
     .selectAll(".encounter_age")
     .data(encounterDates)
     .enter()
     .append("text")
-    .attr("x", (d) => mainX(d))
+    .attr("x", (d) => d._px)
     .attr("y", AGE_AREA.height / 2)
     .attr("dy", ".5ex")
     .attr("class", "encounter_age")
@@ -1844,9 +1856,9 @@ export function renderTimeline({
     .data(encounterDates)
     .enter()
     .append("line")
-    .attr("x1", (d) => mainX(d))
+    .attr("x1", (d) => d._px)
     .attr("y1", 12)
-    .attr("x2", (d) => mainX(d))
+    .attr("x2", (d) => d._px)
     .attr("y2", 25)
     .attr("class", "encounter_age_guideline");
 
@@ -1864,15 +1876,19 @@ export function renderTimeline({
 
   const interiorDates = interiorAges.map((a) => ageToDate(a, startAge, minStartDate));
 
+  interiorDates.forEach((d, i) => {
+    d._px = mainX(d);
+  });
+
   // Draw guideline lines for intermediate ages
   age_ER
     .selectAll(".interior_age_guideline")
     .data(interiorDates)
     .enter()
     .append("line")
-    .attr("x1", (d) => mainX(d))
+    .attr("x1", (d) => d._px)
     .attr("y1", 12)
-    .attr("x2", (d) => mainX(d))
+    .attr("x2", (d) => d._px)
     .attr("y2", 25)
     .attr("class", "interior_age_guideline");
 
@@ -1886,7 +1902,7 @@ export function renderTimeline({
     .data(interiorDates)
     .enter()
     .append("text")
-    .attr("x", (d) => mainX(d))
+    .attr("x", (d) => d._px)
     .attr("y", AGE_AREA.height / 2) // below everything else
     .attr("class", "years_since_label")
     .text((d, i) => `Year ${yearsSinceDiagnosis[i]}`);

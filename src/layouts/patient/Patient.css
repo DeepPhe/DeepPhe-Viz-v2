@@ -414,7 +414,8 @@ svg .tick text {
 .basicCardHeader .MuiIconButton-root {
     position: absolute;
     left: 0;
-    top: 5px;
+    top: 3px;
+    padding: .75rem;
 }
 
 .info_icon {
@@ -1359,7 +1360,7 @@ white text with more shading
 }
 
 
-/* PatientEpisodeTimeline */
+/* PatientDocumentTimeline */
 .episode_legend_circle,
 .main_report_PE {
     fill-opacity: 0.3;
@@ -1423,7 +1424,7 @@ white text with more shading
     height: auto;
 }
 
-.patient_episode_timeline_svg {
+.patient_document_timeline_svg {
     width: 100%;
     overflow-x: auto;
 }

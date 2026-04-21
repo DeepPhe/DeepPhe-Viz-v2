@@ -7,9 +7,15 @@
     height: auto;
 }
 
-.patient_episode_timeline_svg {
+.patient_document_timeline_svg {
     width: 100%;
     overflow-x: auto;
+}
+
+.main_report_PE.concept_highlight {
+    stroke: yellow;
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 5px yellow);
 }
 
 /* Episode and report elements */

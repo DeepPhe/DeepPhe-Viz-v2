@@ -36,7 +36,7 @@ export const MARGINS = { top: 5, right: 20, bottom: 5, left: 200 };
 export const ARROW = { width: 20, LabelGap: 5, labelPadding: 10 };
 
 export const LEGEND = {
-  height: 22,
+  height: 40,
   spacing: 2,
   anchorX: 40,
   anchorY: 6,

@@ -116,7 +116,7 @@ export function ConceptPanel(props) {
         <Box className="custom-box">
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="concept panel tabs">
             {/*<TabsList>*/}
-            <Tab label="Concepts" {...a11yProps(0)} />
+            <Tab label="Concept List" {...a11yProps(0)} />
             <Tab label="Group Filter" {...a11yProps(1)} />
             <Tab label="Confidence Filter" {...a11yProps(2)} />
             {/*</TabsList>*/}
